@@ -1,0 +1,21 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Wed, 25 Nov 2015 01:58:20 +0100
+Subject: Avoid forward-incompatibility warnings from Automake
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 32a2ccb..8591297 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -21,7 +21,7 @@ AC_INIT([[XML-Security-C]],[1.7.3],[dev@santuario.apache.org],[xml-security-c])
+ AC_CONFIG_SRCDIR(xsec)
+ AC_CONFIG_AUX_DIR(build-aux)
+ AC_CONFIG_MACRO_DIR(m4)
+-AM_INIT_AUTOMAKE
++AM_INIT_AUTOMAKE([subdir-objects])
+ AC_PROG_LIBTOOL
+ 
+ AC_ARG_ENABLE(debug,

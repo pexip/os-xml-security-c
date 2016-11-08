@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+# Where the xml-security-c-utils man pages are installed.
+UTILS_MAN1DIR := debian/xml-security-c-utils/usr/share/man/man1
+
+# Enable compiler hardening flags.
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --without-xalan --disable-static
+
+# Install man pages for the xml-security-c-utils binaries.
+override_dh_install:
+	dh_install --fail-missing
+	mkdir -p '$(UTILS_MAN1DIR)'
+	set -e; VERSION=$$(./config.status --version | sed 's/.* //;q');\
+	for pod in debian/man-pages/*.pod ; do			\
+	    pod2man "$$pod" --section 1 --name=`basename "$$pod"`	\
+		--center 'Apache XML Security' --release "$$VERSION"	\
+		'$(UTILS_MAN1DIR)'/`basename "$$pod" .pod`.1 ;		\
+	done
+
+override_dh_installdocs:
+	dh_installdocs -A NOTICE.txt

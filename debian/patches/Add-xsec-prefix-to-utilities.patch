@@ -1,0 +1,75 @@
+From: Russ Allbery <rra@debian.org>
+Date: Mon, 7 Apr 2014 16:43:45 -0700
+Subject: Add xsec prefix to utilities
+
+Many of the utilities that come with the package have very
+generic names.  Add xsec- to the beginning of all of the binary
+names to avoid colliding with other packages or claiming too
+generic of a namespace.
+---
+ xsec/Makefile.am | 32 ++++++++++++++++----------------
+ 1 file changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/xsec/Makefile.am b/xsec/Makefile.am
+index c4f41a6..f1c484c 100644
+--- a/xsec/Makefile.am
++++ b/xsec/Makefile.am
+@@ -69,42 +69,42 @@ tools =
+ 
+ # xtest
+ 
+-tools += xtest
+-xtest_SOURCES = \
++tools += xsec-xtest
++xsec_xtest_SOURCES = \
+   tools/xtest/xtest.cpp
+ 
+-tools += c14n
+-c14n_SOURCES = \
++tools += xsec-c14n
++xsec_c14n_SOURCES = \
+   tools/c14n/c14n.cpp
+ 
+-tools += checksig
+-checksig_SOURCES = \
++tools += xsec-checksig
++xsec_checksig_SOURCES = \
+   tools/checksig/checksig.cpp \
+   tools/checksig/AnonymousResolver.hpp \
+   tools/checksig/AnonymousResolver.cpp \
+   tools/checksig/InteropResolver.hpp \
+   tools/checksig/InteropResolver.cpp
+ 
+-tools += templatesign
+-templatesign_SOURCES = \
++tools += xsec-templatesign
++xsec_templatesign_SOURCES = \
+   tools/templatesign/templatesign.cpp
+ 
+-tools += txfmout
+-txfmout_SOURCES = \
++tools += xsec-txfmout
++xsec_txfmout_SOURCES = \
+   tools/txfmout/txfmout.cpp
+ 
+-tools += siginf
+-siginf_SOURCES = \
++tools += xsec-siginf
++xsec_siginf_SOURCES = \
+   tools/siginf/siginf.cpp
+ 
+-tools += cipher
+-cipher_SOURCES = \
++tools += xsec-cipher
++xsec_cipher_SOURCES = \
+   tools/cipher/cipher.cpp \
+   tools/cipher/XencInteropResolver.hpp \
+   tools/cipher/XencInteropResolver.cpp
+ 
+-tools += xklient
+-xklient_SOURCES = \
++tools += xsec-xklient
++xsec_xklient_SOURCES = \
+   tools/xklient/xklient.cpp
+ 
+ 

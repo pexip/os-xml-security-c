@@ -1,0 +1,25 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sat, 30 Jan 2016 23:40:38 +0100
+Subject: TXFMOutputFile: close output file only if it's open
+
+---
+ xsec/transformers/TXFMOutputFile.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/xsec/transformers/TXFMOutputFile.cpp b/xsec/transformers/TXFMOutputFile.cpp
+index 04542bd..f0c8681 100644
+--- a/xsec/transformers/TXFMOutputFile.cpp
++++ b/xsec/transformers/TXFMOutputFile.cpp
+@@ -36,10 +36,10 @@ XERCES_CPP_NAMESPACE_USE
+ 
+ TXFMOutputFile::~TXFMOutputFile() {
+ 
+-    if (f.is_open())
++    if (f.is_open()) {
+         f.write("\n----- END -----\n", 17);
+ 	f.close();
+-
++    }
+ }
+ 
+ // Methods to set the inputs

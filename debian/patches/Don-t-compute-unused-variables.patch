@@ -1,0 +1,47 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sun, 31 Jan 2016 00:37:51 +0100
+Subject: Don't compute unused variables
+
+---
+ xsec/utils/XSECNameSpaceExpander.cpp | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/xsec/utils/XSECNameSpaceExpander.cpp b/xsec/utils/XSECNameSpaceExpander.cpp
+index ff147b7..448469e 100644
+--- a/xsec/utils/XSECNameSpaceExpander.cpp
++++ b/xsec/utils/XSECNameSpaceExpander.cpp
+@@ -158,7 +158,6 @@ void XSECNameSpaceExpander::expandNameSpaces(void) {
+ 	DOMElement	*docElt;		// The document element - do not expand it's namespaces
+ 	
+ 	docElt = mp_fragment; //mp_doc->getDocumentElement();
+-	int count = attNodeCount(docElt);
+ 
+ 	DOMNode *c;
+ 
+@@ -172,8 +171,6 @@ void XSECNameSpaceExpander::expandNameSpaces(void) {
+ 
+ 	m_expanded = true;
+ 
+-	count = attNodeCount(docElt);
+-
+ }
+ 
+ 
+@@ -182,9 +179,6 @@ void XSECNameSpaceExpander::deleteAddedNamespaces(void) {
+ 	NameSpaceEntryListVectorType::size_type size = m_lst.size();
+ 	XSECNameSpaceEntry *e;
+ 
+-	DOMElement *docElt = mp_fragment; //mp_doc->getDocumentElement();
+-	int 	count = attNodeCount(docElt);
+-
+ 	NameSpaceEntryListVectorType::size_type i;
+ 
+ 	for (i = 0; i < size; ++i) {
+@@ -206,7 +200,6 @@ void XSECNameSpaceExpander::deleteAddedNamespaces(void) {
+ 	// Now done - empty everything
+ 	m_lst.clear();
+ 	m_expanded = false;
+-	count = attNodeCount(docElt);
+ 
+ }
+ 

@@ -1,0 +1,35 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sat, 30 Jan 2016 21:59:31 +0100
+Subject: Fix GCC5 warnings
+
+---
+ xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp | 2 +-
+ xsec/enc/XSECCryptoSymmetricKey.hpp            | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp b/xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp
+index ceabb92..d61a776 100644
+--- a/xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp
++++ b/xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp
+@@ -151,7 +151,7 @@ public :
+ 							 SymmetricKeyMode mode = MODE_CBC,
+ 							 const unsigned char * iv = NULL,
+                              const unsigned char* tag = NULL,
+-                             unsigned int taglen = NULL);
++                             unsigned int taglen = 0);
+ 
+ 	/**
+ 	 * \brief Continue an decrypt operation using this key.
+diff --git a/xsec/enc/XSECCryptoSymmetricKey.hpp b/xsec/enc/XSECCryptoSymmetricKey.hpp
+index 3bb5188..44c1e65 100644
+--- a/xsec/enc/XSECCryptoSymmetricKey.hpp
++++ b/xsec/enc/XSECCryptoSymmetricKey.hpp
+@@ -185,7 +185,7 @@ public :
+ 							 SymmetricKeyMode mode = MODE_CBC,
+ 							 const unsigned char* iv = NULL,
+                              const unsigned char* tag = NULL,
+-                             unsigned int taglen = NULL) = 0;
++                             unsigned int taglen = 0) = 0;
+ 
+ 	/**
+ 	 * \brief Continue a decrypt operation using this key.

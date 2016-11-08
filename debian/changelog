@@ -1,0 +1,394 @@
+xml-security-c (1.7.3-4) unstable; urgency=medium
+
+  [ Etienne Dysli Metref ]
+  * [73c1622] Add myself to uploaders
+
+  [ Ferenc Wágner ]
+  * [dd93312] Stay with OpenSSL 1.0 (Closes: #828607)
+  * [d775f9f] Migrate to my Debian address
+
+ -- Ferenc Wágner <wferi@debian.org>  Tue, 08 Nov 2016 21:52:45 +0100
+
+xml-security-c (1.7.3-3) unstable; urgency=medium
+
+  * [dee8abd] New patch Only-add-found-packages-to-the-pkg-config-
+    dependenci.patch
+
+ -- Ferenc Wágner <wferi@niif.hu>  Thu, 21 Jul 2016 19:24:49 +0200
+
+xml-security-c (1.7.3-2) unstable; urgency=medium
+
+  * [9af4b2f] New patches fixing GCC-6 FTBFS, warnings and typos
+    (Closes: #811620)
+  * [eb1af76] Update Standards-Version to 3.9.8 (no changes needed)
+  * [e742472] Switch to secure VCS URIs
+  * [894b638] New patch Use-pkg-config-for-Xerces-OpenSSL-and-NSS-and-
+    provid.patch
+  * [64c49b7] New patch We-do-not-use-pthreads-threadtest.cpp-is-Windows-
+    onl.patch
+  * [a5a8a19] The build system now links with the needed libraries only
+
+ -- Ferenc Wágner <wferi@niif.hu>  Thu, 21 Jul 2016 13:41:14 +0200
+
+xml-security-c (1.7.3-1) unstable; urgency=medium
+
+  * [df661d6] Check signature in watch file
+  * [b78a045] Add debian/gbp.conf enabling pristine-tar
+  * [ca9476a] Imported Upstream version 1.7.3
+  * [f8b635d] Delete upstreamed patch "Avoid use of PATH_MAX where possible"
+  * [9d2337f] Switch watch file to check for bzip-compressed archives
+  * [f95b4ef] The default compressor is xz since jessie
+  * [ed19f44] Renaming of the binaries happends via a patch since 4771f62 and
+    017dc35
+  * [34dd591] Enable all hardening features
+  * [893eda7] Remove superfluous dh_clean override
+  * [2207b52] Fail package build if any installed file is left out in the future
+  * [62c8d2f] Add myself to Uploaders
+  * [4afa12e] Update Standards-Version to 3.9.6 (no changes needed)
+  * [d338569] Since 2b8a713 we've got proper patch files
+  * [cd68dec] Enable commit ids in gbp dch
+  * [71cc459] Add version number to the manual pages
+  * [e544a7b] Run wrap-and-sort -ast on the package
+  * [cf73c2b] Get rid of patch numbers
+  * [0832cf9] New patch
+    Avoid-forward-incompatibility-warnings-from-Automake.patch
+  * [3099c82] Comment the --as-needed tricks
+  * [e26686c] Update debian/copyright
+  * [3fad239] Add NOTICE.txt to all binary packages
+  * [4eaef76] Incorporate the 1.7.2-3.1 NMU.  Thanks to Julien Cristau.
+
+ -- Ferenc Wágner <wferi@niif.hu>  Sun, 29 Nov 2015 19:59:37 +0100
+
+xml-security-c (1.7.2-3.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename library packages for g++5 ABI transition (closes: 791323).
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 16 Aug 2015 17:56:43 +0200
+
+xml-security-c (1.7.2-3) unstable; urgency=medium
+
+  * Avoid use of PATH_MAX where possible by using getcwd to allocate the
+    appropriate size string.  Fixes FTBFS on GNU/Hurd.  Patch from Svante
+    Signell.  (Closes: #735162)
+  * Convert all Debian patches to separate patch files managed via gbp pq.
+  * Update standards version to 3.9.5 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Mon, 07 Apr 2014 17:10:56 -0700
+
+xml-security-c (1.7.2-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 10 Jul 2013 23:02:08 -0700
+
+xml-security-c (1.7.2-1) experimental; urgency=high
+
+  * New upstream release.
+    - The attempted fix to address CVE-2013-2154 introduced the
+      possibility of a heap overflow, possibly leading to arbitrary code
+      execution, in the processing of malformed XPointer expressions in
+      the XML Signature Reference processing code.  Fix that heap
+      overflow.  (Closes: #714241, CVE-2013-2210)
+
+ -- Russ Allbery <rra@debian.org>  Thu, 27 Jun 2013 13:00:54 -0700
+
+xml-security-c (1.7.1-1) experimental; urgency=high
+
+  * New upstream release.
+    - Fix a spoofing vulnerability that allows an attacker to reuse
+      existing signatures with arbitrary content.  (CVE-2013-2153)
+    - Fix a stack overflow in the processing of malformed XPointer
+      expressions in the XML Signature Reference processing code.
+      (CVE-2013-2154)
+    - Fix processing of the output length of an HMAC-based XML Signature
+      that could cause a denial of service when processing specially
+      chosen input.  (CVE-2013-2155)
+    - Fix a heap overflow in the processing of the PrefixList attribute
+      optionally used in conjunction with Exclusive Canonicalization,
+      potentially allowing arbitrary code execution. (CVE-2013-2156)
+    - Reduce entity expansion limits when parsing.
+    - New --id option to the xenc-checksig utility.
+  * Rename the binaries in the xml-security-c-utils package to start with
+    xsec-* instead of xmlsec-*.  This reflects the common abbreviation
+    used by the package.
+
+ -- Russ Allbery <rra@debian.org>  Mon, 17 Jun 2013 21:27:58 -0700
+
+xml-security-c (1.7.0-1) experimental; urgency=low
+
+  * New upstream release.
+    - AES-GCM support.
+    - XML Encryption 1.1 OAEP enhancements.
+  * Increase versioned dependency on libssl-dev to ensure that we have
+    AES-GCM support.  (This only matters for backports to squeeze.)
+  * Mark libxml-security-c-dev as Multi-Arch: same.
+  * Add new xml-security-c-utils package that contains the utility
+    programs included with the library.  Rename the binaries to add
+    "xmlsec-" to the beginning of the names, since some of the programs
+    are otherwise rather generic.  Add man pages for each of the programs.
+    (Closes: #682830)
+  * Switch from autotools-dev to dh-autoreconf and regenerate the entire
+    build system during the build, not just the config.guess and
+    config.sub scripts, and add --as-needed.
+  * Add -fPIE to hardening flags since we're now installing binaries.
+  * Move single-debian-patch to local-options and patch-header to
+    local-patch-header so that they only apply to the packages built from
+    the canonical Git repository and NMUs get regular version-numbered
+    patches.
+  * Switch to xz compression for *.debian.tar and the *.deb packages.
+  * Use canonical URLs for Vcs-Browser and Vcs-Git.
+  * Update standards version to 3.9.4.
+    - Update debian/copyright to specify copyright-format 1.0.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 23 May 2013 00:05:09 -0700
+
+xml-security-c (1.6.1-5) unstable; urgency=low
+
+  * Revert changes to add symbols file.  Due to churn in weak symbols for
+    inlined functions, it doesn't appear maintainanable with existing
+    tools, and for this library the shlibs behavior seems sufficient.
+  * Minor update to the format of the debian/copyright file.
+
+ -- Russ Allbery <rra@debian.org>  Tue, 31 Jan 2012 11:25:27 -0800
+
+xml-security-c (1.6.1-4) unstable; urgency=low
+
+  * Update symbols files for all non-i386 architectures currently built by
+    the buildds except mipsel (which will hopefully be the same as mips).
+  * Build-Depend on pkg-kde-tools and use its symbolhelper plugin so that
+    the package can use the output of pkgkde-symbolshelper.
+
+ -- Russ Allbery <rra@debian.org>  Fri, 27 Jan 2012 20:29:57 -0800
+
+xml-security-c (1.6.1-3) unstable; urgency=low
+
+  * Also enable bindnow hardening build flags and use the correct syntax
+    to add additional hardening flags.
+  * Add symbols file constructed with pkgkde-symbolshelper.  Add a
+    README.source file with a pointer to the documentation.
+
+ -- Russ Allbery <rra@debian.org>  Fri, 27 Jan 2012 12:36:07 -0800
+
+xml-security-c (1.6.1-2) unstable; urgency=low
+
+  * Update to debhelper compatibility level V9.
+    - Enable hardening build flags.  (Closes: #656658)
+    - Enable multiarch support.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 25 Jan 2012 17:58:22 -0800
+
+xml-security-c (1.6.1-1) unstable; urgency=high
+
+  * Urgency high for security fix.
+  * New upstream release.
+    - DSIGObject::load method crashes for ds:Object without Id attribute
+    - Buffer overflow when signing or verifying files with big asymmetric
+      keys (Closes: #632973, CVE-2011-2516)
+    - Memory bug inside XENCCipherImpl::deSerialise
+    - Function cleanURIEscapes always throws XSECException, when any
+      escape sequence occurs
+    - Function isHexDigit doesn't recognize invalid escape sequences
+    - Percent-encoded multibyte (UTF-8) sequences unrecognized
+    - RSA-OAEP handler only allows SHA-1 digests
+  * Update debian/watch for the new organization of Apache downloads.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 07 Jul 2011 09:10:33 -0700
+
+xml-security-c (1.6.0-2) unstable; urgency=low
+
+  * Force build dependency on libssl-dev 1.0 or later for consistent build
+    results.  If some Shibboleth-related libraries are built against
+    earlier versions of libssl, it produces linking failures when building
+    the Shibboleth SP package.
+  * Stop running autoreconf during the build.  Upstream now ships
+    sufficiently new generated files, and we no longer patch configure.
+    Remove the associated build dependencies and extra clean files.
+  * Update standards version to 3.9.2 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Thu, 07 Apr 2011 14:29:28 -0700
+
+xml-security-c (1.6.0-1) unstable; urgency=low
+
+  * New upstream releaes.
+    - Expose algorithm URI on Signature and Reference objects
+    - White/blacklisting of otherwise registered algorithms
+    - Allow selected XML Signature 1.1 KeyInfo extensions
+    - Add elliptic curve keys and signatures via ECDSA
+    - Support debugging of Reference/SignedInfo data
+    - Add methods for Reference removal to DSIGSignature and
+      DSIGSignedInfo classes
+    - Lots of various bug fixes
+  * Add build dependency on pkg-config, which upstream now uses to find
+    the SSL libraries.
+  * Remove --with-xerces from the configure flags, since "yes" is
+    interpreted as a path to libraries and headers.
+  * Remove unnecessary --with-openssl from configure flags.
+  * Update to debhelper compatibility level V8.
+    - Use the autotools-dev debhelper module for config.{sub,guess}.
+    - Use debhelper rule minimization.
+    - Move files to clean into a separate clean control file.
+  * Use autoreconf instead of running the tools separately.
+  * Update package home page for new upstream location.
+  * Update package long description for the new official upstream name.
+  * Update debian/copyright to the current DEP-5 specification.
+  * Install the upstream NOTICE.txt file.
+  * Change to Debian source format 3.0 (quilt).  Force a single Debian
+    patch for simplicity since the packaging is maintained in Git using
+    branches, and include a patch header explaining why.
+  * debian/watch fixes for upstream distribution and versioning.
+    - Mangle a tilde into upstream rc version numbers.
+    - Update the upstream distribution URL.
+    - Avoid matching signature and checksum files.
+  * Update standards version to 3.9.1 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Sun, 06 Mar 2011 20:29:13 -0800
+
+xml-security-c (1.5.1-3) unstable; urgency=low
+
+  * Force source format 1.0 for now since it makes backporting easier.
+  * Add ${misc:Depends} to all package dependencies.
+  * Update debhelper compatibility level to V7.
+    - Use dh_prep instead of dh_clean -k.
+  * Update standards version to 3.8.4 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Wed, 12 May 2010 20:59:25 -0700
+
+xml-security-c (1.5.1-2) unstable; urgency=low
+
+  * Fix the dependencies of libxml-security-c-dev to depend on Xerces-C
+    3.x and stop depending on Xalan, reflecting the changes to the library
+    build.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 06 Aug 2009 08:32:16 -0700
+
+xml-security-c (1.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Rename library package for upstream SONAME bump.
+  * Upstream now ships an older version of libtool, so run libtoolize and
+    aclocal before the build.  Add build dependencies on automake and
+    libtool.
+  * Build against Xerces-C 3.0.
+  * Stop building against Xalan.  The Xalan packages for Debian have been
+    orphaned, the current Xalan release does not support Xerces-C 3.0, and
+    porting it is not trivial.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 05 Aug 2009 14:11:52 -0700
+
+xml-security-c (1.4.0-4) unstable; urgency=high
+
+  * CVE-2009-0217: Apply upstream patch to sanity-check the HMAC
+    truncation length.  Closes a vulnerability that could allow an
+    attacker to spoof HMAC-based signatures and bypass authentication.
+  * Remove duplicate section for libxml-security-c14.
+  * Update standards version to 3.8.2 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Fri, 24 Jul 2009 15:02:55 -0700
+
+xml-security-c (1.4.0-3) unstable; urgency=low
+
+  * Drop the suggests of libxml-security-c-doc since upstream no longer
+    includes the documentation.
+
+ -- Russ Allbery <rra@debian.org>  Tue, 26 Aug 2008 16:38:08 -0700
+
+xml-security-c (1.4.0-2) unstable; urgency=low
+
+  [ Ferenc Wagner ]
+  * Add dependencies to libxml-security-c-dev for the packages whose
+    header files are included by XML-Security-C headers.
+
+  [ Russ Allbery ]
+  * Include the SONAME portion of the library filename in the *.install
+    file for libxml-security-c14 so that the build will fail if the
+    library name unexpectedly changes.
+  * Rewrite debian/copyright in the new proposed format.
+  * Reference the Apache 2.0 license in common-licenses instead of
+    including a copy.
+  * Update standards version to 3.8.0.
+  * Update watch format to 3 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Wed, 18 Jun 2008 18:22:49 -0700
+
+xml-security-c (1.4.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Drop the libxml-security-c-doc package.  Upstream no longer includes
+      the API documentation in their source package and it's not useful
+      enough to generate ourselves at build time.
+    - Bump library SONAME.
+  * Maintainer is now the Debian Shib Team.  Move myself to Uploaders.
+  * Build against libxerces-c2-dev.  (Closes: #479195)
+  * Remove all modified files on debian/rules clean.
+  * Stop using quilt and instead apply the patches directly.
+  * Move Homepage to a regular control field.
+  * Add Vcs-Git and Vcs-Browser control fields.
+  * Update standards version to 3.7.3 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Sun, 11 May 2008 20:16:30 -0700
+
+xml-security-c (1.3.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Performance improvements in canonicalisation.
+    - Update signature classes to pass in requested algorithms as URIs
+      rather than enums.  Enum based methods are now deprecated.
+    - Fix memory leaks in OpenSSL wrapping code.
+    - Provide ability for calling application to define whether references
+      are interlocking.
+    - Complete implementation of XKMS message set
+    - Methods to allow loading of encrypted data without doing decrypt 
+      and to process a decrypt/encrypt operation without replacing the
+      original nodes.
+    - Various bug fixes.
+  * Add patch from Cyril Brulebois to recognize kFreeBSD and GNU Hurd
+    systems.  (Closes: #414210)
+  * Remove Quanah from maintainers at his request.
+  * Update debhelper compatibility level to V5.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 16 May 2007 20:59:11 -0700
+
+xml-security-c (1.2.1-3) unstable; urgency=low
+
+  * Fix compilation with g++ 4.1.  (Closes: #375348)
+
+ -- Russ Allbery <rra@debian.org>  Mon, 26 Jun 2006 20:44:57 -0700
+
+xml-security-c (1.2.1-2) unstable; urgency=low
+
+  * Initial upload to Debian.  (Closes: #368551)
+  * Include Xalan support.
+  * Only include the major library version in the SONAME, not the minor
+    library version.  The minor version corresponds to patch releases,
+    which shouldn't break the ABI.
+  * Package library documentation as libxml-security-c-doc.
+  * Minor improvements to package descriptions.  Add homepage links.
+  * Pre-create the library directory in debian/rules rather than via a
+    patch.
+  * Switch to quilt as the patch system.
+  * Update config.guess and config.sub.
+  * Change priority to extra.
+  * General cleanup of debian/rules.
+    - Remove commented-out and unused code.
+    - Add build-arch and build-indep targets, just in case.
+    - Run make distclean, not clean, and check its error status.
+    - Always pass the host type into configure.
+  * Include NOTICE text in debian/copyright rather than installing NOTICE,
+    and include an explicit copyright statement and a license for the
+    Debian packaging modifications.
+  * Don't install CHANGELOG.txt twice or KEYS at all.
+  * Remove unnecessary dh_installdirs invocation.
+  * Install whole directories rather than wildcards in *.install files.
+  * Remove commented-out samples from debian/watch.
+  * Update to standards version 3.7.2 (no changes required).
+  * Add myself as uploader.
+
+ -- Russ Allbery <rra@debian.org>  Tue, 30 May 2006 17:49:15 -0700
+
+xml-security-c (1.2.1-1) stable; urgency=low
+
+  * Initial Release.
+
+ -- Quanah Gibson-Mount <quanah@stanford.edu>  Thu, 30 Mar 2006 17:09:41 -0800
+

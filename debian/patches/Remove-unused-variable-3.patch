@@ -1,0 +1,34 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sun, 31 Jan 2016 01:02:08 +0100
+Subject: Remove unused variable 3
+
+---
+ xsec/tools/xklient/xklient.cpp | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/xsec/tools/xklient/xklient.cpp b/xsec/tools/xklient/xklient.cpp
+index 68ce39c..6e6b93c 100644
+--- a/xsec/tools/xklient/xklient.cpp
++++ b/xsec/tools/xklient/xklient.cpp
+@@ -3812,7 +3812,6 @@ int doParsedMsgDump(DOMDocument * doc) {
+ 	// Get an XKMS Message Factory
+ 	XSECProvider prov;
+ 	XKMSMessageFactory * factory = prov.getXKMSMessageFactory();
+-	int errorsOccured;
+ 
+ 	try {
+ 
+@@ -3835,13 +3834,11 @@ int doParsedMsgDump(DOMDocument * doc) {
+ 		cerr << "An error occured during message loading\n   Message: "
+ 		<< msg << endl;
+ 		XSEC_RELEASE_XMLCH(msg);
+-		errorsOccured = true;
+ 		return 2;
+ 	}
+ 	catch (XSECCryptoException &e) {
+ 		cerr << "An error occured during encryption/signature processing\n   Message: "
+ 		<< e.getMsg() << endl;
+-		errorsOccured = true;
+ 
+ #if defined (XSEC_HAVE_OPENSSL)
+ 		ERR_load_crypto_strings();

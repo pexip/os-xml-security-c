@@ -1,0 +1,84 @@
+=head1 NAME
+
+xmlsec-xklient - Client for an XKMS service
+
+=head1 SYNOPSIS
+
+B<xmlsec-xklient> [B<-t>] msgdump [I<options>] I<filename>
+
+B<xmlsec-xklient> [B<-t>] msgcreate LocateRequest [I<options>]
+
+B<xmlsec-xklient> [B<-t>] dorequest [I<options>] I<type> [I<options>]
+
+=head1 DESCRIPTION
+
+B<xmlsec-xklient> is a general client for web services that follows the
+XML Key Management Specification (XKMS).  It supports three basic
+operations:
+
+=over 4
+
+=item msgdump
+
+Given an input file name containing an XKMS message, dump that message to
+standard output.
+
+=item msgcreate
+
+Create an XKMS message and print the resulting message to standard output.
+The only supported message type to create is C<LocateRequest> or C<lr>.
+
+=item dorequest
+
+Send an XKMS request.  The request type is one of:
+
+    CompoundRequest (cr)
+    LocateRequest   (lr)
+    ValidateRequest (vr)
+    PendingRequest  (pr)
+    RegisterRequest (rr)
+    ReissueRequest  (ir)
+    RecoverRequest  (or)
+    RevokeRequest   (er)
+
+=back
+
+Each of these three operations have their own special command-line options
+that may be given after the operation, and each of the XKMS request types
+have their own set of options to specify what goes into the request.  Each
+operation supports the B<-h> or B<--help> flag to print out usage for that
+particular operation and, in the case of C<dorequest>, that operation and
+request type.
+
+All the specific per-operation options are not (yet) documented in this
+manual page.  Use the B<-h> or B<--help> option to get more usage
+information for the operation that you want to perform.
+
+=head1 OPTIONS
+
+This section only documents the general options that are supported before
+the operation type.
+
+=over 4
+
+=item B<--text>, B<-t>
+
+Print out any created XML when performing any of the other operations.
+
+=back
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

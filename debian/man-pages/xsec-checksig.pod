@@ -1,0 +1,71 @@
+=head1 NAME
+
+xmlsec-checksig - Check a signature embedded in an XML file
+
+=head1 SYNOPSIS
+
+B<xmlsec-checksig> [B<-s>] [B<-h> I<string>] [B<-x>] [B<-d> I<ns-uri> I<name>]
+    [B<-i>] [B<--id> I<name>] I<input>
+
+=head1 DESCRIPTION
+
+B<xmlsec-checksig> checks a digital signature embedded in an XML file
+using the Apache XML Security for C++ library.  It reads the XML document
+to check from the provided I<input> file and expects the signature to
+follow the XML Digital Signature and Encryption specifications.
+
+=head1 OPTIONS
+
+Note that each option must be given as a separate argument.
+
+=over 4
+
+=item B<--hmackey> I<string>, B<-h> I<string>
+
+Use the HMAC key specified by I<string>.
+
+=item B<--id> I<name>
+
+Use the attribute id with name I<name>.  To also specify the namespace,
+use B<--idns> instead.
+
+=item B<--idns> I<ns-uri> I<name>, B<-d> I<ns-uri> I<name>
+
+Use the attribute id specified by the namespace URI I<ns-uri> and the name
+I<name>.
+
+=item B<--interop>, B<-i>
+
+Use the interop resolver for the Baltimore interop examples.
+
+=item B<--skiprefs>, B<-s>
+
+Skip checking references and only check the signature.
+
+=item B<--xsecresolver>, B<-x>
+
+Use the Apache XML Security for C++ test XMLDSig URI resolver.
+
+=back
+
+=head1 RETURN STATUS
+
+B<xmlsec-checksig> exits with status 0 if the signature is valid and with
+status 1 if the signature is not valid.  If it cannot process the input
+file for some reason, it exits with status 2.
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

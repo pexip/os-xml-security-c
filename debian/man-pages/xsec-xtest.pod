@@ -1,0 +1,62 @@
+=head1 NAME
+
+xmlsec-xtest - Perform run-time tests of the XML Security library
+
+=head1 SYNOPSIS
+
+B<xmlsec-xtest> [B<--help>] [B<-p>]
+
+=head1 DESCRIPTION
+
+B<xmlsec-xtest> performs a set of run-time tests against the Apache XML
+Security for C++ library.  This is rarely of interest to a user of the
+library, but it can be used as a sanity check to ensure that the library
+is working properly.
+
+=head1 OPTIONS
+
+Note that the single-character options must still occur as separate
+options on the command line.  In other words, B<-pe> to specify both the
+B<-p> and B<-e> options is not allowed.
+
+=over 4
+
+=item B<--help>
+
+Print out usage information and exit.
+
+=item B<--print-docs>, B<-p>
+
+Print out the test documents while running each test.
+
+=item B<--encryption-only>, B<-e>
+
+=item B<--encryption-unit-only>, B<-u>
+
+=item B<--signature-only>, B<-s>
+
+=item B<--signature-unit-only>, B<-t>
+
+=item B<--xkms-only>, B<-x>
+
+By default, B<xmlsec-xtest> runs all of the tests.  One of these options
+may be specified to run only that set of tests.  All of these options are
+mutually exclusive; at most one of them should be specified.
+
+=back
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

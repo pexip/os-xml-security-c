@@ -1,0 +1,22 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sat, 30 Jan 2016 22:12:45 +0100
+Subject: Remove unused variable 1
+
+---
+ xsec/dsig/DSIGAlgorithmHandlerDefault.cpp | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/xsec/dsig/DSIGAlgorithmHandlerDefault.cpp b/xsec/dsig/DSIGAlgorithmHandlerDefault.cpp
+index 779e29d..e60b84c 100644
+--- a/xsec/dsig/DSIGAlgorithmHandlerDefault.cpp
++++ b/xsec/dsig/DSIGAlgorithmHandlerDefault.cpp
+@@ -93,8 +93,7 @@ bool compareBase64StringToRaw(const char * b64Str,
+     d.rem = 0;
+     d.quot = 0;
+ 
+-	unsigned int maxCompareBytes, maxCompareBits;
+-	maxCompareBits = 0;
++	unsigned int maxCompareBytes;
+ 
+ 	unsigned int size;
+ 

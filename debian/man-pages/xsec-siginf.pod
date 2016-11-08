@@ -1,0 +1,40 @@
+=head1 NAME
+
+xmlsec-siginf - Output information about a signature in an XML file
+
+=head1 SYNOPSIS
+
+B<xmlsec-siginf> [B<-s>] I<input>
+
+=head1 DESCRIPTION
+
+B<xmlsec-siginf> prints to standard output various information about a
+signature found in an XML file.  The signature must comply with the XML
+Digital Signature and Encryption specifications.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--skiprefs>, B<-s>
+
+Skip information on references and print out only information about the
+main signature.
+
+=back
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

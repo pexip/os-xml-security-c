@@ -1,0 +1,65 @@
+=head1 NAME
+
+xmlsec-templatesign - Sign a template XML signature file
+
+=head1 SYNOPSIS
+
+B<xmlsec-templatesign> [B<-s> I<distinguished-name>] [B<-h> I<string>] [B<-c>]
+    (B<-d> | B<-e> | B<-r>) I<private-key> I<password> I<input>
+
+=head1 DESCRIPTION
+
+B<xmlsec-templatesign> signs a template XML signature file using the
+Apache XML Security for C++ library.  The resulting signed file is printed
+to standard output.  The signing key is specified with one of B<-d> (for a
+DSA key), B<-e> (for an EC key), or B<-r> (for an RSA key).  The key must
+be stored in a PEM-encoded file, and the password for that file must be
+given on the command line.
+
+=head1 OPTIONS
+
+Note that each option must be given as a separate argument.
+
+=over 4
+
+=item B<--dsakey>, B<-d>
+
+The provided I<private-key> file is a PEM-encoded DSA private key.
+
+=item B<--eckey>, B<-e>
+
+The provided I<private-key> file is a PEM-encoded EC private key.
+
+=item B<--rsakey>, B<-r>
+
+The provided I<private-key> file is a PEM-encoded RSA private key.
+
+=item B<--clearkeys>, B<-c>
+
+Clear out any current KeyInfo elements in the file.
+
+=item B<--hmackey> I<string>, B<-h> I<string>
+
+Use the HMAC key specified by I<string>.
+
+=item B<--x509subjectname> I<name>, B<-s> I<name>
+
+The provided I<name> will be set as SubjectName in X.509.
+
+=back
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

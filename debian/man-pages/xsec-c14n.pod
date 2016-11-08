@@ -1,0 +1,60 @@
+=head1 NAME
+
+xmlsec-c14n - Canonicalize an XML file
+
+=head1 SYNOPSIS
+
+B<xmlsec-c14n> [B<-n>] [B<-x>] [B<-1.1>] [B<-id> I<id>] I<input>
+
+=head1 DESCRIPTION
+
+B<xmlsec-c14n> canonicalizes an XML document following the W3C Canonical
+XML Recommendation.  By default, it uses version 1.0, but it can use
+version 1.1 with the B<-1.1> flag and Exclusive XML Canonicalization 1.0
+with the B<-x> flag.
+
+The source XML document is read from the provided I<input> file, and the
+canonicalized version is written to standard output.
+
+=head1 OPTIONS
+
+Note that each option must be given as a separate argument.
+
+=over 4
+
+=item B<-n>
+
+Do not include XML comments in the output.
+
+=item B<-x>
+
+Canonicalize to the Exclusive XML Canonicalization 1.0 Recommendation
+instead of the default.
+
+=item B<-1.1>
+
+Canonicalizae to the Canonical XML 1.1 Recommendation instead of the
+default.
+
+=item B<-id> I<id>
+
+Rather than canonicalizing the entire input document, canonicalize and
+output only the subtree rooted at the node identified by I<id>.
+
+=back
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut

@@ -1,0 +1,101 @@
+=head1 NAME
+
+xmlsec-cipher - Perform basic encryption and decryption of XML documents
+
+=head1 SYNOPSIS
+
+B<xmlsec-cipher> [B<-i>] ([B<-d>] | B<-de> | B<-ef> | B<-ex>) [B<-x>]
+    [B<-o> I<output>] B<-k> [kek] (I<filename> [I<password>] | I<key-string>)
+    I<input>
+
+=head1 DESCRIPTION
+
+B<xmlsec-cipher> encrypts or decrypts an XML document following the XML
+Digital Signature and Encryption specifications using the Apache XML
+Security for C++ library.  The default action is to decrypt the input
+file.  Other operations can be selected with the B<-de>, B<-ef>, or B<-ex>
+options.  The result of the operation, whether encryption or decryption,
+will be printed to standard output.
+
+=head1 OPTIONS
+
+Note that each option must be given as a separate argument.
+
+=over 4
+
+=item B<--decrypt>, B<-d>
+
+Reads in the input file as an XML file, searches for an EncryptedData
+node, and decrypts the output, printing it to standard output.  This is
+the default operation and does not need to be specified.
+
+=item B<--decrypt-element>, B<-de>
+
+Reads in the input file as an XML file and prints it out with the fist
+encrypted element decrypted.
+
+=item B<--encrypt-file>, B<-ef>
+
+Reads the input file as raw data and creates an XML EncryptedData document
+as output, containing the encrypted version of that input data.
+
+=item B<--encrypt-xml>, B<-ex>
+
+Parse the input file as XML, find the document element, and encrypt the
+document, outputting the result as an XML EncryptedData document.
+
+=item (B<--key> | B<-k>) [kek] I<type> I<filename> [I<password>]
+
+=item (B<--key> | B<-k>) [kek] I<type> I<key-string>
+
+Specifies the key to use for encryption or decryption.
+
+If the first argument following the B<--key> or B<-k> option is the string
+C<kek>, the following key argument will be used as a Key EncryptionKey.
+
+I<type> specifies the key type and must be one of X509, RSA, AES128,
+AES192, AES256, AES128-GCM, AES192-GCM, AES256-GCM, or 3DES.
+
+The remaining arguments depend on the key type.  For X509, only a
+I<filename> may be given and must contain an RSA KEK certificate.  For
+RSA, a I<filename> and I<password> may specify an RSA private key file and
+its password (this must be a KEK).  For the other key types, the last
+argument is the string to use as the key.
+
+=item B<--xkms>, B<-x>
+
+The key specified after this argument on the command line is interpreted
+as an XKMS RSAKeyPair encryption key.
+
+=item B<--interop>, B<-i>
+
+Use hte interop resolver for Baltimore interop examples.
+
+=item B<--out-file> I<file>, B<-o> I<file>
+
+Rather than printing the result to standard output, write it to the
+specified file.
+
+=back
+
+=head1 RETURN STATUS
+
+B<xmlsec-cipher> exits with status 0 if the encryption or decryption
+operation was successful and with status 1 if it failed.  If it cannot
+process the input file for some reason, it exits with status 2.
+
+=head1 AUTHOR
+
+This manual page was written by Russ Allbery for Debian.
+
+=head1 MANUAL LICENSE
+
+The authors hereby relinquish any claim to any copyright that they may
+have in this work, whether granted under contract or by operation of law
+or international treaty, and hereby commit to the public, at large, that
+they shall not, at any time in the future, seek to enforce any copyright
+in this work against any person or entity, or prevent any person or entity
+from copying, publishing, distributing or creating derivative works of
+this work.
+
+=cut
