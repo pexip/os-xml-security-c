@@ -1,3 +1,9 @@
+xml-security-c (1.7.3-4pexip1) pexip; urgency=medium
+
+  * Prepare Pexip packaging
+
+ -- John-Mark Bell <jmb@pexip.com>  Fri, 03 Aug 2018 17:47:51 +0000
+
 xml-security-c (1.7.3-4) unstable; urgency=medium
 
   [ Etienne Dysli Metref ]
