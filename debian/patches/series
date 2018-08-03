@@ -21,3 +21,4 @@ Fix-typo-occured-occurred.patch
 Use-pkg-config-for-Xerces-OpenSSL-and-NSS-and-provid.patch
 We-do-not-use-pthreads-threadtest.cpp-is-Windows-onl.patch
 Only-add-found-packages-to-the-pkg-config-dependenci.patch
+Default-KeyInfo-resolver-doesn-t-check-for-empty-element-.patch
