@@ -23,7 +23,7 @@
  * XSECNameSpaceExander := Class for expanding out a document's name space axis
  *							and then shrinking again
  *
- * $Id: XSECNameSpaceExpander.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECNameSpaceExpander.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -31,7 +31,8 @@
 #include <xsec/utils/XSECNameSpaceExpander.hpp>
 #include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+
+#include "XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -150,7 +151,7 @@ int attNodeCount(DOMElement * d) {
 
 }
 
-void XSECNameSpaceExpander::expandNameSpaces(void) {
+void XSECNameSpaceExpander::expandNameSpaces() {
 
 	if (m_expanded)
 		return;				// Don't do this twice!
@@ -158,7 +159,6 @@ void XSECNameSpaceExpander::expandNameSpaces(void) {
 	DOMElement	*docElt;		// The document element - do not expand it's namespaces
 	
 	docElt = mp_fragment; //mp_doc->getDocumentElement();
-	int count = attNodeCount(docElt);
 
 	DOMNode *c;
 
@@ -172,18 +172,13 @@ void XSECNameSpaceExpander::expandNameSpaces(void) {
 
 	m_expanded = true;
 
-	count = attNodeCount(docElt);
-
 }
 
 
-void XSECNameSpaceExpander::deleteAddedNamespaces(void) {
+void XSECNameSpaceExpander::deleteAddedNamespaces() {
 
 	NameSpaceEntryListVectorType::size_type size = m_lst.size();
 	XSECNameSpaceEntry *e;
-
-	DOMElement *docElt = mp_fragment; //mp_doc->getDocumentElement();
-	int 	count = attNodeCount(docElt);
 
 	NameSpaceEntryListVectorType::size_type i;
 
@@ -206,11 +201,10 @@ void XSECNameSpaceExpander::deleteAddedNamespaces(void) {
 	// Now done - empty everything
 	m_lst.clear();
 	m_expanded = false;
-	count = attNodeCount(docElt);
 
 }
 
-bool XSECNameSpaceExpander::nodeWasAdded(DOMNode *n) {
+bool XSECNameSpaceExpander::nodeWasAdded(DOMNode *n) const {
 
 	NameSpaceEntryListVectorType::size_type size = m_lst.size();
 	XSECNameSpaceEntry *e;

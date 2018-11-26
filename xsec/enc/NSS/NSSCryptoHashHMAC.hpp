@@ -30,12 +30,14 @@
 #define NSSCRYPTOHASHHMAC_INCLUDE
 
 #include <xsec/framework/XSECDefs.hpp>
-#include <xsec/enc/XSECCryptoHash.hpp>
 
 #if defined (XSEC_HAVE_NSS)
 
 #include <pk11func.h>
 #include <nss.h>
+
+#include <xsec/enc/XSECCryptoHash.hpp>
+#include <xsec/utils/XSECSafeBuffer.hpp>
 
 /**
  * @ingroup nsscrypto
@@ -49,7 +51,7 @@
  *
  */
 
-class DSIG_EXPORT NSSCryptoHashHMAC : public XSECCryptoHash {
+class XSEC_EXPORT NSSCryptoHashHMAC : public XSECCryptoHash {
 
 
 public :
@@ -83,7 +85,7 @@ public :
 	 * @param key The key the HMAC function should use.
 	 */
 
-	virtual void setKey(XSECCryptoKey * key);
+	virtual void setKey(const XSECCryptoKey * key);
 
 	//@}
 

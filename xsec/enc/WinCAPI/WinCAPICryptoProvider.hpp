@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoProvider.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoProvider.hpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
@@ -37,7 +37,7 @@
 #if defined (XSEC_HAVE_WINCAPI)
 
 #if defined (_WIN32_WINNT)
-#	undef _WIN32_WINNT
+#    undef _WIN32_WINNT
 #endif
 #define _WIN32_WINNT 0x0400
 #include <wincrypt.h>
@@ -46,14 +46,14 @@
 // For older versions of wincrypt.h
 
 #if !defined (PROV_RSA_AES)
-#	define PROV_RSA_AES      24
-#	define ALG_SID_AES_128   14
-#	define ALG_SID_AES_192   15
-#	define ALG_SID_AES_256   16
-#	define ALG_SID_AES       17
-#	define CALG_AES_128      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_128)
-#	define CALG_AES_192      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_192)
-#	define CALG_AES_256      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_256)
+#    define PROV_RSA_AES      24
+#    define ALG_SID_AES_128   14
+#    define ALG_SID_AES_192   15
+#    define ALG_SID_AES_256   16
+#    define ALG_SID_AES       17
+#    define CALG_AES_128      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_128)
+#    define CALG_AES_192      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_192)
+#    define CALG_AES_256      (ALG_CLASS_DATA_ENCRYPT|ALG_TYPE_BLOCK|ALG_SID_AES_256)
 #endif
 
 #define WINCAPI_BLOBHEADERLEN   0x08
@@ -86,309 +86,279 @@
  */
  /*\@{*/
 
-class DSIG_EXPORT WinCAPICryptoProvider : public XSECCryptoProvider {
+class XSEC_EXPORT WinCAPICryptoProvider : public XSECCryptoProvider {
 
 
 public :
 
-	/** @name Constructors and Destructors */
-	//@{
-	/**
-	 * \brief Create a Windows CAPI interface layer
-	 *
-	 * Windows CSPs work under a provider model.  The user should specify
-	 * which CSP to use.
-	 *
-	 * @param provDSSName Name of DSS provider - must be of type PROV_DSS.
-	 * Will use the default Windows DSS provider if nothing passed in.
-	 * @param provRSAName RSA provider - must be of type PROV_RSA_FULL.
-	 * Will use the default RSA_FULL provider if nothing passed in
+    /** @name Constructors and Destructors */
+    //@{
+    /**
+     * \brief Create a Windows CAPI interface layer
+     *
+     * Windows CSPs work under a provider model.  The user should specify
+     * which CSP to use.
+     *
+     * @param provDSSName Name of DSS provider - must be of type PROV_DSS.
+     * Will use the default Windows DSS provider if nothing passed in.
+     * @param provRSAName RSA provider - must be of type PROV_RSA_FULL.
+     * Will use the default RSA_FULL provider if nothing passed in
          * @param dwFlags If you are running XSEC as service you should specify
          * CRYPT_MACHINE_KEYSET here
-	 */
+     */
 
-	WinCAPICryptoProvider(LPCSTR provDSSName = NULL, LPCSTR provRSAName = NULL, DWORD dwFlags = 0);
+    WinCAPICryptoProvider(LPCSTR provDSSName = NULL, LPCSTR provRSAName = NULL, DWORD dwFlags = 0);
 
-	virtual ~WinCAPICryptoProvider();
+    virtual ~WinCAPICryptoProvider();
 
-	//@}
+    //@}
 
-	/** @name Hashing (Digest) Functions */
-	//@{
+    /** @name Hashing (Digest) Functions */
+    //@{
 
-	/**
-	 * \brief Return a SHA1 implementation.
-	 *
-	 * Call used by the library to obtain a SHA1 object from the 
-	 * provider.
-	 *
-	 * @returns A pointer to an WinCAPI Hash object that implements SHA1
-	 * @see WinCAPICryptoHash
-	 */
+    /**
+     * \brief Get the provider's maximum digest length.
+     *
+     * Call used by the library to max out the buffer sizes it uses.
+     *
+     * @returns maximum size to allow for
+     */
+    virtual unsigned int getMaxHashSize() const;
 
-	virtual XSECCryptoHash			* hashSHA1() const;
+    /**
+     * \brief Return a hashing implementation.
+     *
+     * Call used by the library to obtain a hashing implementation from the
+     * provider.
+     *
+     * @returns a pointer to a hashing object.
+     */
+    virtual XSECCryptoHash* hash(XSECCryptoHash::HashType type) const;
 
-	/**
-	 * \brief Return a SHA implementation.
-	 *
-	 * Call used by the library to obtain a SHA object from the 
-	 * provider.  Size of hash determined by length argument (160 = SHA1)
-	 *
-	 * @returns A pointer to a Hash object that implements SHA1
-	 * @param length - length of hash.  E.g. 160 for SHA1 or 256 for SHA256
-	 * @see WinCAPICryptoHash
-	 */
-	 
-	virtual XSECCryptoHash			* hashSHA(int length = 160) const;
-	
-	/**
-	 * \brief Return a HMAC SHA1 implementation.
-	 *
-	 * Call used by the library to obtain a HMAC SHA1 object from the 
-	 * provider.  The caller will need to set the key in the hash
-	 * object with an XSECCryptoKeyHMAC using WinCAPICryptoHash::setKey()
-	 *
-	 * @returns A pointer to a Hash object that implements HMAC-SHA1
-	 * @see WinCAPICryptoHash
-	 */
+    /**
+     * \brief Return an HMAC implementation.
+     *
+     * Call used by the library to obtain an HMAC implementation from the
+     * provider.  The caller will need to set the key in the hash
+     * object with an XSECCryptoKeyHMAC using XSECCryptoHash::setKey().
+     *
+     * @returns a pointer to the hashing object.
+     */
+    virtual XSECCryptoHash* HMAC(XSECCryptoHash::HashType type) const;
 
-	virtual XSECCryptoHash			* hashHMACSHA1() const;
+    /**
+     * \brief Return a HMAC key
+     *
+     * Sometimes the library needs to create an HMAC key (notably within
+     * the XKMS utilities.
+     *
+     * This function allows the library to obtain a key that can then have
+     * a value set within it.
+     */
 
-	/**
-	 * \brief Return a HMAC SHA(1-512) implementation.
-	 *
-	 * Call used by the library to obtain a HMAC SHA object from the 
-	 * provider.  The caller will need to set the key in the hash
-	 * object with an XSECCryptoKeyHMAC using XSECCryptoHash::setKey()
-	 *
-	 * @returns A pointer to a Hash object that implements HMAC-SHA1
-	 * @param length Length of hash output (160 = SHA1, 256, 512 etc)
-	 * @see WinCAPICryptoHash
-	 */
+    virtual XSECCryptoKeyHMAC* keyHMAC(void) const;
 
-	virtual XSECCryptoHash			* hashHMACSHA(int length = 160) const;
-	
-	/**
-	 * \brief Return a MD5 implementation.
-	 *
-	 * Call used by the library to obtain a MD5 object from the 
-	 * WiNCAPI provider.
-	 *
-	 * @returns A pointer to a Hash object that implements MD5
-	 * @see WinCAPICryptoHash
-	 */
+    //@}
 
-	virtual XSECCryptoHash			* hashMD5() const;
+    /** @name Encoding functions */
+    //@{
 
-	/**
-	 * \brief Return a HMAC MD5 implementation.
-	 *
-	 * Call used by the library to obtain a HMAC MD5 object from the 
-	 * provider.  The caller will need to set the key in the hash
-	 * object with an XSECCryptoKeyHMAC using XSECCryptoHash::setKey()
-	 *
-	 * @note The use of MD5 is explicitly marked as <b>not recommended</b> 
-	 * in the XML Digital Signature standard due to recent advances in
-	 * cryptography indicating there <em>may</em> be weaknesses in the 
-	 * algorithm.
-	 *
-	 * @returns A pointer to a Hash object that implements HMAC-MD5
-	 * @see WinCAPICryptoHash
-	 */
+    /**
+     * \brief Return a Base64 encoder/decoder implementation.
+     *
+     * Call used by the library to obtain a Base64
+     * encoder/decoder.
+     *
+     * @note Windows providers do not implement Base64, so the internal
+     * implementation (XSCrypt) is used instead.
+     *
+     *
+     * @returns Pointer to the new Base64 encoder.
+     * @see XSCryptCryptoBase64
+     */
 
-	virtual XSECCryptoHash			* hashHMACMD5() const;
+    virtual XSECCryptoBase64* base64() const;
 
-	/**
-	 * \brief Return a HMAC key
-	 *
-	 * Sometimes the library needs to create an HMAC key (notably within
-	 * the XKMS utilities.
-	 *
-	 * This function allows the library to obtain a key that can then have
-	 * a value set within it.
-	 */
+    //@}
 
-	virtual XSECCryptoKeyHMAC		* keyHMAC(void) const;
+    /** @name Keys and Certificates */
+    //@{
 
-	//@}
+    /**
+     * \brief Return a DSA key implementation object.
+     *
+     * Call used by the library to obtain a DSA key object.
+     *
+     * @returns Pointer to the new DSA key
+     * @see WinCAPICryptoKeyDSA
+     */
 
-	/** @name Encoding functions */
-	//@{
+    virtual XSECCryptoKeyDSA* keyDSA() const;
 
-	/**
-	 * \brief Return a Base64 encoder/decoder implementation.
-	 *
-	 * Call used by the library to obtain a Base64 
-	 * encoder/decoder.
-	 *
-	 * @note Windows providers do not implement Base64, so the internal
-	 * implementation (XSCrypt) is used instead.
-	 * 
-	 *
-	 * @returns Pointer to the new Base64 encoder.
-	 * @see XSCryptCryptoBase64
-	 */
+    /**
+     * \brief Return an RSA key implementation object.
+     *
+     * Call used by the library to obtain an WinCAPI RSA key object.
+     *
+     * @returns Pointer to the new RSA key
+     * @see WinCAPICryptoKeyRSA
+     */
 
-	virtual XSECCryptoBase64		* base64() const;
+    virtual XSECCryptoKeyRSA* keyRSA() const;
 
-	//@}
+    /**
+     * \brief Return an EC key implementation object.
+     *
+     * Call used by the library to obtain an WinCAPI EC key object.
+     *
+     * @returns Pointer to the new EC key
+     */
 
-	/** @name Keys and Certificates */
-	//@{
+    virtual XSECCryptoKeyEC* keyEC() const;
 
-	/**
-	 * \brief Return a DSA key implementation object.
-	 * 
-	 * Call used by the library to obtain a DSA key object.
-	 *
-	 * @returns Pointer to the new DSA key
-	 * @see WinCAPICryptoKeyDSA
-	 */
+    /**
+     * \brief Return a key implementation object based on DER-encoded input.
+     *
+     * Call used by the library to obtain a key object from a DER-encoded key.
+     *
+     * @param buf       DER-encoded data
+     * @param buflen    length of data
+     * @param base64    true iff data is base64-encoded
+     * @returns Pointer to the new key
+     */
 
-	virtual XSECCryptoKeyDSA		* keyDSA() const;
+    virtual XSECCryptoKey* keyDER(const char* buf, unsigned long buflen, bool base64) const;
 
-	/**
-	 * \brief Return an RSA key implementation object.
-	 * 
-	 * Call used by the library to obtain an WinCAPI RSA key object.
-	 *
-	 * @returns Pointer to the new RSA key
-	 * @see WinCAPICryptoKeyRSA
-	 */
+    /**
+     * \brief Return an X509 implementation object.
+     *
+     * Call used by the library to obtain an object that can work
+     * with X509 certificates.
+     *
+     * @returns Pointer to the new X509 object
+     * @see WinCAPICryptoX509
+     */
 
-	virtual XSECCryptoKeyRSA		* keyRSA() const;
+    virtual XSECCryptoX509* X509() const;
 
-	/**
-	 * \brief Return an X509 implementation object.
-	 * 
-	 * Call used by the library to obtain an object that can work
-	 * with X509 certificates.
-	 *
-	 * @returns Pointer to the new X509 object
-	 * @see WinCAPICryptoX509
-	 */
+    //@}
 
-	virtual XSECCryptoX509			* X509() const;
+    /** @name Windows CAPI Specific methods */
+    //@{
 
-	//@}
+    /**
+     * \brief Returns the Crypto Provider being used for DSS
+     */
 
-	/** @name Windows CAPI Specific methods */
-	//@{
+    HCRYPTPROV getProviderDSS(void) {return m_provDSS;}
 
-	/**
-	 * \brief Returns the Crypto Provider being used for DSS
-	 */
+    /**
+     * \brief Returns the Provider being used for RSA functions
+     */
 
-	HCRYPTPROV getProviderDSS(void) {return m_provDSS;}
+    HCRYPTPROV getProviderRSA(void) {return m_provRSA;}
 
-	/**
-	 * \brief Returns the Provider being used for RSA functions
-	 */
+    /**
+     * \brief Return the internal key store provider
+     */
 
-	HCRYPTPROV getProviderRSA(void) {return m_provRSA;}
+    HCRYPTPROV getApacheKeyStore(void) {return m_provApacheKeyStore;}
 
-	/**
-	 * \brief Return the internal key store provider
-	 */
+    /**
+     * \brief Translate B64 I2OS integer to a WinCAPI int.
+     *
+     * Decodes a Base64 (ds:CryptoBinary) integer and reverses the order to
+     * allow loading into a Windows CAPI function.  (CAPI uses Little Endian
+     * storage of integers).
+     *
+     * @param b64 Base 64 string
+     * @param b64Len Length of base64 string
+     * @param retLen Parameter to hold length of return integer
+     */
 
-	HCRYPTPROV getApacheKeyStore(void) {return m_provApacheKeyStore;}
+    static BYTE* b642WinBN(const char* b64, unsigned int b64Len, unsigned int& retLen);
 
-	/**
-	 * \brief Translate B64 I2OS integer to a WinCAPI int.
-	 *
-	 * Decodes a Base64 (ds:CryptoBinary) integer and reverses the order to 
-	 * allow loading into a Windows CAPI function.  (CAPI uses Little Endian 
-	 * storage of integers).
-	 *
-	 * @param b64 Base 64 string
-	 * @param b64Len Length of base64 string
-	 * @param retLen Parameter to hold length of return integer
-	 */
+    /**
+     * \brief Translate a WinCAPI int to a B64 I2OS integer .
+     *
+     * Encodes a Windows integer in I2OSP base64 encoded format.
+     *
+     * @param n Buffer holding the Windows Integer
+     * @param nLen Length of data in buffer
+     * @param retLen Parameter to hold length of return integer
+     * @returns A pointer to a buffer holding the encoded data
+     * (transfers ownership)
+     */
 
-	static BYTE * b642WinBN(const char * b64, unsigned int b64Len, unsigned int &retLen);
+    static unsigned char* WinBN2b64(BYTE* n, DWORD nLen, unsigned int &retLen);
 
-	/**
-	 * \brief Translate a WinCAPI int to a B64 I2OS integer .
-	 *
-	 * Encodes a Windows integer in I2OSP base64 encoded format.
-	 *
-	 * @param n Buffer holding the Windows Integer
-	 * @param nLen Length of data in buffer
-	 * @param retLen Parameter to hold length of return integer
-	 * @returns A pointer to a buffer holding the encoded data 
-	 * (transfers ownership)
-	 */
+    /**
+     * \brief Determine whether a given algorithm is supported
+     *
+     * A call that can be used to determine whether a given
+     * symmetric algorithm is supported
+     */
 
-	static unsigned char * WinBN2b64(BYTE * n, DWORD nLen, unsigned int &retLen);
+    virtual bool algorithmSupported(XSECCryptoSymmetricKey::SymmetricKeyType alg) const;
 
-	/**
-	 * \brief Determine whether a given algorithm is supported
-	 *
-	 * A call that can be used to determine whether a given 
-	 * symmetric algorithm is supported
-	 */
+    /**
+     * \brief Determine whether a given algorithm is supported
+     *
+     * A call that can be used to determine whether a given
+     * digest algorithm is supported
+     */
 
-	virtual bool algorithmSupported(XSECCryptoSymmetricKey::SymmetricKeyType alg) const;
+    virtual bool algorithmSupported(XSECCryptoHash::HashType alg) const;
 
-	/**
-	 * \brief Determine whether a given algorithm is supported
-	 *
-	 * A call that can be used to determine whether a given 
-	 * digest algorithm is supported
-	 */
+    /**
+     * \brief Return a Symmetric Key implementation object.
+     *
+     * Call used by the library to obtain a bulk encryption
+     * object.
+     *
+     * @returns Pointer to the new SymmetricKey object
+     * @see XSECCryptoSymmetricKey
+     */
 
-	virtual bool algorithmSupported(XSECCryptoHash::HashType alg) const;
-	
-	/**
-	 * \brief Return a Symmetric Key implementation object.
-	 *
-	 * Call used by the library to obtain a bulk encryption
-	 * object.
-	 *
-	 * @returns Pointer to the new SymmetricKey object
-	 * @see XSECCryptoSymmetricKey
-	 */
+    virtual XSECCryptoSymmetricKey* keySymmetric(XSECCryptoSymmetricKey::SymmetricKeyType alg) const;
 
-	virtual XSECCryptoSymmetricKey	* keySymmetric(XSECCryptoSymmetricKey::SymmetricKeyType alg) const;
+    /**
+     * \brief Obtain some random octets
+     *
+     * For generation of IVs and the like, the library needs to be able
+     * to obtain "random" octets.  The library uses this call to the
+     * crypto provider to obtain what it needs.
+     *
+     * @param buffer The buffer to place the random data in
+     * @param numOctets Number of bytes required
+     * @returns Number of bytes obtained.
+     */
 
-	/**
-	 * \brief Obtain some random octets
-	 *
-	 * For generation of IVs and the like, the library needs to be able
-	 * to obtain "random" octets.  The library uses this call to the 
-	 * crypto provider to obtain what it needs.
-	 *
-	 * @param buffer The buffer to place the random data in
-	 * @param numOctets Number of bytes required
-	 * @returns Number of bytes obtained.
-	 */
-
-	virtual unsigned int getRandom(unsigned char * buffer, unsigned int numOctets) const;
+    virtual unsigned int getRandom(unsigned char * buffer, unsigned int numOctets) const;
 
 
-	//@}
+    //@}
 
-	/** @name Information Functions */
-	//@{
+    /** @name Information Functions */
+    //@{
 
-	/**
-	 * \brief Returns a string that identifies the Crypto Provider
-	 */
+    /**
+     * \brief Returns a string that identifies the Crypto Provider
+     */
 
-	virtual const XMLCh * getProviderName() const;
+    virtual const XMLCh* getProviderName() const;
 
-	//@}
+    //@}
 
 
 private:
-
-	HCRYPTPROV		m_provDSS;
-	HCRYPTPROV		m_provRSA;
-	HCRYPTPROV		m_provApacheKeyStore;
-	LPCSTR			m_provDSSName;
-	LPCSTR			m_provRSAName;
-	bool			m_haveAES;
-	DWORD			m_provRSAType;
+    HCRYPTPROV        m_provDSS;
+    HCRYPTPROV        m_provRSA;
+    HCRYPTPROV        m_provApacheKeyStore;
+    LPCSTR            m_provDSSName;
+    LPCSTR            m_provRSAName;
+    bool              m_haveAES;
+    DWORD             m_provRSAType;
 
 };
 

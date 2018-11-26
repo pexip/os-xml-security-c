@@ -22,7 +22,7 @@
  *
  * XKMSMessageAbstractType := Interface for base schema of XKMS messages
  *
- * $Id: XKMSMessageAbstractType.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSMessageAbstractType.hpp 1826172 2018-03-08 04:40:40Z scantor $
  *
  */
 
@@ -33,6 +33,8 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/dsig/DSIGConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 class DSIGSignature;
 
@@ -84,7 +86,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMElement);
  */
 
 
-class XKMSMessageAbstractType {
+class XSEC_EXPORT XKMSMessageAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -254,9 +256,9 @@ public:
 	 */
 
 	virtual DSIGSignature * addSignature(
-		canonicalizationMethod cm = CANON_C14N_NOC,
-		signatureMethod	sm = SIGNATURE_DSA,
-		hashMethod hm = HASH_SHA1) = 0;
+		const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm) = 0;
 
 	//@}
 
@@ -303,5 +305,7 @@ private:
 	XKMSMessageAbstractType & operator = (const XKMSMessageAbstractType &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSMESSAGEABSTRACTTYPE_INCLUDE */

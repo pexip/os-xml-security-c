@@ -23,7 +23,7 @@
  * XSECEnv := Configuration class - used by the other classes to retrieve
  *            information on the environment they are working under
  *
- * $Id: XSECEnv.hpp 1350043 2012-06-13 22:31:04Z scantor $
+ * $Id: XSECEnv.hpp 1809031 2017-09-20 13:38:03Z scantor $
  *
  */
 
@@ -57,7 +57,7 @@ class XSECURIResolver;
  *
  */
 
-class DSIG_EXPORT XSECEnv {
+class XSEC_EXPORT XSECEnv {
 
 public:
     
@@ -167,6 +167,7 @@ public:
 
 	void setXENC11NSPrefix(const XMLCh * prefix);
 
+#ifdef XSEC_XKMS_ENABLED
 	/**
 	 * \brief Set prefix for XKMS nodes
 	 *
@@ -175,6 +176,7 @@ public:
 	 */
 
 	void setXKMSNSPrefix(const XMLCh * prefix);
+#endif
 
 	/**
 	 * \brief Get the NS Prefix being used for DSIG elements.
@@ -235,6 +237,7 @@ public:
 
 	const XMLCh * getXENC11NSPrefix() const {return mp_xenc11PrefixNS;}
 
+#ifdef XSEC_XKMS_ENABLED
 	/**
 	 * \brief Get namespace prefix for XKMS nodes
 	 *
@@ -245,6 +248,7 @@ public:
 	 */
 
 	const XMLCh * getXKMSNSPrefix(void) const {return mp_xkmsPrefixNS;}
+#endif
 	
 	//@}
 
@@ -362,11 +366,10 @@ public:
 	 * The setIdByAttributeName call enables or disables the second part of the Id
 	 * search.  I.e. when the Id doesn't exist as an attribute of Type=ID, whether or
 	 * not to search for an attribute of a name in the list of names.  By default
-	 * this behaviour is enabled.
+	 * this behaviour is disabled.
 	 *
-	 * @warning This is currently enabled by default for backwards compatibility
-	 * reasons only.  Future version may reverse this and ship disabled by default, as
-	 * this behaviour is a potential security risk.
+	 * @warning The default has been changed from earlier versions of the library
+	 * to address the security risk of assuming IDness based on name.
 	 *
 	 * @param flag Enable (true) or Disable (false) searching for Id attributes by name
 	 */
@@ -549,8 +552,9 @@ private:
 	XMLCh						* mp_xpfPrefixNS;
 	XMLCh						* mp_xencPrefixNS;
 	XMLCh						* mp_xenc11PrefixNS;
+#ifdef XSEC_XKMS_ENABLED
 	XMLCh						* mp_xkmsPrefixNS;
-
+#endif
 	// Resolvers
 	XSECURIResolver				* mp_URIResolver;
 

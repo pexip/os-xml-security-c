@@ -22,18 +22,17 @@
  *
  * XENCEncryptedDataImpl := Implementation for holder object for EncryptedData 
  *
- * $Id: XENCEncryptedDataImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCEncryptedDataImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
+#include <xsec/framework/XSECError.hpp>
 
 #include "XENCCipherImpl.hpp"
 #include "XENCEncryptedDataImpl.hpp"
 #include "XENCCipherDataImpl.hpp"
-
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLUniDefs.hpp>
 
@@ -60,6 +59,20 @@ static XMLCh s_EncryptedData[] = {
 	chLatin_a,
 	chNull,
 };
+
+XENCEncryptedData* XENCEncryptedData::create(
+	const XSECEnv* env,
+	XENCCipherData::XENCCipherDataType type,
+	const XMLCh * algorithm,
+	const XMLCh * value)
+{
+
+	XENCEncryptedDataImpl* ret = new XENCEncryptedDataImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankEncryptedData(type, algorithm, value);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Construct/Destruct

@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoKeyHMAC.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoKeyHMAC.hpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
@@ -61,7 +61,7 @@
  * loading of these keys.
  */
 
-class DSIG_EXPORT WinCAPICryptoKeyHMAC : public XSECCryptoKeyHMAC {
+class XSEC_EXPORT WinCAPICryptoKeyHMAC : public XSECCryptoKeyHMAC {
 
 public :
 
@@ -104,7 +104,7 @@ public :
 	 * \brief Return the WinCAPI string identifier
 	 */
 
-	virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVWinCAPI;}
+	virtual const XMLCh * getProviderName() const;
 
 	//@}
 

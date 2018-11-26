@@ -22,7 +22,7 @@
  *
  * DSIGTransformXPath := Class that performs XPath transforms
  *
- * $Id: DSIGTransformXPath.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformXPath.hpp 1817973 2017-12-13 03:18:57Z scantor $
  *
  */
 
@@ -51,7 +51,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNode);
  *
  */
 
-class DSIG_EXPORT DSIGTransformXPath : public DSIGTransform {
+class XSEC_EXPORT DSIGTransformXPath : public DSIGTransform {
 
 public:
 
@@ -99,15 +99,6 @@ public:
 	/** @name Interface Methods */
 
 	//@{
-
-	/**
-	 * \brief Determine the transform type.
-	 *
-	 * Used to determine what the type of the transform is.
-	 *
-	 */
-
-	virtual transformType getTransformType();
 
 	/**
 	 * \brief Create the XPath Transformer class.
@@ -169,7 +160,7 @@ public:
 	 * @returns The expression
 	 */
 
-	const char * getExpression(void);
+	const char * getExpression() const;
 
 	/**
 	 * \brief Add a new namespace to the list to be used
@@ -191,7 +182,7 @@ public:
 	 * @returns A pointer to the NamedNodeMap
 	 */
 
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap * getNamespaces(void) {
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap * getNamespaces() const {
 		return mp_NSMap;
 	}
 

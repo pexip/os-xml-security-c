@@ -22,7 +22,7 @@
  *
  * TXFMSB := Class that takes an input from a safeBuffer to start a pipe
  *
- * $Id: TXFMSB.hpp 1350038 2012-06-13 22:21:29Z scantor $
+ * $Id: TXFMSB.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -37,18 +37,18 @@
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMSB : public TXFMBase {
+class XSEC_EXPORT TXFMSB : public TXFMBase {
 
 private:
 
 	safeBuffer	sb;			// SafeBuffer to use
-	xsecsize_t toOutput;	// Amount left to output
-	xsecsize_t sbs;		    // Size of raw buffer
+	XMLSize_t toOutput;	// Amount left to output
+	XMLSize_t sbs;		    // Size of raw buffer
 
 public:
 
 	TXFMSB(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMSB();
+	virtual ~TXFMSB();
 
 	// Methods to set the inputs
 
@@ -58,16 +58,13 @@ public:
 
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual nodeType getNodeType(void) const;
 
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
 	
 private:
 	TXFMSB();

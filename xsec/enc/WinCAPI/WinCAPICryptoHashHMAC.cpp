@@ -24,17 +24,18 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoHashHMAC.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoHashHMAC.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/enc/WinCAPI/WinCAPICryptoHashHMAC.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
+#include <xsec/enc/WinCAPI/WinCAPICryptoHashHMAC.hpp>
 #include <xsec/enc/WinCAPI/WinCAPICryptoProvider.hpp>
 #include <xsec/enc/WinCAPI/WinCAPICryptoKeyHMAC.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 
 #if defined (XSEC_HAVE_WINCAPI)
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <memory.h>
 
@@ -136,7 +137,7 @@ void WinCAPICryptoHashHMAC::eraseKeys(void) {
 
 }
 
-void WinCAPICryptoHashHMAC::setKey(XSECCryptoKey *key) {
+void WinCAPICryptoHashHMAC::setKey(const XSECCryptoKey *key) {
 
 	
 	BOOL fResult;

@@ -22,7 +22,7 @@
  *
  * XKMSStatusResult := Interface for StatusResult Messages
  *
- * $Id: XKMSStatusResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSStatusResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 
 class XKMSQueryKeyBinding;
@@ -65,7 +68,7 @@ class XKMSUnverifiedKeyBinding;
    <!-- /StatusResult -->\endverbatim
  */
 
-class XKMSStatusResult : public XKMSResultType {
+class XSEC_EXPORT XKMSStatusResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -167,5 +170,7 @@ private:
 	XKMSStatusResult & operator = (const XKMSStatusResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSSTATUSRESULT_INCLUDE */

@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSRequestAbstractType.hpp>
 #include <xsec/xkms/XKMSStatus.hpp>
 
@@ -71,7 +74,7 @@ class XKMSReissueKeyBinding;
 \endverbatim
  */
 
-class XKMSReissueRequest : public XKMSRequestAbstractType {
+class XSEC_EXPORT XKMSReissueRequest : public XKMSRequestAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -172,9 +175,9 @@ public:
 	 */
 
 	virtual DSIGSignature * addProofOfPossessionSignature(
-		canonicalizationMethod cm = CANON_C14N_NOC,
-		signatureMethod	sm = SIGNATURE_DSA,
-		hashMethod hm = HASH_SHA1) = 0;
+		const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm) = 0;
 	
 	//@}
 
@@ -185,5 +188,7 @@ private:
 	XKMSReissueRequest & operator = (const XKMSReissueRequest &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREISSUEREQUEST_INCLUDE */

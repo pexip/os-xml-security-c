@@ -23,7 +23,7 @@
  * SimpleEncrypt := An application to generate an XML document (via Xerces) and encrypt
  *					a portion of it
  *
- * $Id: simpleDecrypt.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: simpleDecrypt.cpp 1834154 2018-06-22 19:22:03Z scantor $
  *
  */
 
@@ -41,20 +41,23 @@
 #include <xsec/framework/XSECException.hpp>
 #include <xsec/xenc/XENCCipher.hpp>
 
-#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyRSA.hpp>
+#ifdef XSEC_HAVE_OPENSSL
+# include <xsec/enc/OpenSSL/OpenSSLCryptoKeyRSA.hpp>
+# include <openssl/bio.h>
+# include <openssl/evp.h>
+# include <openssl/pem.h>
+#endif
+
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xalan
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 XALAN_USING_XALAN(XalanTransformer)
 #endif
 
 // OpenSSL
-
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/pem.h>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -108,17 +111,17 @@ int main (int argc, char **argv) {
 
 	try {
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XalanTransformer::initialize();
 #endif
 		XSECPlatformUtils::Initialise();
 	}
 	catch (const XMLException &e) {
 
-		cerr << "Error during initialisation of Xerces" << endl;
+		cerr << "Error during initialization of libraries" << endl;
 		cerr << "Error Message = : "
 		     << e.getMessage() << endl;
-
+		return -1;
 	}
 
 	// Use xerces to parse the document
@@ -132,7 +135,7 @@ int main (int argc, char **argv) {
 	MemBufInputSource* memIS = new MemBufInputSource ((const XMLByte*) letter, (unsigned int) strlen(letter), "XSECMem");
 
 	parser->parse(*memIS);
-    xsecsize_t errorCount = parser->getErrorCount();
+    XMLSize_t errorCount = parser->getErrorCount();
     if (errorCount > 0) {
 		cerr << "Error parsing input document\n";
 		exit (1);
@@ -151,6 +154,7 @@ int main (int argc, char **argv) {
 
 		cipher = prov.newCipher(doc);
 
+#ifdef XSEC_HAVE_OPENSSL
 		/* Load the private key via OpenSSL and then wrap in an OpenSSLCrypto construct */
 		BIO * bioMem = BIO_new(BIO_s_mem());
 		BIO_puts(bioMem, s_privateKey);
@@ -160,6 +164,9 @@ int main (int argc, char **argv) {
 
 		OpenSSLCryptoKeyRSA * k = new OpenSSLCryptoKeyRSA(pk);
 		cipher->setKEK(k);
+#else
+		throw XSECException(XSECException::CryptoProviderError);
+#endif
 
 		/* Find the EncryptedData node */
 		DOMNode * encryptedNode = findXENCNode(doc, "EncryptedData");
@@ -169,7 +176,7 @@ int main (int argc, char **argv) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
 		char * msg = XMLString::transcode(e.getMsg());
 		cerr << "An error occurred during an encryption operation\n   Message: "

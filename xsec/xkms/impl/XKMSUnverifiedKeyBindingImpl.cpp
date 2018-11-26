@@ -22,7 +22,7 @@
  *
  * XKMSUnverifiedKeyBindingImpl := Implementation for UnverifiedKeyBinding
  *
- * $Id: XKMSUnverifiedKeyBindingImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSUnverifiedKeyBindingImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -30,11 +30,15 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "XKMSUnverifiedKeyBindingImpl.hpp"
 
 #include <xercesc/dom/DOM.hpp>
 
-#include "XKMSUnverifiedKeyBindingImpl.hpp"
+#include <xsec/xkms/XKMSConstants.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -85,3 +89,4 @@ DOMElement * XKMSUnverifiedKeyBindingImpl::createBlankUnverifiedKeyBinding(void)
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

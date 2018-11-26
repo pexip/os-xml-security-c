@@ -22,19 +22,18 @@
  *
  * XENCCipherValueImpl := Implementation for CipherValue elements
  *
- * $Id: XENCCipherValueImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherValueImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/framework/XSECEnv.hpp>
 
 #include "XENCCipherValueImpl.hpp"
-
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECEnv.hpp>
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLUniDefs.hpp>
 
@@ -59,6 +58,18 @@ static XMLCh s_CipherValue[] = {
 	chLatin_e,
 	chNull,
 };
+
+XENCCipherValue* XENCCipherValue::create(
+	const XSECEnv* env,
+	const XMLCh * value)
+{
+
+	XENCCipherValueImpl* ret = new XENCCipherValueImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankCipherValue(value);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Constructors/Destructors

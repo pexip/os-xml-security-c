@@ -23,23 +23,25 @@
  * XSECCryptoSymmetricKey := Bulk encryption algorithms should all be
  *							implemented via this interface
  *
- * $Id: WinCAPICryptoSymmetricKey.cpp 1655508 2015-01-29 02:05:56Z scantor $
+ * $Id: WinCAPICryptoSymmetricKey.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/framework/XSECDefs.hpp>
-#include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+#include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/WinCAPI/WinCAPICryptoProvider.hpp>
 #include <xsec/enc/WinCAPI/WinCAPICryptoSymmetricKey.hpp>
+#include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/enc/XSECCryptoException.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
 
-#include <xercesc/util/Janitor.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
 #if defined (XSEC_HAVE_WINCAPI)
+
+#include "../../utils/XSECDOMUtils.hpp"
+
+#include <xercesc/util/Janitor.hpp>
 
 // --------------------------------------------------------------------------------
 //           Constructors and Destructors

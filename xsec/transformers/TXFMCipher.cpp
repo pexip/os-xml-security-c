@@ -22,7 +22,7 @@
  *
  * TXFMCipher := Class that performs encryption and decryption transforms
  *
- * $Id: TXFMCipher.cpp 1352681 2012-06-21 20:58:40Z scantor $
+ * $Id: TXFMCipher.cpp 1817135 2017-12-04 22:24:05Z scantor $
  *
  */
 
@@ -36,7 +36,7 @@
 XERCES_CPP_NAMESPACE_USE
 
 TXFMCipher::TXFMCipher(DOMDocument *doc, 
-					   XSECCryptoKey * key, 
+					   const XSECCryptoKey * key,
 					   bool encrypt,
                        XSECCryptoSymmetricKey::SymmetricKeyMode mode,
                        unsigned int taglen) : 
@@ -89,19 +89,19 @@ void TXFMCipher::setInput(TXFMBase *newInput) {
 
 	// Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMCipher::getInputType(void) {
+TXFMBase::ioType TXFMCipher::getInputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
-TXFMBase::ioType TXFMCipher::getOutputType(void) {
+TXFMBase::ioType TXFMCipher::getOutputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
 
 
-TXFMBase::nodeType TXFMCipher::getNodeType(void) {
+TXFMBase::nodeType TXFMCipher::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_NONE;
 
@@ -164,23 +164,5 @@ unsigned int TXFMCipher::readBytes(XMLByte * const toFill, unsigned int maxToFil
 	}
 
 	return ret;
-
-}
-
-DOMDocument *TXFMCipher::getDocument() {
-
-	return NULL;
-
-}
-
-DOMNode * TXFMCipher::getFragmentNode() {
-
-	return NULL;		// Return a null node
-
-}
-
-const XMLCh * TXFMCipher::getFragmentId() {
-
-	return NULL;	// Empty string
 
 }

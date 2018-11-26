@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoException.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoException.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 #ifndef XSECCRYPTOEXCEPTION_INCLUDE
@@ -64,7 +64,7 @@ extern const char * XSECCryptoExceptionStrings[];
  * provide more information to the caller.
  */
 
-class DSIG_EXPORT XSECCryptoException {
+class XSEC_EXPORT XSECCryptoException {
 
 public:
 
@@ -80,18 +80,18 @@ public:
 
 	enum XSECCryptoExceptionType {
 
-		None						= 0,
+		None					= 0,
 		GeneralError				= 1,
-		MDError						= 2,		// Error in Message Digest
-		Base64Error					= 3,		// Error in a Base64 operation
-		MemoryError					= 4,		// Memory allocation error
-		X509Error					= 5,		// X509 problem
-		DSAError					= 6,		// DSA Error
-		RSAError					= 7,		// RSA Error
+		MDError					= 2,		// Error in Message Digest
+		Base64Error				= 3,		// Error in a Base64 operation
+		MemoryError				= 4,		// Memory allocation error
+		X509Error				= 5,		// X509 problem
+		DSAError				= 6,		// DSA Error
+		RSAError				= 7,		// RSA Error
 		SymmetricError				= 8,
 		UnsupportedError			= 9,		// Called function is not supported
-		UnsupportedAlgorithm        = 10,
-        ECError                     = 11,
+		UnsupportedAlgorithm        		= 10,
+		ECError					= 11,
 		UnknownError				= 12		// Must be last!
 
 	};
@@ -149,7 +149,7 @@ public:
 	 * @returns A pointer to the char buffer holding the error string
 	 */
 
-	const char * getMsg(void);
+	const char * getMsg(void) const;
 
 	/**
 	 * \brief Get the error type
@@ -159,7 +159,7 @@ public:
 
 	//@} 
 
-	XSECCryptoExceptionType getType(void);
+	XSECCryptoExceptionType getType(void) const;
 
 private:
 

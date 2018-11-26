@@ -22,7 +22,7 @@
  *
  * XKMSRegisterRequest := Interface for RegisterRequest Messages
  *
- * $Id: XKMSRegisterRequest.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRegisterRequest.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSRequestAbstractType.hpp>
 
 class DSIGSignature;
@@ -69,7 +72,7 @@ class XKMSPrototypeKeyBinding;
 \endverbatim
  */
 
-class XKMSRegisterRequest : public XKMSRequestAbstractType {
+class XSEC_EXPORT XKMSRegisterRequest : public XKMSRequestAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -168,9 +171,9 @@ public:
 	 */
 
 	virtual DSIGSignature * addProofOfPossessionSignature(
-		canonicalizationMethod cm = CANON_C14N_NOC,
-		signatureMethod	sm = SIGNATURE_DSA,
-		hashMethod hm = HASH_SHA1) = 0;
+		const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm) = 0;
 	
 	//@}
 
@@ -181,5 +184,7 @@ private:
 	XKMSRegisterRequest & operator = (const XKMSRegisterRequest &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREGISTERREQUEST_INCLUDE */

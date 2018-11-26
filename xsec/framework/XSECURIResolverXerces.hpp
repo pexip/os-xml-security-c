@@ -23,7 +23,7 @@
  * XSECURIResolverXerces := Virtual Interface class that takes a URI and
  *                    creates a binary input stream from it.
  *
- * $Id: XSECURIResolverXerces.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECURIResolverXerces.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -49,7 +49,7 @@
  *
  */
 
-class DSIG_EXPORT XSECURIResolverXerces : public XSECURIResolver {
+class XSEC_EXPORT XSECURIResolverXerces : public XSECURIResolver {
 
 public:
 

@@ -22,7 +22,7 @@
  *
  * DSIGReferenceList := Class for Loading and storing a list of references
  *
- * $Id: DSIGReferenceList.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGReferenceList.cpp 1817148 2017-12-05 01:59:28Z scantor $
  *
  */
 
@@ -56,7 +56,7 @@ void DSIGReferenceList::addReference(DSIGReference * ref) {
 
 }
 
-DSIGReferenceList::size_type DSIGReferenceList::getSize() {
+DSIGReferenceList::size_type DSIGReferenceList::getSize() const {
 
 	return m_referenceList.size();
 
@@ -76,7 +76,7 @@ DSIGReference * DSIGReferenceList::removeReference(size_type index) {
 
 }
 
-DSIGReference * DSIGReferenceList::item(ReferenceListVectorType::size_type index) {
+DSIGReference * DSIGReferenceList::item(ReferenceListVectorType::size_type index) const {
 
 	if (index < m_referenceList.size())
 		return m_referenceList[index];
@@ -84,6 +84,7 @@ DSIGReference * DSIGReferenceList::item(ReferenceListVectorType::size_type index
 	return NULL;
 
 }
+
 bool DSIGReferenceList::empty() {
 
 	// Clear out the list - note we do NOT delete the reference elements

@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoHash.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoHash.hpp 1817135 2017-12-04 22:24:05Z scantor $
  *
  */
 
@@ -57,7 +57,7 @@ class WinCAPICryptoProvider;
  *
  */
 
-class DSIG_EXPORT WinCAPICryptoHash : public XSECCryptoHash {
+class XSEC_EXPORT WinCAPICryptoHash : public XSECCryptoHash {
 
 
 public :
@@ -92,7 +92,7 @@ public :
 	 * @param key The key the HMAC function should use.
 	 */
 
-	virtual void		setKey(XSECCryptoKey * key) {}
+	virtual void		setKey(const XSECCryptoKey * key) {}
 
 	//@}
 

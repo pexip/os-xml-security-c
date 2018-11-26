@@ -22,7 +22,7 @@
  *
  * XKMSRequestAbstractType := Interface for base schema of XKMS Request messages
  *
- * $Id: XKMSRequestAbstractType.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRequestAbstractType.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSMessageAbstractType.hpp>
 
 class XKMSRespondWith;
@@ -72,7 +75,7 @@ class XKMSResponseMechanism;
  */
 
 
-class XKMSRequestAbstractType : public XKMSMessageAbstractType {
+class XSEC_EXPORT XKMSRequestAbstractType : public XKMSMessageAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -265,5 +268,7 @@ private:
 	XKMSRequestAbstractType & operator = (const XKMSRequestAbstractType &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREQUESTABSTRACTTYPE_INCLUDE */

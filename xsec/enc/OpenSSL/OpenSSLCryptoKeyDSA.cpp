@@ -24,12 +24,13 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: OpenSSLCryptoKeyDSA.cpp 1655515 2015-01-29 03:11:28Z scantor $
+ * $Id: OpenSSLCryptoKeyDSA.cpp 1843562 2018-10-11 15:13:40Z scantor $
  *
  */
 #include <xsec/framework/XSECDefs.hpp>
 #if defined (XSEC_HAVE_OPENSSL)
 
+#include <xsec/enc/OpenSSL/OpenSSLSupport.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoBase64.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
@@ -42,109 +43,206 @@ XSEC_USING_XERCES(ArrayJanitor);
 
 #include <openssl/dsa.h>
 
-OpenSSLCryptoKeyDSA::OpenSSLCryptoKeyDSA() : mp_dsaKey(NULL) {
+
+OpenSSLCryptoKeyDSA::OpenSSLCryptoKeyDSA() : mp_dsaKey(NULL), mp_accumP(NULL), mp_accumQ(NULL), mp_accumG(NULL) {
 };
 
 OpenSSLCryptoKeyDSA::~OpenSSLCryptoKeyDSA() {
 
 
-	// If we have a DSA, delete it
-	// OpenSSL will ensure the memory holding any private key is freed.
+    // If we have a DSA, delete it
+    // OpenSSL will ensure the memory holding any private key is freed.
 
-	if (mp_dsaKey)
-		DSA_free(mp_dsaKey);
+    if (mp_dsaKey)
+        DSA_free(mp_dsaKey);
 
+    if (mp_accumG)
+        BN_free(mp_accumG);
+
+    if (mp_accumP)
+        BN_free(mp_accumP);
+
+    if (mp_accumQ)
+        BN_free(mp_accumQ);
 };
+
+const XMLCh* OpenSSLCryptoKeyDSA::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVOpenSSL;
+}
 
 // Generic key functions
 
 XSECCryptoKey::KeyType OpenSSLCryptoKeyDSA::getKeyType() const {
 
-	// Find out what we have
-	if (mp_dsaKey == NULL)
-		return KEY_NONE;
+    // Find out what we have
+    if (mp_dsaKey == NULL)
+        return KEY_NONE;
 
-	if (mp_dsaKey->priv_key != NULL && mp_dsaKey->pub_key != NULL)
-		return KEY_DSA_PAIR;
+    if (DSA_get0_privkey(mp_dsaKey) != NULL && DSA_get0_pubkey(mp_dsaKey) != NULL)
+        return KEY_DSA_PAIR;
 
-	if (mp_dsaKey->priv_key != NULL)
-		return KEY_DSA_PRIVATE;
+    if (DSA_get0_privkey(mp_dsaKey) != NULL)
+        return KEY_DSA_PRIVATE;
 
-	if (mp_dsaKey->pub_key != NULL)
-		return KEY_DSA_PUBLIC;
+    if (DSA_get0_pubkey(mp_dsaKey) != NULL)
+        return KEY_DSA_PUBLIC;
 
-	return KEY_NONE;
+    return KEY_NONE;
 
 }
 
-void OpenSSLCryptoKeyDSA::loadPBase64BigNums(const char * b64, unsigned int len) {
+void OpenSSLCryptoKeyDSA::loadPBase64BigNums(const char * b64, unsigned int len)  {
 
-	if (mp_dsaKey == NULL)
-		mp_dsaKey = DSA_new();
+    setPBase(OpenSSLCryptoBase64::b642BN((char *) b64, len));
 
-	mp_dsaKey->p = OpenSSLCryptoBase64::b642BN((char *) b64, len);
+}
+
+void OpenSSLCryptoKeyDSA::setPBase(BIGNUM  * p) {
+
+    if (mp_dsaKey == NULL)
+        mp_dsaKey = DSA_new();
+
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+
+    // Do it immediately
+    mp_dsaKey->p = p;
+
+#else
+    // Save it for later
+    if (mp_accumP != NULL)
+        BN_free(mp_accumP);
+
+    mp_accumP = p;
+
+    commitPQG();
+
+#endif
 
 }
 
 void OpenSSLCryptoKeyDSA::loadQBase64BigNums(const char * b64, unsigned int len) {
 
-	if (mp_dsaKey == NULL)
-		mp_dsaKey = DSA_new();
-
-	mp_dsaKey->q = OpenSSLCryptoBase64::b642BN((char *) b64, len);
+    setQBase(OpenSSLCryptoBase64::b642BN((char *) b64, len));
 
 }
+
+void OpenSSLCryptoKeyDSA::setQBase(BIGNUM  * q) {
+
+    if (mp_dsaKey == NULL)
+        mp_dsaKey = DSA_new();
+
+#if (OPENSSL_VERSION_NUMBER <   0x10100000L)
+
+    mp_dsaKey->q = q;
+
+#else
+    if (mp_accumQ != NULL)
+        BN_free(mp_accumQ);
+
+    mp_accumQ = q;
+    commitPQG();
+
+#endif
+
+}
+
 
 void OpenSSLCryptoKeyDSA::loadGBase64BigNums(const char * b64, unsigned int len) {
 
-	if (mp_dsaKey == NULL)
-		mp_dsaKey = DSA_new();
-
-	mp_dsaKey->g = OpenSSLCryptoBase64::b642BN((char *) b64, len);
+    setGBase(OpenSSLCryptoBase64::b642BN((char *) b64, len));
 
 }
 
+void OpenSSLCryptoKeyDSA::setGBase(BIGNUM  * g) {
+
+    if (mp_dsaKey == NULL)
+        mp_dsaKey = DSA_new();
+
+#if (OPENSSL_VERSION_NUMBER <   0x10100000L)
+
+    mp_dsaKey->g = g;
+
+#else
+    if (mp_accumG != NULL)
+        BN_free(mp_accumG);
+
+    mp_accumG = g;
+    commitPQG();
+
+#endif
+
+}
+
+#if (OPENSSL_VERSION_NUMBER >=  0x10100000L)
+void OpenSSLCryptoKeyDSA::commitPQG() {
+
+
+    if (mp_accumP != NULL && mp_accumQ != NULL && mp_accumG != NULL) {
+
+        DSA_set0_pqg(mp_dsaKey, mp_accumP, mp_accumQ, mp_accumG);
+        mp_accumP = NULL;
+        mp_accumQ = NULL;
+        mp_accumG = NULL;
+
+    }
+}
+#endif
+
 void OpenSSLCryptoKeyDSA::loadYBase64BigNums(const char * b64, unsigned int len) {
 
-	if (mp_dsaKey == NULL)
-		mp_dsaKey = DSA_new();
+    if (mp_dsaKey == NULL)
+        mp_dsaKey = DSA_new();
 
-	mp_dsaKey->pub_key = OpenSSLCryptoBase64::b642BN((char *) b64, len);
+    BIGNUM *newPub = OpenSSLCryptoBase64::b642BN((char *) b64, len);
+    const BIGNUM *oldPriv;
+    DSA_get0_key(mp_dsaKey, NULL, &oldPriv);
 
+    DSA_set0_key(mp_dsaKey, newPub, (oldPriv?BN_dup(oldPriv):NULL));
 }
 
 void OpenSSLCryptoKeyDSA::loadJBase64BigNums(const char * b64, unsigned int len) {
 
-	if (mp_dsaKey == NULL)
-		mp_dsaKey = DSA_new();
+    if (mp_dsaKey == NULL)
+        mp_dsaKey = DSA_new();
 
-	// Do nothing
+    // Do nothing
 }
 
 
 // "Hidden" OpenSSL functions
 
-OpenSSLCryptoKeyDSA::OpenSSLCryptoKeyDSA(EVP_PKEY *k) {
+OpenSSLCryptoKeyDSA::OpenSSLCryptoKeyDSA(EVP_PKEY *k) : mp_accumP(NULL), mp_accumQ(NULL), mp_accumG(NULL) {
 
-	// Create a new key to be loaded as we go
+    // Create a new key to be loaded as we go
 
-	mp_dsaKey = DSA_new();
+    mp_dsaKey = DSA_new();
+    mp_accumG = NULL;
+    mp_accumP = NULL;
+    mp_accumQ = NULL;
 
-	if (k == NULL || k->type != EVP_PKEY_DSA)
-		return;	// Nothing to do with us
+    if (k == NULL || EVP_PKEY_id(k) != EVP_PKEY_DSA)
+        return; // Nothing to do with us
 
+    const BIGNUM *otherP = NULL, *otherQ = NULL, *otherG = NULL;
+    DSA_get0_pqg(EVP_PKEY_get0_DSA(k), &otherP, &otherQ, &otherG);
 
-	if (k->pkey.dsa->p)
-		mp_dsaKey->p = BN_dup(k->pkey.dsa->p);
-	if (k->pkey.dsa->q)
-		mp_dsaKey->q = BN_dup(k->pkey.dsa->q);
-	if (k->pkey.dsa->g)
-		mp_dsaKey->g = BN_dup(k->pkey.dsa->g);
-	if (k->pkey.dsa->pub_key)
-		mp_dsaKey->pub_key = BN_dup(k->pkey.dsa->pub_key);
-	if (k->pkey.dsa->priv_key)
-		mp_dsaKey->priv_key = BN_dup(k->pkey.dsa->priv_key);
+    if (otherP != NULL && otherQ != NULL && otherG != NULL) {
+        DSA_set0_pqg(mp_dsaKey, BN_dup(otherP), BN_dup(otherQ), BN_dup(otherG));
+    }
 
+    const BIGNUM *otherPriv = NULL, *otherPub = NULL;
+    DSA_get0_key(EVP_PKEY_get0_DSA(k), &otherPub, &otherPriv);
+
+    if (otherPub != NULL) {
+
+        BIGNUM *newPriv = NULL;
+
+        if (otherPriv != NULL)
+            newPriv = BN_dup(otherPriv);
+
+        DSA_set0_key(mp_dsaKey, BN_dup(otherPub), newPriv);
+
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -152,97 +250,108 @@ OpenSSLCryptoKeyDSA::OpenSSLCryptoKeyDSA(EVP_PKEY *k) {
 // --------------------------------------------------------------------------------
 
 bool OpenSSLCryptoKeyDSA::verifyBase64Signature(unsigned char * hashBuf,
-								 unsigned int hashLen,
-								 char * base64Signature,
-								 unsigned int sigLen) {
+                                 unsigned int hashLen,
+                                 char * base64Signature,
+                                 unsigned int sigLen) const {
 
-	// Use the currently loaded key to validate the Base64 encoded signature
+    // Use the currently loaded key to validate the Base64 encoded signature
 
-	if (mp_dsaKey == NULL) {
+    if (mp_dsaKey == NULL) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Attempt to validate signature with empty key");
+    }
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Attempt to validate signature with empty key");
-	}
+    XSECCryptoKey::KeyType keyType = getKeyType();
+    if (keyType != KEY_DSA_PAIR && keyType != KEY_DSA_PUBLIC) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Attempt to validate signature without public key");
+    }
 
     char* cleanedBase64Signature;
-	unsigned int cleanedBase64SignatureLen = 0;
+    unsigned int cleanedBase64SignatureLen = 0;
 
-	cleanedBase64Signature =
-		XSECCryptoBase64::cleanBuffer(base64Signature, sigLen, cleanedBase64SignatureLen);
-	ArrayJanitor<char> j_cleanedBase64Signature(cleanedBase64Signature);
+    cleanedBase64Signature =
+        XSECCryptoBase64::cleanBuffer(base64Signature, sigLen, cleanedBase64SignatureLen);
+    ArrayJanitor<char> j_cleanedBase64Signature(cleanedBase64Signature);
 
-	int sigValLen;
-	unsigned char* sigVal = new unsigned char[sigLen + 1];
+    int sigValLen;
+    unsigned char* sigVal = new unsigned char[sigLen + 1];
     ArrayJanitor<unsigned char> j_sigVal(sigVal);
 
-	EVP_ENCODE_CTX m_dctx;
-	EVP_DecodeInit(&m_dctx);
-	int rc = EVP_DecodeUpdate(&m_dctx,
-						  sigVal,
-						  &sigValLen,
-						  (unsigned char *) cleanedBase64Signature,
-						  cleanedBase64SignatureLen);
+    EvpEncodeCtxRAII dctx;
 
-	if (rc < 0) {
+    if (!dctx.of()) {
+        throw XSECCryptoException(XSECCryptoException::ECError,
+            "OpenSSL:DSA - allocation fail during Context Creation");
+    }
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error during Base64 Decode");
-	}
-	int t = 0;
+    EVP_DecodeInit(dctx.of());
 
-	EVP_DecodeFinal(&m_dctx, &sigVal[sigValLen], &t);
+    int rc = EVP_DecodeUpdate(dctx.of(),
+                          sigVal,
+                          &sigValLen,
+                          (unsigned char *) cleanedBase64Signature,
+                          cleanedBase64SignatureLen);
 
-	sigValLen += t;
+    if (rc < 0) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error during Base64 Decode");
+    }
 
-	// Translate to BNs and thence to DSA_SIG
-	BIGNUM * R;
-	BIGNUM * S;
+    int t = 0;
 
-	if (sigValLen == 40) {
+    EVP_DecodeFinal(dctx.of(), &sigVal[sigValLen], &t);
 
-		R = BN_bin2bn(sigVal, 20, NULL);
-		S = BN_bin2bn(&sigVal[20], 20, NULL);
-	}
-	else {
+    sigValLen += t;
 
-		unsigned char rb[20];
-		unsigned char sb[20];
+    // Translate to BNs and thence to DSA_SIG
+    BIGNUM * R;
+    BIGNUM * S;
 
-		if (sigValLen == 46 && ASN2DSASig(sigVal, rb, sb) == true) {
+    if (sigValLen == 40) {
 
-			R = BN_bin2bn(rb, 20, NULL);
-			S = BN_bin2bn(sb, 20, NULL);
+        R = BN_bin2bn(sigVal, 20, NULL);
+        S = BN_bin2bn(&sigVal[20], 20, NULL);
+    }
+    else {
 
-		}
+        unsigned char rb[20];
+        unsigned char sb[20];
 
-		else {
+        if (sigValLen == 46 && ASN2DSASig(sigVal, rb, sb) == true) {
 
-			throw XSECCryptoException(XSECCryptoException::DSAError,
-				"OpenSSL:DSA - Signature Length incorrect");
-		}
-	}
+            R = BN_bin2bn(rb, 20, NULL);
+            S = BN_bin2bn(sb, 20, NULL);
 
-	DSA_SIG * dsa_sig = DSA_SIG_new();
+        }
 
-	dsa_sig->r = BN_dup(R);
-	dsa_sig->s = BN_dup(S);
+        else {
 
-	BN_free(R);
-	BN_free(S);
+            throw XSECCryptoException(XSECCryptoException::DSAError,
+                "OpenSSL:DSA - Signature Length incorrect");
+        }
+    }
 
-	// Now we have a signature and a key - lets check
+    DSA_SIG * dsa_sig = DSA_SIG_new();
 
-	int err = DSA_do_verify(hashBuf, hashLen, dsa_sig, mp_dsaKey);
+    DSA_SIG_set0(dsa_sig, BN_dup(R), BN_dup(S));
 
-	DSA_SIG_free(dsa_sig);
+    BN_free(R);
+    BN_free(S);
 
-	if (err < 0) {
+    // Now we have a signature and a key - lets check
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error validating signature");
-	}
+    int err = DSA_do_verify(hashBuf, hashLen, dsa_sig, mp_dsaKey);
 
-	return (err == 1);
+    DSA_SIG_free(dsa_sig);
+
+    if (err < 0) {
+
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error validating signature");
+    }
+
+    return (err == 1);
 
 }
 
@@ -252,78 +361,82 @@ bool OpenSSLCryptoKeyDSA::verifyBase64Signature(unsigned char * hashBuf,
 
 
 unsigned int OpenSSLCryptoKeyDSA::signBase64Signature(unsigned char * hashBuf,
-		unsigned int hashLen,
-		char * base64SignatureBuf,
-		unsigned int base64SignatureBufLen) {
+        unsigned int hashLen,
+        char * base64SignatureBuf,
+        unsigned int base64SignatureBufLen) const {
 
-	// Sign a pre-calculated hash using this key
+    // Sign a pre-calculated hash using this key
 
-	if (mp_dsaKey == NULL) {
+    if (mp_dsaKey == NULL) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Attempt to sign data with empty key");
+    }
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Attempt to sign data with empty key");
-	}
+    KeyType keyType = getKeyType();
+    if (keyType != KEY_DSA_PAIR && keyType != KEY_DSA_PRIVATE) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Attempt to sign data without private key");
+    }
 
-	DSA_SIG * dsa_sig;
 
-	dsa_sig = DSA_do_sign(hashBuf, hashLen, mp_dsaKey);
+    DSA_SIG* dsa_sig = DSA_do_sign(hashBuf, hashLen, mp_dsaKey);
 
-	if (dsa_sig == NULL) {
+    if (dsa_sig == NULL) {
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error signing data");
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error signing data");
 
-	}
+    }
 
-	// Now turn the signature into a base64 string
+    // Now turn the signature into a base64 string
+    
+    const BIGNUM *dsaSigR;
+    const BIGNUM *dsaSigS;
 
-	unsigned char* rawSigBuf = new unsigned char[(BN_num_bits(dsa_sig->r) + BN_num_bits(dsa_sig->s) + 7) / 8];
+    DSA_SIG_get0(dsa_sig, &dsaSigR, &dsaSigS);
+
+    unsigned char* rawSigBuf = new unsigned char[(BN_num_bits(dsaSigR) + BN_num_bits(dsaSigS) + 7) / 8];
     ArrayJanitor<unsigned char> j_sigbuf(rawSigBuf);
-	
-    unsigned int rawLen = BN_bn2bin(dsa_sig->r, rawSigBuf);
+    
+    unsigned int rawLen = BN_bn2bin(dsaSigR, rawSigBuf);
 
-	if (rawLen <= 0) {
+    if (rawLen <= 0) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error converting signature to raw buffer");
+    }
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error converting signature to raw buffer");
+    unsigned int rawLenS = BN_bn2bin(dsaSigS, (unsigned char *) &rawSigBuf[rawLen]);
 
-	}
+    if (rawLenS <= 0) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error converting signature to raw buffer");
+    }
 
-	unsigned int rawLenS = BN_bn2bin(dsa_sig->s, (unsigned char *) &rawSigBuf[rawLen]);
+    rawLen += rawLenS;
 
-	if (rawLenS <= 0) {
+    // Now convert to Base 64
 
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error converting signature to raw buffer");
+    BIO * b64 = BIO_new(BIO_f_base64());
+    BIO * bmem = BIO_new(BIO_s_mem());
 
-	}
+    BIO_set_mem_eof_return(bmem, 0);
+    b64 = BIO_push(b64, bmem);
 
-	rawLen += rawLenS;
+    // Translate signature from Base64
 
-	// Now convert to Base 64
+    BIO_write(b64, rawSigBuf, rawLen);
+    BIO_flush(b64);
 
-	BIO * b64 = BIO_new(BIO_f_base64());
-	BIO * bmem = BIO_new(BIO_s_mem());
+    unsigned int sigValLen = BIO_read(bmem, base64SignatureBuf, base64SignatureBufLen);
 
-	BIO_set_mem_eof_return(bmem, 0);
-	b64 = BIO_push(b64, bmem);
+    BIO_free_all(b64);
 
-	// Translate signature from Base64
+    if (sigValLen <= 0) {
+        throw XSECCryptoException(XSECCryptoException::DSAError,
+            "OpenSSL:DSA - Error base64 encoding signature");
+    }
 
-	BIO_write(b64, rawSigBuf, rawLen);
-	BIO_flush(b64);
-
-	unsigned int sigValLen = BIO_read(bmem, base64SignatureBuf, base64SignatureBufLen);
-
-	BIO_free_all(b64);
-
-	if (sigValLen <= 0) {
-
-		throw XSECCryptoException(XSECCryptoException::DSAError,
-			"OpenSSL:DSA - Error base64 encoding signature");
-	}
-
-	return sigValLen;
+    return sigValLen;
 
 }
 
@@ -331,27 +444,31 @@ unsigned int OpenSSLCryptoKeyDSA::signBase64Signature(unsigned char * hashBuf,
 
 XSECCryptoKey * OpenSSLCryptoKeyDSA::clone() const {
 
-	OpenSSLCryptoKeyDSA * ret;
+    OpenSSLCryptoKeyDSA * ret;
 
-	XSECnew(ret, OpenSSLCryptoKeyDSA);
+    XSECnew(ret, OpenSSLCryptoKeyDSA);
 
-	ret->m_keyType = m_keyType;
-	ret->mp_dsaKey = DSA_new();
+    ret->mp_dsaKey = DSA_new();
 
-	// Duplicate parameters
-	if (mp_dsaKey->p)
-		ret->mp_dsaKey->p = BN_dup(mp_dsaKey->p);
-	if (mp_dsaKey->q)
-		ret->mp_dsaKey->q = BN_dup(mp_dsaKey->q);
-	if (mp_dsaKey->g)
-		ret->mp_dsaKey->g = BN_dup(mp_dsaKey->g);
-	if (mp_dsaKey->pub_key)
-		ret->mp_dsaKey->pub_key = BN_dup(mp_dsaKey->pub_key);
-	if (mp_dsaKey->priv_key)
-		ret->mp_dsaKey->priv_key = BN_dup(mp_dsaKey->priv_key);
+    // Duplicate parameters
 
-	return ret;
+    const BIGNUM *p=NULL, *q=NULL, *g=NULL;
+    DSA_get0_pqg(mp_dsaKey, &p, &q, &g);
 
+    if (p && q && g) // DSA_set0_pqg only works if all three params are non zero
+        DSA_set0_pqg(ret->mp_dsaKey, BN_dup(p), BN_dup(q), BN_dup(g));
+
+    const BIGNUM *oldPub= NULL, *oldPriv=NULL;
+    DSA_get0_key(mp_dsaKey, &oldPub, &oldPriv);
+
+    if (oldPub) {
+
+        // DSA_setKey requires non-null Public
+
+        DSA_set0_key(ret->mp_dsaKey, BN_dup(oldPub), (oldPriv?BN_dup(oldPriv):NULL));
+
+    }
+    return ret;
 }
 
 #endif /* XSEC_HAVE_OPENSSL */

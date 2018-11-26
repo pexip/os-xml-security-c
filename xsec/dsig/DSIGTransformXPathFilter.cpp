@@ -25,17 +25,19 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGTransformXPathFilter.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformXPathFilter.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
+#include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/dsig/DSIGTransformXPathFilter.hpp>
 #include <xsec/dsig/DSIGXPathFilterExpr.hpp>
-#include <xsec/dsig/DSIGSignature.hpp>
-#include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/transformers/TXFMXPathFilter.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/dom/DOMNode.hpp>
 
@@ -49,7 +51,6 @@ DSIGTransformXPathFilter::DSIGTransformXPathFilter(const XSECEnv * env, DOMNode 
 DSIGTransform(env, node),
 m_loaded(false) {
 
-
 }
 
 
@@ -58,53 +59,37 @@ DSIGTransform(env),
 m_loaded(false) {
 
 }
-	  
-	  
+
+
 DSIGTransformXPathFilter::~DSIGTransformXPathFilter() {
 
-	exprVectorType::iterator i;
-
-	for (i = m_exprs.begin(); i != m_exprs.end(); ++i) {
-
-		delete (*i);
-
-	}
-
-}
-
-transformType DSIGTransformXPathFilter::getTransformType() {
-
-	return TRANSFORM_XPATH_FILTER;
-
+    for (exprVectorType::iterator i = m_exprs.begin(); i != m_exprs.end(); ++i) {
+        delete (*i);
+    }
 }
 
 
 void DSIGTransformXPathFilter::appendTransformer(TXFMChain * input) {
 
-	if (m_loaded == false) {
+    if (m_loaded == false) {
+        throw XSECException(XSECException::XPathFilterError,
+            "DSIGTransformXPathFilter::appendTransform - load not yet called");
+    }
 
-		throw XSECException(XSECException::XPathFilterError,
-			"DSIGTransformXPathFilter::appendTransform - load not yet called");
-
-	}
-
-#ifdef XSEC_NO_XPATH
-
-	throw XSECException(XSECException::UnsupportedFunction,
-		"XPath transforms are not supported in this compilation of the XSEC library");
-
+#ifndef XSEC_HAVE_XPATH
+    throw XSECException(XSECException::UnsupportedFunction,
+        "XPath transforms are not supported in this build of the XSEC library");
 #else
+    TXFMXPathFilter *xpf;
+    // XPath transform
+    XSECnew(xpf, TXFMXPathFilter(mp_txfmNode->getOwnerDocument()));
+    input->appendTxfm(xpf);
 
-	TXFMXPathFilter *xpf;
-	// XPath transform
-	XSECnew(xpf, TXFMXPathFilter(mp_txfmNode->getOwnerDocument()));
-	input->appendTxfm(xpf);
+    // These can throw, but the TXFMXPathFilter is now owned by the chain, so will
+    // be cleaned up down the calling stack.
 
-	// These can throw, but the TXFMXPathFilter is now owned by the chain, so will
-	// be cleaned up down the calling stack.
+    xpf->evaluateExprs(&m_exprs);
 
-	xpf->evaluateExprs(&m_exprs);
-	
 #endif /* NO_XPATH */
 
 }
@@ -114,43 +99,42 @@ void DSIGTransformXPathFilter::appendTransformer(TXFMChain * input) {
 // --------------------------------------------------------------------------------
 
 
-DOMElement * DSIGTransformXPathFilter::createBlankTransform(DOMDocument * parentDoc) {
+DOMElement * DSIGTransformXPathFilter::createBlankTransform(DOMDocument* parentDoc) {
 
-	safeBuffer str;
-	const XMLCh * prefix;
-	DOMElement *ret;
-	DOMDocument *doc = mp_env->getParentDocument();
+    safeBuffer str;
+    const XMLCh * prefix;
+    DOMElement *ret;
+    DOMDocument *doc = mp_env->getParentDocument();
 
-	prefix = mp_env->getDSIGNSPrefix();
-	
-	// Create the transform node
-	makeQName(str, prefix, "Transform");
-	ret = doc->createElementNS(DSIGConstants::s_unicodeStrURIDSIG, str.rawXMLChBuffer());
-	ret->setAttributeNS(NULL,DSIGConstants::s_unicodeStrAlgorithm, DSIGConstants::s_unicodeStrURIXPF);
-	
-	mp_txfmNode = ret;
+    prefix = mp_env->getDSIGNSPrefix();
 
-	m_loaded = true;
+    // Create the transform node
+    makeQName(str, prefix, "Transform");
+    ret = doc->createElementNS(DSIGConstants::s_unicodeStrURIDSIG, str.rawXMLChBuffer());
+    ret->setAttributeNS(NULL,DSIGConstants::s_unicodeStrAlgorithm, DSIGConstants::s_unicodeStrURIXPF);
 
-	return ret;
+    mp_txfmNode = ret;
 
+    m_loaded = true;
 
+    return ret;
 }
 
-DSIGXPathFilterExpr * DSIGTransformXPathFilter::appendFilter(xpathFilterType filterType,
-											const XMLCh * filterExpr) {
+DSIGXPathFilterExpr* DSIGTransformXPathFilter::appendFilter(
+        DSIGXPathFilterExpr::XPathFilterType filterType,
+        const XMLCh* filterExpr) {
 
-	DSIGXPathFilterExpr * e;
+    DSIGXPathFilterExpr * e;
 
-	XSECnew(e, DSIGXPathFilterExpr(mp_env));
+    XSECnew(e, DSIGXPathFilterExpr(mp_env));
 
-	DOMNode * elt = e->setFilter(filterType, filterExpr);
-	m_exprs.push_back(e);
+    DOMNode * elt = e->setFilter(filterType, filterExpr);
+    m_exprs.push_back(e);
 
-	mp_txfmNode->appendChild(elt);
-	mp_env->doPrettyPrint(mp_txfmNode);
+    mp_txfmNode->appendChild(elt);
+    mp_env->doPrettyPrint(mp_txfmNode);
 
-	return e;
+    return e;
 
 }
 
@@ -158,61 +142,52 @@ DSIGXPathFilterExpr * DSIGTransformXPathFilter::appendFilter(xpathFilterType fil
 //           Load from XML
 // --------------------------------------------------------------------------------
 
-void DSIGTransformXPathFilter::load(void) {
+void DSIGTransformXPathFilter::load() {
 
-	if (mp_txfmNode == NULL) {
+    if (mp_txfmNode == NULL) {
+        throw XSECException(XSECException::XPathFilterError,
+            "DSIGTransformXPathFilter::load called on NULL node");
+    }
 
-		throw XSECException(XSECException::XPathFilterError,
-			"DSIGTransformXPathFilter::load called on NULL node");
-		
-	}
+    // Very simple - go through each child.  If it's an XPath child
+    // Create the DSIGXPathFilterExpr object
 
-	// Very simple - go through each child.  If it's an XPath child
-	// Create the DSIGXPathFilterExpr object
+    DOMNode * n = mp_txfmNode->getFirstChild();
 
-	DOMNode * n = mp_txfmNode->getFirstChild();
+    while (n != NULL) {
+        if (n->getNodeType() == DOMNode::ELEMENT_NODE &&
+            strEquals(getXPFLocalName(n), "XPath")) {
 
-	while (n != NULL) {
+            DSIGXPathFilterExpr * xpf;
+            XSECnew(xpf, DSIGXPathFilterExpr(mp_env, n));
 
-		if (n->getNodeType() == DOMNode::ELEMENT_NODE &&
-			strEquals(getXPFLocalName(n), "XPath")) {
+            // Add it to the vector prior to load to ensure deleted if
+            // anything throws an exception
 
-			DSIGXPathFilterExpr * xpf;
-			XSECnew(xpf, DSIGXPathFilterExpr(mp_env, n));
+            m_exprs.push_back(xpf);
 
-			// Add it to the vector prior to load to ensure deleted if
-			// anything throws an exception
+            xpf->load();
+        }
 
-			m_exprs.push_back(xpf);
+        n = n->getNextSibling();
+    }
 
-			xpf->load();
-
-		}
-
-		n = n->getNextSibling();
-
-	}
-
-	m_loaded = true;
-
+    m_loaded = true;
 }
 
 // --------------------------------------------------------------------------------
 //           Retrieve expression information
 // --------------------------------------------------------------------------------
 
-unsigned int DSIGTransformXPathFilter::getExprNum(void) {
-
-	return (unsigned int) m_exprs.size();
-
+unsigned int DSIGTransformXPathFilter::getExprNum() const {
+    return (unsigned int) m_exprs.size();
 }
 
 
-DSIGXPathFilterExpr * DSIGTransformXPathFilter::expr(unsigned int n) {
+DSIGXPathFilterExpr* DSIGTransformXPathFilter::expr(unsigned int n) const {
 
-	if (n < m_exprs.size())
-		return m_exprs[n];
+    if (n < m_exprs.size())
+        return m_exprs[n];
 
-	return NULL;
-
+    return NULL;
 }

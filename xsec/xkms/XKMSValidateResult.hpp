@@ -22,7 +22,7 @@
  *
  * XKMSValidateResult := Interface for ValidateResult Messages
  *
- * $Id: XKMSValidateResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSValidateResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 #include <xsec/xkms/XKMSStatus.hpp>
 
@@ -68,7 +71,7 @@ class XKMSUnverifiedKeyBinding;
 \endverbatim
  */
 
-class XKMSValidateResult : public XKMSResultType {
+class XSEC_EXPORT XKMSValidateResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -136,5 +139,7 @@ private:
 	XKMSValidateResult & operator = (const XKMSValidateResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSVALIDATERESULT_INCLUDE */

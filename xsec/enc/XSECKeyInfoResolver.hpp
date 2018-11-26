@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECKeyInfoResolver.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECKeyInfoResolver.hpp 1817138 2017-12-04 23:07:26Z scantor $
  *
  */
 
@@ -55,7 +55,7 @@
  *
  */
 
-class DSIG_EXPORT XSECKeyInfoResolver {
+class XSEC_EXPORT XSECKeyInfoResolver {
 
 public :
 
@@ -85,7 +85,7 @@ public :
 	 * @returns Either the appropriate key or NULL if none can be found
 	 */
 
-	virtual XSECCryptoKey * resolveKey(DSIGKeyInfoList * lst) = 0;
+	virtual XSECCryptoKey * resolveKey(const DSIGKeyInfoList * lst) const = 0;
 
 	/**
 	 * \brief Clone the resolver to be installed in a new object.

@@ -22,7 +22,7 @@
  *
  * XSECTXFMInputSource := Transfomer InputSource for Xerces Parser.
  *
- * $Id: XSECTXFMInputSource.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECTXFMInputSource.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *					 
  */
 
@@ -51,7 +51,7 @@ XSEC_DECLARE_XERCES_CLASS(BinInputStream);
  */
 
 
-class DSIG_EXPORT XSECTXFMInputSource : public XERCES_CPP_NAMESPACE_QUALIFIER InputSource
+class XSEC_EXPORT XSECTXFMInputSource : public XERCES_CPP_NAMESPACE_QUALIFIER InputSource
 {
 
 public :

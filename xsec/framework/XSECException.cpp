@@ -31,7 +31,8 @@
  */
 
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XSECException::XSECException(XSECExceptionType eNum, const XMLCh * inMsg) {
 
@@ -84,13 +85,13 @@ XSECException::~XSECException() {
 
 }
 
-const XMLCh * XSECException::getMsg(void) {
+const XMLCh * XSECException::getMsg(void) const {
 
 	return msg;
 
 }
 
-XSECException::XSECExceptionType XSECException::getType(void) {
+XSECException::XSECExceptionType XSECException::getType(void) const {
 
 	return type;
 

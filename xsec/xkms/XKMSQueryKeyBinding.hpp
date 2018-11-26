@@ -22,7 +22,7 @@
  *
  * XKMSQueryKeyBinding := Interface for QueryKeyBinding elements
  *
- * $Id: XKMSQueryKeyBinding.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSQueryKeyBinding.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSKeyBindingAbstractType.hpp>
 
 /**
@@ -64,7 +67,7 @@
  */
 
 
-class XKMSQueryKeyBinding : public XKMSKeyBindingAbstractType {
+class XSEC_EXPORT XKMSQueryKeyBinding : public XKMSKeyBindingAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -85,5 +88,7 @@ private:
 	XKMSQueryKeyBinding & operator = (const XKMSQueryKeyBinding &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSQUERYKEYBINDING_INCLUDE */

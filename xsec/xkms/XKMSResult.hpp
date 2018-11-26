@@ -22,7 +22,7 @@
  *
  * XKMSResult := Interface for Result Messages
  *
- * $Id: XKMSResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 
 /**
@@ -46,7 +49,7 @@
  * there is no result.  It is a straight instantiation of the ResultType
  */
 
-class XKMSResult : public XKMSResultType {
+class XSEC_EXPORT XKMSResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -77,5 +80,7 @@ private:
 	XKMSResult & operator = (const XKMSResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSRESULT_INCLUDE */

@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: TXFMDocObject.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMDocObject.hpp 1817130 2017-12-04 21:43:21Z scantor $
  *
  */
 
@@ -45,12 +45,12 @@
  */
 
 
-class DSIG_EXPORT TXFMDocObject : public TXFMBase {
+class XSEC_EXPORT TXFMDocObject : public TXFMBase {
 
 public:
 
 	TXFMDocObject(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMDocObject();
+	virtual ~TXFMDocObject();
 
 	// Methods to set the inputs
 
@@ -72,16 +72,16 @@ public:
 
 	// Methods to get tranform output type and input requirement
 
-	TXFMBase::ioType getInputType(void);
-	TXFMBase::ioType getOutputType(void);
-	TXFMBase::nodeType getNodeType(void);
+	TXFMBase::ioType getInputType(void) const;
+	TXFMBase::ioType getOutputType(void) const;
+	TXFMBase::nodeType getNodeType(void) const;
 
 	// Methods to get output data
 
 	unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * getFragmentNode();
-	virtual const XMLCh * getFragmentId();
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * getDocument() const;
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * getFragmentNode() const;
+	virtual const XMLCh* getFragmentId() const;
 	
 private:
 

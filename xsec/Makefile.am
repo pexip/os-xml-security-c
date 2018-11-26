@@ -14,13 +14,15 @@
 # limitations under the License.
 #
 
-AUTOMAKE_OPTIONS = foreign
-
-AM_CPPFLAGS = -I..
+# Find generated headers in the build directory;
+# find everything else in the source directory (always with full path)
+AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
 
 noinst_PROGRAMS = ${samples}
 bin_PROGRAMS = ${tools}
-LDADD = libxml-security-c.la
+
+AM_CXXFLAGS = $(xerces_CXXFLAGS) $(xalan_CXXFLAGS)
+LDADD = libxml-security-c.la $(xerces_LIBS) $(xalan_LIBS)
 
 #
 # The following are sample programs.  They are NOT installed
@@ -30,35 +32,43 @@ samples =
 
 # HMAC sign
 
-samples += simpleHMAC
-simpleHMAC_SOURCES = \
+samples += xsec-simpleHMAC
+xsec_simpleHMAC_SOURCES = \
   samples/simpleHMAC.cpp \
   samples/IOStreamOutputter.cpp \
   samples/IOStreamOutputter.hpp
 
 # HMAC validate
 
-samples += simpleValidate
-simpleValidate_SOURCES = \
+samples += xsec-simpleValidate
+xsec_simpleValidate_SOURCES = \
   samples/simpleValidate.cpp \
   samples/IOStreamOutputter.cpp \
   samples/IOStreamOutputter.hpp
 
 # Encrypt
 
-samples += simpleEncrypt
-simpleEncrypt_SOURCES = \
+samples += xsec-simpleEncrypt
+xsec_simpleEncrypt_SOURCES = \
   samples/simpleEncrypt.cpp \
   samples/IOStreamOutputter.cpp \
   samples/IOStreamOutputter.hpp
+xsec_simpleEncrypt_CXXFLAGS = $(AM_CXXFLAGS) \
+  $(openssl_CFLAGS)
+xsec_simpleEncrypt_LDADD = $(LDADD) \
+  $(openssl_LIBS)
 
 # Decrypt
 
-samples += simpleDecrypt
-simpleDecrypt_SOURCES = \
+samples += xsec-simpleDecrypt
+xsec_simpleDecrypt_SOURCES = \
   samples/simpleDecrypt.cpp \
   samples/IOStreamOutputter.cpp \
   samples/IOStreamOutputter.hpp
+xsec_simpleDecrypt_CXXFLAGS = $(AM_CXXFLAGS) \
+  $(openssl_CFLAGS)
+xsec_simpleDecrypt_LDADD = $(LDADD) \
+  $(openssl_LIBS)
 
 #
 # Finally we compile the tools that can be used to manipulate
@@ -69,44 +79,94 @@ tools =
 
 # xtest
 
-tools += xtest
-xtest_SOURCES = \
-  tools/xtest/xtest.cpp
+tools += xsec-xtest
+xsec_xtest_SOURCES = \
+   tools/xtest/xtest.cpp
+xsec_xtest_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
+xsec_xtest_CXXFLAGS = $(AM_CXXFLAGS) \
+   $(nss_CFLAGS) \
+   $(openssl_CFLAGS)
+xsec_xtest_LDADD = $(LDADD) \
+   $(nss_LIBS) \
+   $(openssl_LIBS)
 
-tools += c14n
-c14n_SOURCES = \
-  tools/c14n/c14n.cpp
+tools += xsec-c14n
+xsec_c14n_SOURCES = \
+   tools/c14n/c14n.cpp
+xsec_c14n_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
 
-tools += checksig
-checksig_SOURCES = \
-  tools/checksig/checksig.cpp \
-  tools/checksig/AnonymousResolver.hpp \
-  tools/checksig/AnonymousResolver.cpp \
-  tools/checksig/InteropResolver.hpp \
-  tools/checksig/InteropResolver.cpp
+tools += xsec-checksig
+xsec_checksig_SOURCES = \
+   tools/checksig/checksig.cpp \
+   tools/checksig/AnonymousResolver.hpp \
+   tools/checksig/AnonymousResolver.cpp \
+   tools/checksig/InteropResolver.hpp \
+   tools/checksig/InteropResolver.cpp
+xsec_checksig_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
+xsec_checksig_CXXFLAGS = $(AM_CXXFLAGS) \
+   $(nss_CFLAGS) \
+   $(openssl_CFLAGS)
+xsec_checksig_LDADD = $(LDADD) \
+   $(nss_LIBS) \
+   $(openssl_LIBS)
 
-tools += templatesign
-templatesign_SOURCES = \
-  tools/templatesign/templatesign.cpp
+tools += xsec-templatesign
+xsec_templatesign_SOURCES = \
+   tools/templatesign/templatesign.cpp
+xsec_templatesign_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
+xsec_templatesign_CXXFLAGS = $(AM_CXXFLAGS) \
+   $(openssl_CFLAGS)
+xsec_templatesign_LDADD = $(LDADD) \
+   $(openssl_LIBS)
 
-tools += txfmout
-txfmout_SOURCES = \
-  tools/txfmout/txfmout.cpp
+tools += xsec-txfmout
+xsec_txfmout_SOURCES = \
+   tools/txfmout/txfmout.cpp
+xsec_txfmout_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
 
-tools += siginf
-siginf_SOURCES = \
-  tools/siginf/siginf.cpp
+tools += xsec-siginf
+xsec_siginf_SOURCES = \
+   tools/siginf/siginf.cpp
+xsec_siginf_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
 
-tools += cipher
-cipher_SOURCES = \
-  tools/cipher/cipher.cpp \
-  tools/cipher/XencInteropResolver.hpp \
-  tools/cipher/XencInteropResolver.cpp
+tools += xsec-cipher
+xsec_cipher_SOURCES = \
+   tools/cipher/cipher.cpp \
+   tools/cipher/XencInteropResolver.hpp \
+   tools/cipher/XencInteropResolver.cpp
+xsec_cipher_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
+xsec_cipher_CXXFLAGS = $(AM_CXXFLAGS) \
+   $(nss_CFLAGS) \
+   $(openssl_CFLAGS)
+xsec_cipher_LDADD = $(LDADD) \
+   $(nss_LIBS) \
+   $(openssl_LIBS)
 
-tools += xklient
-xklient_SOURCES = \
-  tools/xklient/xklient.cpp
+if XSEC_AM_HAVE_XKMS
+tools += xsec-xklient
+xsec_xklient_SOURCES = \
+   tools/xklient/xklient.cpp \
+   enc/OpenSSL/OpenSSLSupport.hpp
+xsec_xklient_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_TOOLS
+xsec_xklient_CXXFLAGS = $(AM_CXXFLAGS) \
+   $(openssl_CFLAGS)
+xsec_xklient_LDADD = $(LDADD) \
+   $(openssl_LIBS)
+endif
 
+libxml_security_c_la_CPPFLAGS = $(AM_CPPFLAGS) -DXSEC_BUILDING_LIBRARY
+
+libxml_security_c_la_CXXFLAGS = \
+   $(xalan_CXXFLAGS) \
+   $(xerces_CXXFLAGS) \
+   $(openssl_CFLAGS) \
+   $(nss_CFLAGS)
+
+libxml_security_c_la_LIBADD = \
+   $(xalan_LIBS) \
+   $(xerces_LIBS) \
+   $(openssl_LIBS) \
+   $(nss_LIBS)
 
 lib_LTLIBRARIES = libxml-security-c.la
 
@@ -170,7 +230,8 @@ opensslinclude_HEADERS = \
   enc/OpenSSL/OpenSSLCryptoKeyDSA.hpp \
   enc/OpenSSL/OpenSSLCryptoKeyEC.hpp \
   enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp \
-  enc/OpenSSL/OpenSSLCryptoHash.hpp 
+  enc/OpenSSL/OpenSSLCryptoHash.hpp \
+  enc/OpenSSL/OpenSSLSupport.hpp
 
 nssinclude_HEADERS = \
   enc/NSS/NSSCryptoX509.hpp \
@@ -219,23 +280,25 @@ frameworkinclude_HEADERS = \
   framework/XSECException.hpp \
   framework/XSECError.hpp \
   framework/XSECProvider.hpp \
-  framework/XSECConfig.hpp \
   framework/XSECURIResolverXerces.hpp \
   framework/XSECAlgorithmMapper.hpp \
   framework/XSECW32Config.hpp \
   framework/XSECVersion.hpp
 
+nodist_frameworkinclude_HEADERS = \
+  framework/XSECConfig.hpp
+
 transformersinclude_HEADERS = \
   transformers/TXFMXPathFilter.hpp \
-  transformers/TXFMSHA1.hpp \
+  transformers/TXFMHash.hpp \
   transformers/TXFMParser.hpp \
   transformers/TXFMOutputFile.hpp \
   transformers/TXFMURL.hpp \
   transformers/TXFMBase.hpp \
+  transformers/TXFMChar.hpp \
   transformers/TXFMCipher.hpp \
   transformers/TXFMEnvelope.hpp \
   transformers/TXFMChain.hpp \
-  transformers/TXFMMD5.hpp \
   transformers/TXFMDocObject.hpp \
   transformers/TXFMConcatChains.hpp \
   transformers/TXFMSB.hpp \
@@ -245,7 +308,6 @@ transformersinclude_HEADERS = \
   transformers/TXFMBase64.hpp
 
 utilsinclude_HEADERS = \
-  utils/XSECAutoPtr.hpp \
   utils/XSECSafeBuffer.hpp \
   utils/XSECSOAPRequestor.hpp \
   utils/XSECTXFMInputSource.hpp \
@@ -253,13 +315,8 @@ utilsinclude_HEADERS = \
   utils/XSECSOAPRequestorSimple.hpp \
   utils/XSECXPathNodeList.hpp \
   utils/XSECSafeBufferFormatter.hpp \
-  utils/XSECDOMUtils.hpp \
   utils/XSECBinTXFMInputStream.hpp \
   utils/XSECPlatformUtils.hpp 
-
-unixutilsinclude_HEADERS = \
-  utils/unixutils/XSECURIResolverGenericUnix.hpp \
-  utils/unixutils/XSECBinHTTPURIInputStream.hpp
 
 xencinclude_HEADERS = \
   xenc/XENCEncryptionMethod.hpp \
@@ -346,8 +403,9 @@ lib_sources += ${utils_sources}
 lib_sources += ${xenc_sources}
 
 # XML Key Management
-
-lib_sources += ${xkms_sources}
+if XSEC_AM_HAVE_XKMS
+  lib_sources += ${xkms_sources}
+endif
 
 #
 # The following blocks are conditionally added on the basis
@@ -410,7 +468,6 @@ enc_sources = \
   enc/XSECCryptoUtils.cpp \
   enc/XSECCryptoBase64.cpp \
   enc/XSCrypt/XSCryptCryptoBase64.cpp \
-  enc/XSECCryptoProvider.cpp \
   enc/XSECCryptoException.cpp
 
 # Framework files
@@ -432,7 +489,7 @@ txfm_sources = \
   transformers/TXFMEnvelope.cpp \
   transformers/TXFMBase64.cpp \
   transformers/TXFMXPathFilter.cpp \
-  transformers/TXFMSHA1.cpp \
+  transformers/TXFMHash.cpp \
   transformers/TXFMC14n.cpp \
   transformers/TXFMURL.cpp \
   transformers/TXFMOutputFile.cpp \
@@ -440,7 +497,7 @@ txfm_sources = \
   transformers/TXFMXSL.cpp \
   transformers/TXFMDocObject.cpp \
   transformers/TXFMConcatChains.cpp \
-  transformers/TXFMMD5.cpp
+  transformers/TXFMChar.cpp
 
 # Utility files.  Note we don't worry about checking
 # if the UNIX stuff is necessary - we just assume that
@@ -448,18 +505,20 @@ txfm_sources = \
 # make.  Cygwin compiles use the UNIX utilities, not windows
 
 utils_sources = \
-  utils/unixutils/XSECSOAPRequestorSimpleUnix.cpp \
-  utils/unixutils/XSECURIResolverGenericUnix.cpp \
-  utils/unixutils/XSECBinHTTPURIInputStream.cpp \
+  utils/XSECAlgorithmSupport.hpp \
+  utils/XSECAlgorithmSupport.cpp \
+  utils/XSECAutoPtr.hpp \
   utils/XSECBinTXFMInputStream.cpp \
   utils/XSECXPathNodeList.cpp \
   utils/XSECSafeBuffer.cpp \
   utils/XSECTXFMInputSource.cpp \
+  utils/XSECDOMUtils.hpp \
   utils/XSECDOMUtils.cpp \
   utils/XSECSafeBufferFormatter.cpp \
-  utils/XSECSOAPRequestorSimple.cpp \
   utils/XSECNameSpaceExpander.cpp \
-  utils/XSECPlatformUtils.cpp
+  utils/XSECPlatformUtils.cpp \
+  utils/XSECSOAPRequestorSimple.cpp \
+  utils/unixutils/XSECSOAPRequestorSimpleUnix.cpp
 
 # XML Encryption
 
@@ -575,8 +634,9 @@ openssl_sources = \
   enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp \
   enc/OpenSSL/OpenSSLCryptoKeyEC.cpp \
   enc/OpenSSL/OpenSSLCryptoSymmetricKey.cpp \
-  enc/OpenSSL/OpenSSLCryptoKeyHMAC.cpp
-  
+  enc/OpenSSL/OpenSSLCryptoKeyHMAC.cpp \
+  enc/OpenSSL/OpenSSLSupport.cpp
+
 nss_sources = \
   enc/NSS/NSSCryptoX509.cpp \
   enc/NSS/NSSCryptoHashHMAC.cpp \
@@ -590,17 +650,10 @@ nss_sources = \
 #
 # Now the library specific build items
 #
-libxml_security_c_la_LDFLAGS = -version-info 17:3:0
-
-install-exec-hook:
-	for la in $(lib_LTLIBRARIES) ; do rm -f $(DESTDIR)$(libdir)/$$la ; done
+libxml_security_c_la_LDFLAGS = -version-info 20:2:0
 
 EXTRA_DIST = \
-  utils/winutils/XSECURIResolverGenericWin32.cpp \
   utils/winutils/XSECSOAPRequestorSimpleWin32.cpp \
-  utils/winutils/XSECBinHTTPURIInputStream.cpp \
-  utils/winutils/XSECURIResolverGenericWin32.hpp \
-  utils/winutils/XSECBinHTTPURIInputStream.hpp \
   enc/WinCAPI/WinCAPICryptoProvider.cpp \
   enc/WinCAPI/WinCAPICryptoKeyHMAC.hpp \
   enc/WinCAPI/WinCAPICryptoHash.cpp \
@@ -617,5 +670,3 @@ EXTRA_DIST = \
   enc/WinCAPI/WinCAPICryptoProvider.hpp \
   enc/WinCAPI/WinCAPICryptoSymmetricKey.cpp \
   enc/WinCAPI/WinCAPICryptoKeyHMAC.cpp
-
-	

@@ -28,9 +28,9 @@
  * version number. They are used to create version strings.
  */
 
-#define XSEC_VERSION_MAJOR   1
-#define XSEC_VERSION_MEDIUM  7
-#define XSEC_VERSION_MINOR   3
+#define XSEC_VERSION_MAJOR   2
+#define XSEC_VERSION_MEDIUM  0
+#define XSEC_VERSION_MINOR   2
 
 // --------------------------------------------------------------------------------
 //           Version Handling

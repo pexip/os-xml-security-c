@@ -37,6 +37,8 @@
 #include <pk11func.h>
 #include <nss.h>
 
+#define NSS_MAX_HASH_SIZE	128
+
 /**
  * @ingroup nsscrypto
  * @{
@@ -49,7 +51,7 @@
  *
  */
 
-class DSIG_EXPORT NSSCryptoHash : public XSECCryptoHash {
+class XSEC_EXPORT NSSCryptoHash : public XSECCryptoHash {
 
 
 public :
@@ -81,7 +83,7 @@ public :
 	 * @param key The key the HMAC function should use.
 	 */
 
-	virtual void setKey(XSECCryptoKey * key) {}
+	virtual void setKey(const XSECCryptoKey * key) {}
 
 	//@}
 
@@ -147,7 +149,7 @@ private:
 	// Not implemented constructors
 	NSSCryptoHash();
 
-	unsigned char				m_mdValue[XSEC_MAX_HASH_SIZE];		// Final output
+	unsigned char				m_mdValue[NSS_MAX_HASH_SIZE];		// Final output
 	unsigned int				m_mdLen;
 
 	HashType	          m_hashType;

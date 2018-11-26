@@ -22,7 +22,7 @@
  *
  * TXFMXPath := Class that performs XPath transforms
  *
- * $Id: TXFMXPathFilter.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMXPathFilter.hpp 1818084 2017-12-14 00:11:29Z scantor $
  *
  */
 
@@ -43,16 +43,13 @@ class TXFMXPathFilterExpr;
 class XSECSafeBufferFormatter;
 
 struct filterSetHolder {
-
-	XSECXPathNodeList	* lst;
-	xpathFilterType		type;
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode				
-						* ancestorInScope;
-
+    XSECXPathNodeList* lst;
+    DSIGXPathFilterExpr::XPathFilterType type;
+    XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* ancestorInScope;
 };
 
 
-#ifndef XSEC_NO_XPATH
+#ifdef XSEC_HAVE_XPATH
 
 /**
  * \brief Transformer to handle XPath transforms
@@ -60,58 +57,52 @@ struct filterSetHolder {
  */
 
 
-class DSIG_EXPORT TXFMXPathFilter : public TXFMBase {
+class XSEC_EXPORT TXFMXPathFilter : public TXFMBase {
 
 public:
 
-	TXFMXPathFilter(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMXPathFilter();
+    TXFMXPathFilter(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* doc);
+    virtual ~TXFMXPathFilter();
 
-	// Methods to set the inputs
+    // Methods to set the inputs
 
-	void setInput(TXFMBase *newInput);
-	
-	// Methods to get tranform output type and input requirement
+    void setInput(TXFMBase* newInput);
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual TXFMBase::nodeType getNodeType(void);
+    // Methods to get tranform output type and input requirement
 
-	// XPathFilter unique
+    virtual TXFMBase::ioType getInputType() const;
+    virtual TXFMBase::ioType getOutputType() const;
+    virtual TXFMBase::nodeType getNodeType() const;
 
-	void evaluateExprs(DSIGTransformXPathFilter::exprVectorType * exprs);
-	XSECXPathNodeList * evaluateSingleExpr(DSIGXPathFilterExpr *expr);
+    // XPathFilter unique
 
-	// Methods to get output data
+    void evaluateExprs(DSIGTransformXPathFilter::exprVectorType* exprs);
+    XSECXPathNodeList* evaluateSingleExpr(DSIGXPathFilterExpr* expr);
 
-	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
-	virtual XSECXPathNodeList	& getXPathNodeList();
+    // Methods to get output data
+
+    virtual unsigned int readBytes(XMLByte* const toFill, const unsigned int maxToFill);
+    virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* getDocument() const;
+    virtual XSECXPathNodeList& getXPathNodeList();
 
 private:
+    typedef std::vector<filterSetHolder*> lstsVectorType;
+    TXFMXPathFilter();
+    void walkDocument(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* n);
+    bool checkNodeInScope(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* n);
+    bool checkNodeInInput(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* n,
+        XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* attParent);
 
-	typedef std::vector<filterSetHolder *> lstsVectorType;
-	TXFMXPathFilter();
-	void walkDocument(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * n);
-	bool checkNodeInScope(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * n);
-	bool checkNodeInInput(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * n, 
-		XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * attParent);
 
+    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* document;
+    XSECXPathNodeList m_xpathFilterMap;
+    lstsVectorType m_lsts;
 
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument			
-						* document;
-	XSECXPathNodeList	m_xpathFilterMap;
-	lstsVectorType		m_lsts;
+    XSECSafeBufferFormatter* mp_formatter;
 
-	XSECSafeBufferFormatter * mp_formatter;
-
-	/* Used to hold details during tree-walk */
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode				
-						* mp_fragment;
-	XSECXPathNodeList	* mp_inputList;
-
+    /* Used to hold details during tree-walk */
+    XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* mp_fragment;
+    XSECXPathNodeList* mp_inputList;
 };
 
 #endif

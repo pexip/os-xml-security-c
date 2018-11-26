@@ -25,12 +25,17 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: TXFMBase.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMBase.cpp 1817130 2017-12-04 21:43:21Z scantor $
  *
  */
 
 #include <xsec/transformers/TXFMBase.hpp>
 #include <xsec/framework/XSECError.hpp>
+
+TXFMBase::TXFMBase(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc)
+    : input(NULL), keepComments(true), mp_nse(NULL), mp_expansionDoc(doc)
+{
+}
 
 // -----------------------------------------------------------------------
 //  Ensure name spaces are reset when this is destroyed
@@ -53,7 +58,7 @@ TXFMBase::~TXFMBase() {
 //  For expanding name spaces when necessary
 // -----------------------------------------------------------------------
 
-bool TXFMBase::nameSpacesExpanded(void) {
+bool TXFMBase::nameSpacesExpanded(void) const {
 
 	if (mp_nse != NULL)
 		return true;
@@ -107,3 +112,20 @@ void TXFMBase::activateComments(void) {
 
 }
 
+XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *TXFMBase::getDocument() const {
+
+    return NULL;
+
+}
+
+XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * TXFMBase::getFragmentNode() const {
+
+    return NULL;		// Return a null node
+
+}
+
+const XMLCh* TXFMBase::getFragmentId() const {
+
+    return NULL;
+
+}

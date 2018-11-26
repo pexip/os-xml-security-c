@@ -22,7 +22,7 @@
  *
  * DSIG_Reference := Class for checking and setting up reference nodes in a DSIG signature
  *
- * $Id: DSIGReference.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGReference.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *					 
  */
 
@@ -68,7 +68,7 @@ class XSECEnv;
  *
  */
 
-class DSIG_EXPORT DSIGReference {
+class XSEC_EXPORT DSIGReference {
 
 public:
 
@@ -134,29 +134,6 @@ public:
 	 */
 	
 	void load();
-
-	/**
-	 * \brief Create a Reference structure in the document.
-	 *
-	 * <p>This function will create a Reference structure in the owner
-	 * document.  In some cases, a call to this function will be sufficient
-	 * to put the required Reference in place.  In other cases, calls will
-	 * also need to be made to the various append*Transform methods.</p>
-	 *
-	 * @note The XSEC Library currently makes very little use of <em>type</em>
-	 * attributes in \<Reference\> Elements.  However this may of use to calling
-	 * applications.
-	 *
-	 * @param URI The URI (data source) for this reference.  Set to NULL for
-	 * an anonymous reference.
-	 * @param hm The type of Digest to be used (generally SHA-1)
-	 * @param type A type string (as defined by XML Signature).
-	 * @returns The root Reference element of the newly created DOM structure.
-	 * @deprecated Use the URI based creation method instead
-	 */
-
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * 
-		createBlankReference(const XMLCh * URI, hashMethod hm, char * type);
 
 	/**
 	 * \brief Create a Reference structure in the document.
@@ -251,16 +228,6 @@ public:
 	);
 
 	/**
-	 * \brief Append a Canonicalization Transform to the Reference.
-	 *
-	 * @param cm The type of canonicalisation to be added.
-	 * @returns The newly create canonicalisation transform
-	 * @deprecated Use the AlgorithmURI based method instead
-	 */
-
-	DSIGTransformC14n * appendCanonicalizationTransform(canonicalizationMethod cm);
-
-	/**
 	 * \brief Append a "debug" transformer.
 	 *
 	 * This method allows applications to provide a TXFM that will be appended
@@ -322,19 +289,7 @@ public:
 	 * the value of the URI stored inthe reference
 	 */
 
-	const XMLCh * getURI();
-
-	/**
-	 * \brief Get the Digest method
-	 *
-	 * Obtain the digest method used to find a hash for this reference
-	 *
-	 * @returns the hashMethod
-	 */
-
-	hashMethod getHashMethod(void) {
-		return me_hashMethod;
-	}
+	const XMLCh * getURI() const;
 
     /**
      * \brief Get the Digest Algorithm URI
@@ -354,7 +309,7 @@ public:
 	 * obtain information about the transforms and also change the the transforms
 	 */
 
-	DSIGTransformList * getTransforms(void) {
+	DSIGTransformList * getTransforms(void) const {
 		return mp_transformList;
 	}
 
@@ -364,7 +319,7 @@ public:
 	 * @returns true iff the Reference element is a Manifest reference
 	 */
 	
-	bool isManifest();
+	bool isManifest() const;
 
 	/**
 	 * \brief Get the Manifest
@@ -373,7 +328,7 @@ public:
 	 * list of this reference element.
 	 */
 
-	DSIGReferenceList * getManifestReferenceList();		// Return list of references for a manifest object
+	DSIGReferenceList * getManifestReferenceList() const;		// Return list of references for a manifest object
 
 
 	//@}
@@ -393,8 +348,7 @@ public:
 	 * @returns The number of bytes copied into the buffer
 	 */
 
-	unsigned int calculateHash(XMLByte * toFill, 
-							unsigned int maxToFill);
+	unsigned int calculateHash(XMLByte * toFill, unsigned int maxToFill) const;
 
 	/**
 	 * \brief Read the hash from the Reference element.
@@ -408,8 +362,7 @@ public:
 	 * @returns Number of bytes written
 	 */
 	
-	unsigned int readHash(XMLByte *toFill,			
-							unsigned int maxToFill);
+	unsigned int readHash(XMLByte *toFill, unsigned int maxToFill) const;
 
 	/**
 	 * \brief Validate the Reference element
@@ -421,7 +374,7 @@ public:
 	 * in the reference.
 	 */
 
-	bool checkHash();
+	bool checkHash() const;
 
 	/**
 	 * \brief Set the value of the hash in the Reference
@@ -520,7 +473,7 @@ public:
 	 * @returns true iff all the references validate successfully.
 	 */
 
-	static bool verifyReferenceList(DSIGReferenceList * lst, safeBuffer &errorStr);
+	static bool verifyReferenceList(const DSIGReferenceList * lst, safeBuffer &errorStr);
 	
 	/**
 	 * \brief Hash a reference list
@@ -537,7 +490,7 @@ public:
 	 * internally is very primitive and CPU intensive, so this is a method to 
 	 * bypass the checks.
 	 */
-	static void hashReferenceList(DSIGReferenceList * list, bool interlocking = true);
+	static void hashReferenceList(const DSIGReferenceList * list, bool interlocking = true);
 
 	//@}
 
@@ -552,16 +505,14 @@ private:
 
 
 	XSECSafeBufferFormatter		* mp_formatter;
-	bool formatterLocal;
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode						
 								* mp_referenceNode;		// Points to start of document where reference node is
-	TXFMBase					* mp_preHash;			// To be used pre-hash
+	mutable TXFMBase				* mp_preHash;			// To be used pre-hash
 	DSIGReferenceList			* mp_manifestList;		// The list of references in a manifest
 	const XMLCh					* mp_URI;				// The URI String
 	bool						m_isManifest;			// Does this reference a manifest?
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode						
 								* mp_transformsNode;
-	hashMethod					me_hashMethod;			// What form of digest?
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode						
 								* mp_hashValueNode;		// Node where the Hash value is stored
 	const XSECEnv				* mp_env;

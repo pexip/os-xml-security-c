@@ -23,7 +23,7 @@
  * SimpleEncrypt := An application to generate an XML document (via Xerces) and encrypt
  *					a portion of it
  *
- * $Id: simpleEncrypt.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: simpleEncrypt.cpp 1834154 2018-06-22 19:22:03Z scantor $
  *
  */
 
@@ -37,23 +37,19 @@
 
 #include <xsec/framework/XSECProvider.hpp>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
 #include <xsec/xenc/XENCCipher.hpp>
 #include <xsec/xenc/XENCEncryptedData.hpp>
 #include <xsec/xenc/XENCEncryptedKey.hpp>
 
-#include <xsec/enc/OpenSSL/OpenSSLCryptoSymmetricKey.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoX509.hpp>
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xalan
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 XALAN_USING_XALAN(XalanTransformer)
 #endif
-
-// OpenSSL
-
-#include <openssl/rand.h>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -119,7 +115,7 @@ int main (int argc, char **argv) {
 
 	try {
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XalanTransformer::initialize();
 #endif
 		XSECPlatformUtils::Initialise();
@@ -149,40 +145,24 @@ int main (int argc, char **argv) {
 
 		cipher = prov.newCipher(doc);
 
-		/* Now generate a random key that we can use to encrypt the element
-		 *
-		 * First check the status of the random generation in OpenSSL
-		 */
-
-		if (RAND_status() != 1) {
-
-			cerr << "OpenSSL random generation not properly initialised" << endl;
-			exit(1);
-
-		}
+		/* Now generate a random key that we can use to encrypt the element */
 
 		unsigned char keyBuf[24];
-		if (RAND_bytes(keyBuf, 24) == 0) {
-
-			cerr << "Error obtaining 24 bytes of random from OpenSSL" << endl;
-			exit(1);
-
-		}
+		XSECPlatformUtils::g_cryptoProvider->getRandom(keyBuf, 24);
 
 		/* Wrap this in a Symmetric 3DES key */
 
-		OpenSSLCryptoSymmetricKey * key = 
-			new OpenSSLCryptoSymmetricKey(XSECCryptoSymmetricKey::KEY_3DES_192);
+		XSECCryptoSymmetricKey * key = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_3DES_192);
 		key->setKey(keyBuf, 24);
 		cipher->setKey(key);
 
 		/* Encrypt the element that needs to be hidden */
-		cipher->encryptElement(g_toEncrypt, ENCRYPT_3DES_CBC);
+		cipher->encryptElement(g_toEncrypt, DSIGConstants::s_unicodeStrURI3DES_CBC);
 
 		/* Now lets create an EncryptedKey element to hold the generated key */
 
 		/* First lets load the public key in the certificate */
-		OpenSSLCryptoX509 * x509 = new OpenSSLCryptoX509();
+		XSECCryptoX509* x509 = XSECPlatformUtils::g_cryptoProvider->X509();
 		x509->loadX509Base64Bin(cert, (unsigned int) strlen(cert));
 	
 		/* Now set the Key Encrypting Key (NOTE: Not the normal key) */
@@ -192,7 +172,7 @@ int main (int argc, char **argv) {
 		/* Now do the encrypt, using RSA with PKCS 1.5 padding */
 
 		XENCEncryptedKey * encryptedKey = 
-			cipher->encryptKey(keyBuf, 24, ENCRYPT_RSA_15);
+			cipher->encryptKey(keyBuf, 24, DSIGConstants::s_unicodeStrURIRSA_1_5);
 
 		/*
 		 * Add the encrypted Key to the previously created EncryptedData, which
@@ -206,7 +186,7 @@ int main (int argc, char **argv) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
 		char * msg = XMLString::transcode(e.getMsg());
 		cerr << "An error occurred during an encryption operation\n   Message: "

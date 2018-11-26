@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGKeyInfoList.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoList.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -39,7 +39,6 @@
 #include <xsec/dsig/DSIGKeyInfoMgmtData.hpp>
 #include <xsec/dsig/DSIGKeyInfoExt.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/dsig/DSIGTransformList.hpp>
@@ -47,6 +46,7 @@
 #include <xsec/transformers/TXFMChain.hpp>
 #include <xsec/transformers/TXFMBase.hpp>
 
+#include "../utils/XSECDOMUtils.hpp"
 #include "../xenc/impl/XENCEncryptedKeyImpl.hpp"
 
 #include <xercesc/util/Janitor.hpp>

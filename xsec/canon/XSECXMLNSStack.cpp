@@ -22,7 +22,7 @@
  *
  * XSECXMLNSStack := NS Stack for simple canonicalisation
  *
- * $Id: XSECXMLNSStack.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECXMLNSStack.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -30,8 +30,9 @@
 // XSEC
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/canon/XSECXMLNSStack.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xerces
 

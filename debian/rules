@@ -7,14 +7,14 @@ UTILS_MAN1DIR := debian/xml-security-c-utils/usr/share/man/man1
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@ --with autoreconf
+	dh $@
 
 override_dh_auto_configure:
-	dh_auto_configure -- --without-xalan --disable-static
+	dh_auto_configure -- --disable-static
 
 # Install man pages for the xml-security-c-utils binaries.
 override_dh_install:
-	dh_install --fail-missing
+	dh_install
 	mkdir -p '$(UTILS_MAN1DIR)'
 	set -e; VERSION=$$(./config.status --version | sed 's/.* //;q');\
 	for pod in debian/man-pages/*.pod ; do			\
@@ -25,3 +25,6 @@ override_dh_install:
 
 override_dh_installdocs:
 	dh_installdocs -A NOTICE.txt
+
+override_dh_missing:
+	dh_missing --fail-missing -Xlibxml-security-c.la

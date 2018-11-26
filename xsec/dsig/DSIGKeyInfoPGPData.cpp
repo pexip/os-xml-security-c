@@ -24,18 +24,17 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGKeyInfoPGPData.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoPGPData.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/dsig/DSIGKeyInfoPGPData.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 
-#include <xercesc/util/Janitor.hpp>
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 

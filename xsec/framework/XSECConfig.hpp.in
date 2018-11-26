@@ -6,14 +6,11 @@
 /* Define if OpenSSL is in use. */
 #undef XSEC_HAVE_OPENSSL
 
-/* Define to 1 if strcasecmp present. */
-#undef XSEC_HAVE_STRCASECMP
-
 /* Define to 1 if getcwd(NULL, 0) works. */
 #undef XSEC_HAVE_GETCWD_DYN
 
-/* Define to 1 if Xalan is unavailable. */
-#undef XSEC_NO_XALAN
+/* Define to 1 if Xalan is available. */
+#undef XSEC_HAVE_XALAN
 
 /* Define to 1 if OpenSSL has EVP_CIPHER_CTX_set_padding. */
 #undef XSEC_OPENSSL_CANSET_PADDING
@@ -39,43 +36,7 @@
 /* Define to 1 if OpenSSL has SHA2 support. */
 #undef XSEC_OPENSSL_HAVE_SHA2
 
-/* Define to 1 if Xalan XPathEvaluator requires NodeRefList. */
-#undef XSEC_SELECTNODELIST_REQS_NODEREFLIST
-
-/* Define to 1 if Xalan requires MemoryManager */
-#undef XSEC_XALAN_REQS_MEMORYMANAGER
-
-/* Define to 1 if Xalan XercesParserLiaison ctor takes XercesDOMSupport. */
-#undef XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT
-
-/* Define to 1 if Xerces has a 64-bit-safe API. */
-#undef XSEC_XERCES_64BITSAFE
-
-/* Define to 1 if Xerces DOMEntity has getInputEncoding. */
-#undef XSEC_XERCES_DOMENTITYINPUTENCODING
-
-/* Define to 1 if Xerces has DOMLSSerializer. */
-#undef XSEC_XERCES_DOMLSSERIALIZER
-
-/* Define to 1 if Xerces XMLFormatter requires version. */
-#undef XSEC_XERCES_FORMATTER_REQUIRES_VERSION
-
-/* Define to 1 if Xerces DOM ID methods take extra parameter. */
-#undef XSEC_XERCES_HAS_BOOLSETIDATTRIBUTE
-
-/* Define to 1 if Xerces has legacy setIdAttribute. */
-#undef XSEC_XERCES_HAS_SETIDATTRIBUTE
-
-/* Define to 1 if Xerces InputStream class requires getContentType. */
-#undef XSEC_XERCES_INPUTSTREAM_HAS_CONTENTTYPE
-
-/* Define to 1 if Xerces XMLFormatter requires MemoryManager. */
-#undef XSEC_XERCES_REQUIRES_MEMMGR
-
-/* Define to 1 if Xerces XMLString has release method. */
-#undef XSEC_XERCES_XMLSTRING_HAS_RELEASE
-
-/* Define to 1 if Xalan XSLException returns XalanDOMString. */
-#undef XSEC_XSLEXCEPTION_RETURNS_DOMSTRING
+/* Define to 1 if XKMS support is included. */
+#undef XSEC_XKMS_ENABLED
 
 #include <xsec/framework/XSECVersion.hpp>

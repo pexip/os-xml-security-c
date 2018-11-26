@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoKeyDSA.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoKeyDSA.hpp 1817148 2017-12-05 01:59:28Z scantor $
  *
  */
 
@@ -43,7 +43,7 @@
  * The library uses classes derived from this to process DSA keys.
  */
 
-class DSIG_EXPORT XSECCryptoKeyDSA : public XSECCryptoKey {
+class XSEC_EXPORT XSECCryptoKeyDSA : public XSECCryptoKey {
 
 public :
 
@@ -96,7 +96,7 @@ public :
 	virtual bool verifyBase64Signature(unsigned char * hashBuf, 
 								 unsigned int hashLen,
 								 char * base64Signature,
-								 unsigned int sigLen) = 0;
+								 unsigned int sigLen) const = 0;
 
 	/**
 	 * \brief Create a signature
@@ -117,7 +117,7 @@ public :
 	virtual unsigned int signBase64Signature(unsigned char * hashBuf,
 		unsigned int hashLen,
 		char * base64SignatureBuf,
-		unsigned int base64SignatureBufLen) = 0;
+		unsigned int base64SignatureBufLen) const = 0;
 
 	//@}
 

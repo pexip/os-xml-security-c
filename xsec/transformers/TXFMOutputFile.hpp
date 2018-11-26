@@ -23,7 +23,7 @@
  * TXFMOutputFile := Transform that outputs the byte stream to a file without changing
  *							  the actual data in any way
  *
- * $Id: TXFMOutputFile.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMOutputFile.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -48,7 +48,7 @@ using std::ofstream;
  */
 
 
-class DSIG_EXPORT TXFMOutputFile : public TXFMBase {
+class XSEC_EXPORT TXFMOutputFile : public TXFMBase {
 
 private:
 
@@ -58,7 +58,7 @@ public:
 
 	TXFMOutputFile(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc) : 
 		TXFMBase(doc) {input = NULL;}
-	~TXFMOutputFile();
+	virtual ~TXFMOutputFile();
 
 	// Methods to set the inputs
 
@@ -66,9 +66,9 @@ public:
 
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual TXFMBase::nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual TXFMBase::nodeType getNodeType(void) const;
 
 	// Set output file
 
@@ -77,9 +77,6 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
 	
 private:
 	TXFMOutputFile();

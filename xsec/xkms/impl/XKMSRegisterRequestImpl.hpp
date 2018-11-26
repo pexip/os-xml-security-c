@@ -22,7 +22,7 @@
  *
  * XKMSRegisterRequestImpl := Implementation for RegisterRequest Messages
  *
- * $Id: XKMSRegisterRequestImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRegisterRequestImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -33,6 +33,9 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xkms/XKMSRegisterRequest.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include "XKMSRequestAbstractTypeImpl.hpp"
 
 class XKMSAuthenticationImpl;
@@ -77,9 +80,9 @@ public:
 	virtual XKMSPrototypeKeyBinding * addPrototypeKeyBinding(void);
 	virtual XKMSAuthentication * addAuthentication(void);
 	virtual DSIGSignature * addProofOfPossessionSignature(
-		canonicalizationMethod cm = CANON_C14N_NOC,
-		signatureMethod	sm = SIGNATURE_DSA,
-		hashMethod hm = HASH_SHA1);
+		const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm);
 
 	/* Implemented from MessageAbstractType */
 	virtual messageType getMessageType(void);
@@ -106,4 +109,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSREGISTERREQUESTIMPL_INCLUDE */

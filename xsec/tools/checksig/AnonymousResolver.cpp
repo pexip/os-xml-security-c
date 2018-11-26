@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: AnonymousResolver.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: AnonymousResolver.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -33,7 +33,8 @@
 // XSEC
 
 #include <xsec/framework/XSECException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/Janitor.hpp>

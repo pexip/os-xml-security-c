@@ -22,9 +22,12 @@
  *
  * XKMSConstants := Definitions of varius XKMSconstants (mainly strings)
  *
- * $Id: XKMSConstants.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSConstants.cpp 1817876 2017-12-12 01:27:14Z scantor $
  *
  */
+#include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 #include <xsec/xkms/XKMSConstants.hpp>
 
@@ -1826,3 +1829,5 @@ void XKMSConstants::destroy() {
     s_unicodeStrURISOAP11 = NULL;
     s_unicodeStrURISOAP12 = NULL;
 }
+
+#endif /* XSEC_XKMS_ENABLED */

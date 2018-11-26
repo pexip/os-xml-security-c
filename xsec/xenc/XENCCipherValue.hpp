@@ -22,7 +22,7 @@
  *
  * XENCCipherValue := Interface definition for CipherValue element
  *
- * $Id: XENCCipherValue.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherValue.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -32,6 +32,8 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+class XSECEnv;
 
 XSEC_DECLARE_XERCES_CLASS(DOMElement);
 
@@ -48,7 +50,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMElement);
  */
 
 
-class XENCCipherValue {
+class XSEC_EXPORT XENCCipherValue {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -60,6 +62,20 @@ protected:
 public:
 
 	virtual ~XENCCipherValue() {};
+
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	*
+	* @param env environment instance
+	* @param value value to use
+	*
+	* @returns the new object
+	*/
+	static XENCCipherValue* create(
+		const XSECEnv* env,
+		const XMLCh * value);
 
 	/** @name Get Interface Methods */
 	//@{

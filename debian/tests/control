@@ -1,0 +1,3 @@
+Depends: xml-security-c-utils, libxml-security-c-dev, g++, pkg-config
+Restrictions: allow-stderr
+Tests: xtest simpleValidate

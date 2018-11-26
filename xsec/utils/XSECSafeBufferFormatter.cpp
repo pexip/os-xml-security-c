@@ -22,7 +22,7 @@
  *
  * XSECSafeBufferFormatter := Class for formatting DOMStrings into SafeBuffers
  *
- * $Id: XSECSafeBufferFormatter.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECSafeBufferFormatter.cpp 1807984 2017-09-11 00:54:26Z scantor $
  *
  */
 
@@ -43,18 +43,11 @@ XSECSafeBufferFormatter::XSECSafeBufferFormatter(
 	sbf = new sbFormatTarget();
 	sbf->setBuffer(&formatBuffer);
 
-#if defined(XSEC_XERCES_FORMATTER_REQUIRES_VERSION)
 	formatter = new XMLFormatter(outEncoding,
-									0,
-									sbf,
-									escapeFlags,
-									unrepFlags);
-#else
-	XSECnew(formatter, XMLFormatter(outEncoding,
-									sbf,
-									escapeFlags,
-									unrepFlags));
-#endif
+					0,
+					sbf,
+					escapeFlags,
+					unrepFlags);
 }
 
 
@@ -62,26 +55,18 @@ XSECSafeBufferFormatter::XSECSafeBufferFormatter(
 
 
 XSECSafeBufferFormatter::XSECSafeBufferFormatter(
-						const char * const			outEncoding,
+						const char * const outEncoding,
 						const XMLFormatter::EscapeFlags	escapeFlags,
 						const XMLFormatter::UnRepFlags unrepFlags) {
 
 	sbf = new sbFormatTarget();
 	sbf->setBuffer(&formatBuffer);
 
-#if defined(XSEC_XERCES_FORMATTER_REQUIRES_VERSION)
 	formatter = new XMLFormatter(outEncoding,
-									0,
-									sbf,
-									escapeFlags,
-									unrepFlags);
-#else
-	XSECnew(formatter, XMLFormatter(outEncoding,
-									sbf,
-									escapeFlags,
-									unrepFlags));
-#endif
-
+					0,
+					sbf,
+					escapeFlags,
+					unrepFlags);
 }
 
 // Destructor
@@ -100,7 +85,7 @@ XSECSafeBufferFormatter::~XSECSafeBufferFormatter() {
 
 void  XSECSafeBufferFormatter::formatBuf (
 				 const XMLCh *const toFormat,
-				 const xsecsize_t count,
+				 const XMLSize_t count,
 				 const XMLFormatter::EscapeFlags escapeFlags,
 				 const XMLFormatter::UnRepFlags unrepFlags) {
 

@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECDefs.hpp 1493962 2013-06-17 22:32:41Z scantor $
+ * $Id: XSECDefs.hpp 1808383 2017-09-14 19:27:46Z scantor $
  *
  */
 
@@ -48,8 +48,8 @@
 #	endif
 #	define WIN32_LEAN_AND_MEAN
 #	include <windows.h>
-#elif defined (XSEC_LIBRARY_BUILD)
-#       include "config.h"
+#elif defined(XSEC_BUILDING_LIBRARY) || defined(XSEC_BUILDING_TOOLS)
+#   include "config.h"
 #else
 #	include <xsec/framework/XSECConfig.hpp>
 #endif
@@ -61,13 +61,6 @@
 // Xerces
 
 #include <xercesc/util/XercesDefs.hpp>
-
-// Define "sizes" of data to correspond to Xerces APIs
-#ifdef XSEC_XERCES_64BITSAFE
-    typedef XMLSize_t xsecsize_t;
-#else
-    typedef unsigned int xsecsize_t;
-#endif
 
 // Pending API change, compile in a limit for Xerces SecurityManager entity expansion
 #define XSEC_ENTITY_EXPANSION_LIMIT 1000
@@ -93,37 +86,22 @@
 #	define XSEC_DECLARE_XERCES_STRUCT(NAME) struct NAME;
 #endif
 
-#if defined (XSEC_XERCES_XMLSTRING_HAS_RELEASE)
-#    define XSEC_RELEASE_XMLCH(x) XMLString::release(&(x))
-#else
-#    define XSEC_RELEASE_XMLCH(x) delete[] (x);
-#endif
+#define XSEC_RELEASE_XMLCH(x) XMLString::release(&(x))
 
 // --------------------------------------------------------------------------------
 //           Project Library Handling
 // --------------------------------------------------------------------------------
 
-#if defined (PLATFORM_EXPORT)
-#  define XSEC_PLATFORM_EXPORT PLATFORM_EXPORT
-#  define XSEC_PLATFORM_IMPORT PLATFORM_IMPORT
+#if defined(DLL_EXPORT)
+  #if defined(XSEC_BUILDING_LIBRARY)
+    #define XSEC_EXPORT XERCES_PLATFORM_EXPORT
+  #else
+    #define XSEC_EXPORT XERCES_PLATFORM_IMPORT
+  #endif
 #else
-#  define XSEC_PLATFORM_EXPORT XERCES_PLATFORM_EXPORT
-#  define XSEC_PLATFORM_IMPORT XERCES_PLATFORM_IMPORT
+  #define XSEC_EXPORT
 #endif
 
-#if defined (PROJ_CANON)
-
-#define CANON_EXPORT XSEC_PLATFORM_EXPORT
-#else
-#define CANON_EXPORT XSEC_PLATFORM_IMPORT
-#endif
-
-#if defined (PROJ_DSIG)
-
-#define DSIG_EXPORT XSEC_PLATFORM_EXPORT
-#else
-#define DSIG_EXPORT XSEC_PLATFORM_IMPORT
-#endif
 
 // Platform includes.  Much of this is taken from Xalan
 
@@ -152,16 +130,14 @@
 
 // Given the configuration - what should we set?
 
-#ifdef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
-// Xalan is not available!
+#	define XSEC_HAVE_XPATH
+#	define XSEC_HAVE_XSLT
 
-#	define XSEC_NO_XPATH
-#	define XSEC_NO_XSLT
+#endif
 
-#endif	/* XSEC_NO_XALAN */
-
-#ifdef XSEC_NO_XPATH
+#ifndef XSEC_HAVE_XPATH
 
 #	ifdef XSEC_USE_XPATH_ENVELOPE
 #		undef XSEC_USE_XPATH_ENVELOPE
@@ -169,8 +145,8 @@
 
 #endif
 
-#ifdef XSEC_LIBRARY_BUILD
-#   ifdef XSEC_HAVE_STRCASECMP
+#if defined(XSEC_BUILDING_LIBRARY) || defined(XSEC_BUILDING_TOOLS)
+#   ifdef HAVE_STRCASECMP
 #       define _stricmp(x,y) strcasecmp(x,y)
 #   else
 #       define _stricmp(x,y) stricmp(x,y)

@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoX509.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoX509.cpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
@@ -85,6 +85,10 @@ WinCAPICryptoX509::~WinCAPICryptoX509() {
 	if (mp_certContext != NULL)
 		CertFreeCertificateContext(mp_certContext);
 
+}
+
+const XMLCh * WinCAPICryptoX509::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVWinCAPI;
 }
 
 // load functions

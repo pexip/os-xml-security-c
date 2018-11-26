@@ -26,22 +26,26 @@
  *
  */
 
+#include <xsec/enc/XSECCryptoUtils.hpp>
+#include <xsec/enc/XSECCryptoKey.hpp>
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECAlgorithmMapper.hpp>
 #include <xsec/framework/XSECAlgorithmHandler.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
-#include <xsec/enc/XSECCryptoUtils.hpp>
-#include <xsec/enc/XSECCryptoKey.hpp>
 #include <xsec/xenc/XENCEncryptedData.hpp>
 #include <xsec/xenc/XENCEncryptionMethod.hpp>
 #include <xsec/xenc/XENCCipher.hpp>
 
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
+
 #include "XKMSRecoverResultImpl.hpp"
 #include "XKMSKeyBindingImpl.hpp"
 #include "XKMSRSAKeyPairImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 
@@ -263,9 +267,7 @@ XKMSRSAKeyPair * XKMSRecoverResultImpl::getRSAKeyPair(const char * passPhrase) {
 	}
 
 	// Now find if we can get an algorithm for this URI
-	XSECAlgorithmHandler *handler;
-
-	handler = 
+	const XSECAlgorithmHandler *handler = 
 		XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(
 			xed->getEncryptionMethod()->getAlgorithm());
 
@@ -308,31 +310,14 @@ XENCEncryptedData * XKMSRecoverResultImpl::setRSAKeyPair(const char * passPhrase
 		XMLCh * DQ,
 		XMLCh * InverseQ,
 		XMLCh * D,
-		encryptionMethod em,
 		const XMLCh * algorithmURI) {
 
 	// Try to set up the key first - if this fails, don't want to have added the
 	// XML
 
-	const XMLCh * uri;
-	safeBuffer algorithmSB;
-
-	if (em != ENCRYPT_NONE) {
-		if (encryptionMethod2URI(algorithmSB, em) != true) {
-			throw XSECException(XSECException::XKMSError, 
-				"XKMSRecoverResult::setRSAKeyPair - Unknown encryption method");
-		}
-		uri = algorithmSB.sbStrToXMLCh();
-	}
-    else
-        uri = algorithmURI;
-
 	// Find if we can get an algorithm for this URI
-	XSECAlgorithmHandler *handler;
-
-	handler = 
-		XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(
-			uri);
+	const XSECAlgorithmHandler *handler =
+			XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(algorithmURI);
 
 	if (handler == NULL) {
 		throw XSECException(XSECException::XKMSError,
@@ -348,7 +333,7 @@ XENCEncryptedData * XKMSRecoverResultImpl::setRSAKeyPair(const char * passPhrase
     }
 
 	XSECCryptoKey * sk = handler->createKeyForURI(
-					uri,
+					algorithmURI,
 					(XMLByte *) kbuf,
 					len);
 
@@ -385,10 +370,11 @@ XENCEncryptedData * XKMSRecoverResultImpl::setRSAKeyPair(const char * passPhrase
 	// Encrypt all of this for future use
 	XENCCipher * cipher = m_prov.newCipher(m_msg.mp_env->getParentDocument());
 	cipher->setKey(sk);
-	cipher->encryptElementContent(pk, ENCRYPT_NONE, uri);
+	cipher->encryptElementContent(pk, algorithmURI);
 
 	// Now load the encrypted data back in
 	return cipher->loadEncryptedData(findFirstElementChild(pk));
 
 }	
 
+#endif /* XSEC_XKMS_ENABLED */

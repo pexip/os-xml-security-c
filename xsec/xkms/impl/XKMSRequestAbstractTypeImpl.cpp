@@ -22,7 +22,7 @@
  *
  * XKMSRequestAbstractTypeImpl := Implementation class for XKMS Request messages
  *
- * $Id: XKMSRequestAbstractTypeImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRequestAbstractTypeImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -31,14 +31,20 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
 
-#include <xercesc/dom/DOM.hpp>
-#include <xercesc/dom/DOMNodeList.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSRequestAbstractTypeImpl.hpp"
 #include "XKMSRespondWithImpl.hpp"
 #include "XKMSResponseMechanismImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
+
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/dom/DOMNodeList.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -390,4 +396,4 @@ void XKMSRequestAbstractTypeImpl::removeResponseMechanismItem(int item) {
 
 }
 
-
+#endif /* XSEC_XKMS_ENABLED */

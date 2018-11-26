@@ -22,16 +22,21 @@
  *
  * XKMSResultTypeImpl := Implementation of base schema of XKMS Request messages
  *
- * $Id: XKMSResultTypeImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSResultTypeImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECException.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSResultTypeImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -310,3 +315,4 @@ void XKMSResultTypeImpl::setRequestSignatureValue(const XMLCh * value) {
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

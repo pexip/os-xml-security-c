@@ -22,7 +22,7 @@
  *
  * XKMSPrototypeKeyBindingImpl := Implementation of PrototypeKeyBinding elements
  *
- * $Id: XKMSPrototypeKeyBindingImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSPrototypeKeyBindingImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -33,6 +33,8 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xkms/XKMSPrototypeKeyBinding.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 #include "XKMSKeyBindingAbstractTypeImpl.hpp"
 
@@ -89,4 +91,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSPROTOTYPEKEYBINDINGIMPL_INCLUDE */

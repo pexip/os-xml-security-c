@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGKeyInfo.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfo.hpp 1830720 2018-05-02 02:11:57Z scantor $
  *
  */
 
@@ -33,7 +33,6 @@
 
 // XSEC Includes
 
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/utils/XSECSafeBufferFormatter.hpp>
 #include <xsec/enc/XSECCryptoKey.hpp>
 
@@ -60,7 +59,7 @@ class XSECEnv;
  */
 
 
-class DSIG_EXPORT DSIGKeyInfo {
+class XSEC_EXPORT DSIGKeyInfo {
 
 public:
 
@@ -126,7 +125,7 @@ public:
 	 * \brief Return the DOMNode that heads up this KeyInfo child
 	 */
 
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getKeyInfoDOMNode()
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getKeyInfoDOMNode() const
 		{return mp_keyInfoDOMNode;}
 
 	/**
