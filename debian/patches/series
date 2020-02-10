@@ -22,3 +22,5 @@ Use-pkg-config-for-Xerces-OpenSSL-and-NSS-and-provid.patch
 We-do-not-use-pthreads-threadtest.cpp-is-Windows-onl.patch
 Only-add-found-packages-to-the-pkg-config-dependenci.patch
 Default-KeyInfo-resolver-doesn-t-check-for-empty-element-.patch
+SANTUARIO-496-DSA-verification-crashes-OpenSSL-on-invalid.patch
+SANTUARIO-496-Prevent-KeyInfoResolver-returning-NONE-keys.patch

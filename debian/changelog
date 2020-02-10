@@ -1,3 +1,26 @@
+xml-security-c (1.7.3-4+deb9u2pexip1) pexip; urgency=medium
+
+  * New upstream release
+
+ -- John-Mark Bell <jmb@pexip.com>  Mon, 10 Feb 2020 10:41:06 +0000
+
+xml-security-c (1.7.3-4+deb9u2) stretch; urgency=medium
+
+  * [12dd825] New patches: DSA verification crashes OpenSSL on invalid
+    combinations of key content.
+    Particular KeyInfo combinations result in incomplete DSA key structures
+    that OpenSSL can't handle without crashing.  In the case of Shibboleth
+    SP software this manifests as a crash in the shibd daemon.  Exploitation
+    is believed to be possible only in deployments employing the PKIX trust
+    engine, which is generally recommended against.
+    The upstream patches backported from 2.0.2 apply analogous safeguards to
+    the RSA and ECDSA key handling as well.
+    Upstream bug: https://issues.apache.org/jira/browse/SANTUARIO-496
+    CVE: not assigned
+    Thanks to Scott Cantor (Closes: #913136)
+
+ -- Ferenc Wágner <wferi@debian.org>  Mon, 10 Dec 2018 11:45:41 +0100
+
 xml-security-c (1.7.3-4+deb9u1pexip1) pexip; urgency=medium
 
   * New upstream release
