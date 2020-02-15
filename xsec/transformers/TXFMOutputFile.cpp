@@ -23,12 +23,12 @@
  * TXFMOutputFile := Transform that outputs the byte stream to a file without changing
  *							  the actual data in any way
  *
- * $Id: TXFMOutputFile.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMOutputFile.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/transformers/TXFMOutputFile.hpp>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/transformers/TXFMOutputFile.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -36,10 +36,10 @@ XERCES_CPP_NAMESPACE_USE
 
 TXFMOutputFile::~TXFMOutputFile() {
 
-    if (f.is_open())
-        f.write("\n----- END -----\n", 17);
-	f.close();
-
+    if (f.is_open()) {
+    	    f.write("\n----- END -----\n", 17);
+    	    f.close();
+    }
 }
 
 // Methods to set the inputs
@@ -79,20 +79,20 @@ bool TXFMOutputFile::setFile(char * const fileName) {
 
 // Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMOutputFile::getInputType(void) {
+TXFMBase::ioType TXFMOutputFile::getInputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
 
-TXFMBase::ioType TXFMOutputFile::getOutputType(void) {
+TXFMBase::ioType TXFMOutputFile::getOutputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
 
 
-TXFMBase::nodeType TXFMOutputFile::getNodeType(void) {
+TXFMBase::nodeType TXFMOutputFile::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_NONE;
 
@@ -111,23 +111,5 @@ unsigned int TXFMOutputFile::readBytes(XMLByte * const toFill, unsigned int maxT
 		f.write((char *) toFill, sz);
 
 	return sz;
-
-}
-
-DOMDocument * TXFMOutputFile::getDocument() {
-
-	return NULL;
-
-}
-
-DOMNode * TXFMOutputFile::getFragmentNode() {
-
-	return NULL;
-
-};
-
-const XMLCh * TXFMOutputFile::getFragmentId() {
-
-	return NULL;	// Empty string
 
 }

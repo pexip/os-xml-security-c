@@ -24,14 +24,14 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: TXFMParser.cpp 1493962 2013-06-17 22:32:41Z scantor $
+ * $Id: TXFMParser.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/transformers/TXFMParser.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
 #include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/framework/XSECError.hpp>
 #include <xsec/utils/XSECTXFMInputSource.hpp>
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
@@ -69,7 +69,7 @@ TXFMParser::~TXFMParser() {
 //  For expanding name spaces when necessary
 // -----------------------------------------------------------------------
 
-bool TXFMParser::nameSpacesExpanded(void) {
+bool TXFMParser::nameSpacesExpanded(void) const {
 
 	// NOTE : Do not check inputs as this has its own document
 
@@ -121,9 +121,9 @@ void TXFMParser::setInput(TXFMBase *newInput) {
 	parser.setSecurityManager(&securityManager);
 
 	parser.parse(is);
-    xsecsize_t errorCount = parser.getErrorCount();
+    XMLSize_t errorCount = parser.getErrorCount();
     if (errorCount > 0)
-		throw XSECException(XSECException::XSLError, "Errors occured parsing BYTE STREAM");
+		throw XSECException(XSECException::XSLError, "Errors occurred parsing BYTE STREAM");
 
     mp_parsedDoc = parser.adoptDocument();
 
@@ -135,19 +135,20 @@ void TXFMParser::setInput(TXFMBase *newInput) {
 
 	// Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMParser::getInputType(void) {
+TXFMBase::ioType TXFMParser::getInputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
-TXFMBase::ioType TXFMParser::getOutputType(void) {
+
+TXFMBase::ioType TXFMParser::getOutputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
 
-TXFMBase::nodeType TXFMParser::getNodeType(void) {
+TXFMBase::nodeType TXFMParser::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_DOCUMENT;
 
@@ -161,20 +162,8 @@ unsigned int TXFMParser::readBytes(XMLByte * const toFill, unsigned int maxToFil
 
 }
 
-DOMDocument *TXFMParser::getDocument() {
+DOMDocument *TXFMParser::getDocument() const {
 
 	return mp_parsedDoc;
-
-}
-
-DOMNode * TXFMParser::getFragmentNode() {
-
-	return NULL;		// Return a null node
-
-}
-
-const XMLCh * TXFMParser::getFragmentId() {
-
-	return NULL;	// Empty string
 
 }

@@ -33,6 +33,8 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 
+#ifdef XSEC_XKMS_ENABLED
+
 /**
  * @ingroup xkms
  */
@@ -83,7 +85,7 @@
  */
 
 
-class XKMSRSAKeyPair {
+class XSEC_EXPORT XKMSRSAKeyPair {
 
 public:
 
@@ -175,5 +177,7 @@ private:
 	XKMSRSAKeyPair & operator = (const XKMSRSAKeyPair &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSRSAKEYPAIR_INCLUDE */

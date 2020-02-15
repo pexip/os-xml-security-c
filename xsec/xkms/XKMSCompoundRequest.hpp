@@ -22,7 +22,7 @@
  *
  * XKMSCompoundRequest := Interface for CompoundRequest Messages
  *
- * $Id: XKMSCompoundRequest.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSCompoundRequest.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSRequestAbstractType.hpp>
 
 class XKMSLocateRequest;
@@ -75,7 +78,7 @@ class XKMSRecoverRequest;
 \endverbatim
  */
 
-class XKMSCompoundRequest : public XKMSRequestAbstractType {
+class XSEC_EXPORT XKMSCompoundRequest : public XKMSRequestAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -224,5 +227,7 @@ private:
 	XKMSCompoundRequest & operator = (const XKMSCompoundRequest &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSCOMPOUNDREQUEST_INCLUDE */

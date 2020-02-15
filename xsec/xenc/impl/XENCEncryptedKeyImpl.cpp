@@ -22,19 +22,19 @@
  *
  * XENCEncryptedKeyImpl := Implementation for holder object for EncryptedKeys
  *
- * $Id: XENCEncryptedKeyImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCEncryptedKeyImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
+#include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
 
 #include "XENCCipherImpl.hpp"
 #include "XENCEncryptedKeyImpl.hpp"
 #include "XENCCipherDataImpl.hpp"
+#include "../../utils/XSECDOMUtils.hpp"
 
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 
 #include <xercesc/util/XMLUniDefs.hpp>
 
@@ -93,6 +93,20 @@ static XMLCh s_Recipient[] = {
 	chLatin_t,
 	chNull
 };
+
+XENCEncryptedKey* XENCEncryptedKey::create(
+	const XSECEnv* env,
+	XENCCipherData::XENCCipherDataType type,
+	const XMLCh * algorithm,
+	const XMLCh * value)
+{
+
+	XENCEncryptedKeyImpl* ret = new XENCEncryptedKeyImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankEncryptedKey(type, algorithm, value);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Construct/Destruct

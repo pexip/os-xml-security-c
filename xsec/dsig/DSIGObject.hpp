@@ -23,7 +23,7 @@
  * DSIGObject := Defines the container class used by dsig to hold objects
  *				 inside a signture
  *
- * $Id: DSIGObject.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGObject.hpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -34,6 +34,7 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 
+XSEC_DECLARE_XERCES_CLASS(DOMElement);
 XSEC_DECLARE_XERCES_CLASS(DOMNode);
 
 class XSECEnv;
@@ -54,7 +55,7 @@ class XSECEnv;
  */
 
 
-class DSIG_EXPORT DSIGObject {
+class XSEC_EXPORT DSIGObject {
 
 public:
 
@@ -123,7 +124,7 @@ public:
 	 * @returns the URI attribute string for this object
 	 */
 
-	const XMLCh * getId(void);
+	const XMLCh * getId(void) const;
 
 	/**
 	 * \brief Returns the MimeType string of this object
@@ -131,7 +132,7 @@ public:
 	 * @returns a pointer to the buffer containing the Mime Type string
 	 */
 
-	const XMLCh * getMimeType(void);
+	const XMLCh * getMimeType(void) const;
 
 	/**
 	 * \brief Returns the Encoding string of this object
@@ -139,7 +140,7 @@ public:
 	 * @returns a pointer to the buffer containing the Encoding string
 	 */
 
-	const XMLCh * getEncoding(void);
+	const XMLCh * getEncoding(void) const;
 
 	/**
 	 * \brief Returns the Element node for this object
@@ -147,7 +148,7 @@ public:
 	 * @returns the Element node at the head of this object
 	 */
 
-	const XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void);
+	const XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void) const;
 
 	//@}
 

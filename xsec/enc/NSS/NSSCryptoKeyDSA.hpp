@@ -51,7 +51,7 @@ class NSSCryptoProvider;
  */
 
 
-class DSIG_EXPORT NSSCryptoKeyDSA : public XSECCryptoKeyDSA {
+class XSEC_EXPORT NSSCryptoKeyDSA : public XSECCryptoKeyDSA {
 
 public :
 
@@ -89,7 +89,7 @@ public :
 	 *\brief Return the NSS string identifier
 	 */
 
-	virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVNSS;}
+	virtual const XMLCh * getProviderName() const;
 	
 	/**
 	 * \brief Replicate key
@@ -119,7 +119,7 @@ public :
 	virtual unsigned int signBase64Signature(unsigned char * hashBuf,
 						unsigned int hashLen,
 						char * base64SignatureBuf,
-						unsigned int base64SignatureBufLen);
+						unsigned int base64SignatureBufLen) const;
 
 	/**
 	 * \brief Verify a signature
@@ -136,7 +136,7 @@ public :
 	virtual bool verifyBase64Signature(unsigned char * hashBuf, 
 						 unsigned int hashLen,
 						 char * base64Signature,
-						 unsigned int sigLen);
+						 unsigned int sigLen) const;
 
 	//@}
 
@@ -242,7 +242,7 @@ public :
 
 private:
 
-	SECKEYPublicKey  *	mp_pubkey;
+	mutable SECKEYPublicKey  *	mp_pubkey;
 	SECKEYPrivateKey *	mp_privkey;
 
   SECItem * mp_P;
@@ -252,7 +252,7 @@ private:
 
 	// Instruct to import from parameters
 
-	void importKey(void);
+	void importKey(void) const;
 	void loadParamsFromKey(void);
 
 };

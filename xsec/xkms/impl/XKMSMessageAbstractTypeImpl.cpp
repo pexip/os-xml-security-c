@@ -22,23 +22,28 @@
  *
  * XKMSMessageAbstractTypeImpl := Implementation class for base XKMS messages
  *
- * $Id: XKMSMessageAbstractTypeImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSMessageAbstractTypeImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
+#include <xsec/dsig/DSIGSignature.hpp>
+#include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/dsig/DSIGSignature.hpp>
-#include <xsec/dsig/DSIGReference.hpp>
+
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
+
+#include "XKMSMessageAbstractTypeImpl.hpp"
+
 #include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
 #include <xercesc/util/Janitor.hpp>
-
-#include "XKMSMessageAbstractTypeImpl.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -225,9 +230,7 @@ DOMElement * XKMSMessageAbstractTypeImpl::createBlankMessageAbstractType(
 	mp_messageAbstractTypeElement->setAttributeNS(NULL, XKMSConstants::s_tagId, id ? id : myId);
 	if (id == NULL)
 	    XSEC_RELEASE_XMLCH(myId);
-#if defined (XSEC_XERCES_HAS_SETIDATTRIBUTE)
-	mp_messageAbstractTypeElement->setIdAttributeNS(NULL, XKMSConstants::s_tagId);
-#endif
+	mp_messageAbstractTypeElement->setIdAttributeNS(NULL, XKMSConstants::s_tagId, true);
 	mp_idAttr = 
 		mp_messageAbstractTypeElement->getAttributeNodeNS(NULL, XKMSConstants::s_tagId);
 
@@ -295,9 +298,7 @@ void XKMSMessageAbstractTypeImpl::setId(const XMLCh * id) {
 	}
 
 	mp_messageAbstractTypeElement->setAttributeNS(NULL, XKMSConstants::s_tagId, id);
-#if defined (XSEC_XERCES_HAS_SETIDATTRIBUTE)	
-	mp_messageAbstractTypeElement->setIdAttributeNS(NULL, XKMSConstants::s_tagId);
-#endif
+	mp_messageAbstractTypeElement->setIdAttributeNS(NULL, XKMSConstants::s_tagId, true);
 	mp_idAttr = 
 		mp_messageAbstractTypeElement->getAttributeNodeNS(NULL, XKMSConstants::s_tagId);
 
@@ -336,12 +337,12 @@ void XKMSMessageAbstractTypeImpl::setNonce(const XMLCh * uri) {
 }
 
 DSIGSignature * XKMSMessageAbstractTypeImpl::addSignature(
-		canonicalizationMethod cm,
-		signatureMethod	sm,
-		hashMethod hm) {
+		const XMLCh* c14nAlgorithm,
+                const XMLCh* signatureAlgorithm,
+                const XMLCh* hashAlgorithm) {
 
 	DSIGSignature * ret = m_prov.newSignature();
-	DOMElement * elt = ret->createBlankSignature(mp_env->getParentDocument(), cm, sm, hm);
+	DOMElement * elt = ret->createBlankSignature(mp_env->getParentDocument(), c14nAlgorithm, signatureAlgorithm);
 
 	/* Create the enveloping reference */
 	safeBuffer sb;
@@ -349,9 +350,9 @@ DSIGSignature * XKMSMessageAbstractTypeImpl::addSignature(
 	sb.sbXMLChAppendCh(chPound);
 	sb.sbXMLChCat(getId());
 
-	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer());
+	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer(), hashAlgorithm);
 	ref->appendEnvelopedSignatureTransform();
-	ref->appendCanonicalizationTransform(CANON_C14NE_COM);
+	ref->appendCanonicalizationTransform(DSIGConstants::s_unicodeStrURIEXC_C14N_COM);
 
 	/* Embed the signature in the document */
 	DOMNode * c = mp_messageAbstractTypeElement->getFirstChild();
@@ -450,3 +451,5 @@ void XKMSMessageAbstractTypeImpl::appendOpaqueClientDataItem(const XMLCh * item)
 	m_opaqueClientDataSize++;
 
 }
+
+#endif /* XSEC_XKMS_ENABLED */

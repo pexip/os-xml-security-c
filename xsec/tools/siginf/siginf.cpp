@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: siginf.cpp 1354660 2012-06-27 18:40:57Z scantor $
+ * $Id: siginf.cpp 1832576 2018-05-30 23:45:26Z scantor $
  *
  */
 
@@ -37,7 +37,6 @@
 #include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/framework/XSECException.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/enc/XSECKeyInfoResolverDefault.hpp>
 
 #include <xsec/dsig/DSIGTransformC14n.hpp>
@@ -49,6 +48,8 @@
 #include <xsec/dsig/DSIGTransformEnvelope.hpp>
 
 #include <xsec/dsig/DSIGTransformList.hpp>
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 // General
 
@@ -78,7 +79,7 @@ using std::cout;
 using std::endl;
 using std::ostream;
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 // XALAN
 
@@ -88,9 +89,7 @@ using std::ostream;
 XALAN_USING_XALAN(XPathEvaluator)
 XALAN_USING_XALAN(XalanTransformer)
 
-#endif
-
-#ifdef XSEC_NO_XALAN
+#else
 
 ostream& operator<< (ostream& target, const XMLCh * s)
 {
@@ -129,140 +128,117 @@ ostream & operator<<(ostream& target, X2C &x) {
 }
 
 inline
-void levelSet(int level) {
+void levelSet(unsigned int level) {
 
-	for (int i = 0; i < level; ++i)
+	for (unsigned int i = 0; i < level; ++i)
 		cout << "    ";
 
 }
 
-void outputTransform(DSIGTransform * t, int level) {
+void outputTransform(const DSIGTransform * t, unsigned int level) {
 
-	switch (t->getTransformType()) {
 
-	case (TRANSFORM_BASE64) :
-
+    if (dynamic_cast<const DSIGTransformBase64*>(t)) {
 		cout << "Base64 Decode" << endl;
-		return;
+    }
+    else if (dynamic_cast<const DSIGTransformC14n*>(t)) {
+        const XMLCh* cm = dynamic_cast<const DSIGTransformC14n*>(t)->getCanonicalizationMethod();
+        if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N_NOC)) {
+            cout << "c14n 1.0 canonicalization (without comments)" << endl;
+        }
+        else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N_COM)) {
+            cout << "c14n 1.0 canonicalization (with comments)" << endl;
+        }
+        else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N11_NOC)) {
+            cout << "c14n 1.1 canonicalization (without comments)" << endl;
+        }
+        else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N11_COM)) {
+            cout << "c14n 1.1 canonicalization (with comments)" << endl;
+        }
+        else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIEXC_C14N_NOC)) {
+            cout << "Exclusive c14n 1.0 canonicalization (without comments)" << endl;
+            if (dynamic_cast<const DSIGTransformC14n*>(t)->getPrefixList() != NULL) {
+                levelSet(level);
+                cout << "Inclusive prefixes : " <<
+                    X2C(dynamic_cast<const DSIGTransformC14n*>(t)->getPrefixList()).str() << endl;
+            }
+        }
+        else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIEXC_C14N_COM)) {
+            cout << "Exclusive c14n 1.0 canonicalization (with comments)" << endl;
+            if (dynamic_cast<const DSIGTransformC14n*>(t)->getPrefixList() != NULL) {
+                levelSet(level);
+                cout << "Inclusive prefixes : " <<
+                    X2C(dynamic_cast<const DSIGTransformC14n*>(t)->getPrefixList()).str() << endl;
+            }
+        }
+        else {
+            cout << "Unknown c14n method" << endl;
+        }
+    }
+    else if (dynamic_cast<const DSIGTransformEnvelope*>(t)) {
+        cout << "enveloped signature" << endl;
+    }
+    else if (dynamic_cast<const DSIGTransformXPath*>(t)) {
+        const DSIGTransformXPath* xp = dynamic_cast<const DSIGTransformXPath*>(t);
 
-	case (TRANSFORM_C14N) : 
-		cout << "c14n 1.0 canonicalisation ";
-		if (((DSIGTransformC14n *) t)->getCanonicalizationMethod() == CANON_C14N_NOC)
-			cout << "(without comments)" << endl;
-		else
-			cout << "(with comments)" << endl;
-		return;
+        cout << "XPath" << endl;
+        // Check for namespaces
+        DOMNamedNodeMap* atts = xp->getNamespaces();
 
-	case (TRANSFORM_C14N11) : 
-		cout << "c14n 1.1 canonicalisation ";
-		if (((DSIGTransformC14n *) t)->getCanonicalizationMethod() == CANON_C14N11_NOC)
-			cout << "(without comments)" << endl;
-		else
-			cout << "(with comments)" << endl;
-		return;
+        if (atts != 0) {
+            XMLSize_t s = atts->getLength();
+            for (XMLSize_t i = 0 ; i < s; ++i) {
+                levelSet(level);
+                cout << "Namespace : " << X2C(atts->item(i)->getNodeName()).str() <<
+                    "=\"" << X2C(atts->item(i)->getNodeValue()).str() << "\"\n";
+            }
+        }
+        levelSet(level);
+        // Hmm - this is really a bug.  This should return a XMLCh string
+        cout << "Expr : " << xp->getExpression() << endl;
+    }
+    else if (dynamic_cast<const DSIGTransformXPathFilter*>(t)) {
+        const DSIGTransformXPathFilter * xpf = dynamic_cast<const DSIGTransformXPathFilter*>(t);
 
-    case (TRANSFORM_EXC_C14N) :
+        cout << "XPath-Filter2" << endl;
 
-		cout << "Exclusive c14n 1.0 canonicalisation ";
-		if (((DSIGTransformC14n *) t)->getCanonicalizationMethod() == CANON_C14NE_NOC)
-			cout << "(without comments)" << endl;
-		else
-			cout << "(with comments)" << endl;
+        unsigned int s = xpf->getExprNum();
 
-		// Check for inclusive namespaces
+        for (unsigned int i = 0; i < s; ++i) {
 
-		if (((DSIGTransformC14n *) t)->getPrefixList() != NULL) {
-			levelSet(level);
-			cout << "Inclusive prefixes : " << 
-				X2C(((DSIGTransformC14n *) t)->getPrefixList()).str() << endl;
-		}
-		return;
+            levelSet(level);
+            cout << "Filter : ";
 
-	case (TRANSFORM_ENVELOPED_SIGNATURE) :
+            const DSIGXPathFilterExpr * e = xpf->expr(i);
 
-		cout << "enveloped signature" << endl;
-		return;
+            switch (e->getFilterType()) {
 
-	case (TRANSFORM_XPATH) :
-		{
-			DSIGTransformXPath * xp = (DSIGTransformXPath *) t;
-			
-			cout << "XPath" << endl;
-			// Check for namespaces
-			DOMNamedNodeMap * atts = xp->getNamespaces();
+            case DSIGXPathFilterExpr::FILTER_UNION :
+                cout << "union : \"";
+                break;
+            case DSIGXPathFilterExpr::FILTER_INTERSECT :
+                cout << "intersect : \"";
+                break;
+            default :
+                cout << "subtract : \"";
+            }
 
-			if (atts != 0) {
-
-				XMLSize_t s = atts->getLength();
-				for (XMLSize_t i = 0 ; i < s; ++i) {
-					levelSet(level);
-					cout << "Namespace : " << X2C(atts->item(i)->getNodeName()).str() <<
-						"=\"" << X2C(atts->item(i)->getNodeValue()).str() << "\"\n";
-				}
-			}
-			levelSet(level);
-			// Hmm - this is really a bug.  This should return a XMLCh string
-			cout << "Expr : " << xp->getExpression() << endl;
-			return;
-		}
-
-	case (TRANSFORM_XPATH_FILTER) :
-		{
-			DSIGTransformXPathFilter * xpf = (DSIGTransformXPathFilter *) t;
-
-			cout << "XPath-Filter2" << endl;
-
-			unsigned int s = xpf->getExprNum();
-			
-			for (unsigned int i = 0; i < s; ++i) {
-
-				levelSet(level);
-				cout << "Filter : ";
-
-				DSIGXPathFilterExpr * e = xpf->expr(i);
-
-				switch (e->getFilterType()) {
-
-				case FILTER_UNION :
-					cout << "union : \"";
-					break;
-				case FILTER_INTERSECT :
-					cout << "intersect : \"";
-					break;
-				default :
-					cout << "subtract : \"";
-
-				}
-
-				// Now the expression
-				char * str = XMLString::transcode(e->getFilter());
-				cout << str << "\"" << endl;
-				XSEC_RELEASE_XMLCH(str);
-
-			}
-
-			break;
-
-		}
-
-	case (TRANSFORM_XSLT) :
-		{
-
-			cout << "XSLT" << endl;
-			// Really should serialise and output stylesheet.
-			return;
-			
-		}
-
-	default :
-
+            // Now the expression
+            char * str = XMLString::transcode(e->getFilter());
+            cout << str << "\"" << endl;
+            XSEC_RELEASE_XMLCH(str);
+        }
+    }
+    else if (dynamic_cast<const DSIGTransformXSL*>(t)) {
+        cout << "XSLT" << endl;
+        // Really should serialise and output stylesheet.
+    }
+    else {
 		cout << "unknown transform type" << endl;
-
-	}
-
+    }
 }
 		
-void outputReferences(DSIGReferenceList *rl, int level) {
+void outputReferences(DSIGReferenceList *rl, unsigned int level) {
 
 	int s = (int) rl->getSize();
 
@@ -311,46 +287,30 @@ void outputSignatureInfo(DSIGSignature *sig, bool skipReferences) {
 
 	// First get some information about the main signature
 	cout << "Signature (Signed Info) settings : " << endl;
-	cout << "    Canonicalisation Method : ";
+	cout << "    Canonicalization Method : ";
 	
-	switch (sig->getCanonicalizationMethod()) {
-
-	case (CANON_C14N_NOC) :
-
-		cout << "c14n 1.0 (without comments)";
-		break;
-
-	case (CANON_C14N_COM) :
-
-		cout << "c14n 1.0 (with comments)";
-		break;
-
-	case (CANON_C14N11_NOC) :
-
-		cout << "c14n 1.1 (without comments)";
-		break;
-
-	case (CANON_C14N11_COM) :
-
-		cout << "c14n 1.1 (with comments)";
-		break;
-
-    case (CANON_C14NE_NOC) :
-
-		cout << "exclusive c14n 1.0 (without comments)";
-		break;
-
-	case (CANON_C14NE_COM) :
-
-		cout << "exclusive c14n 1.0 (with comments)";
-		break;
-
-	default :
-
-		cout << "none set";
-		break;
-
-	}
+    const XMLCh* cm = sig->getCanonicalizationMethod();
+    if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N_NOC)) {
+        cout << "c14n 1.0 canonicalization (without comments)" << endl;
+    }
+    else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N_COM)) {
+        cout << "c14n 1.0 canonicalization (with comments)" << endl;
+    }
+    else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N11_NOC)) {
+        cout << "c14n 1.1 canonicalization (without comments)" << endl;
+    }
+    else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIC14N11_COM)) {
+        cout << "c14n 1.1 canonicalization (with comments)" << endl;
+    }
+    else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIEXC_C14N_NOC)) {
+        cout << "Exclusive c14n 1.0 canonicalization (without comments)" << endl;
+    }
+    else if (XMLString::equals(cm, DSIGConstants::s_unicodeStrURIEXC_C14N_COM)) {
+        cout << "Exclusive c14n 1.0 canonicalization (with comments)" << endl;
+    }
+    else {
+        cout << "Unknown c14n method" << endl;
+    }
 
 	cout << endl;
 
@@ -374,7 +334,7 @@ void outputSignatureInfo(DSIGSignature *sig, bool skipReferences) {
 	}
 }
 
-void printUsage(void) {
+void printUsage() {
 
 	cerr << "\nUsage: siginf [options] <input file name>\n\n";
 	cerr << "     Where options are :\n\n";
@@ -427,7 +387,7 @@ int evaluate(int argc, char ** argv) {
 	// Now parse out file
 
 	bool errorsOccured = false;
-	xsecsize_t errorCount = 0;
+	XMLSize_t errorCount = 0;
     try
     {
     	parser->parse(filename);
@@ -437,7 +397,7 @@ int evaluate(int argc, char ** argv) {
     catch (const XMLException& e)
     {
 		char * msg = XMLString::transcode(e.getMessage());
-        cerr << "An error occured during parsing\n   Message: "
+        cerr << "An error occurred during parsing\n   Message: "
              << msg << endl;
 		XSEC_RELEASE_XMLCH(msg);
         errorsOccured = true;
@@ -446,7 +406,7 @@ int evaluate(int argc, char ** argv) {
 
     catch (const DOMException& e)
     {
-       cerr << "A DOM error occured during parsing\n   DOMException code: "
+       cerr << "A DOM error occurred during parsing\n   DOMException code: "
              << e.code << endl;
         errorsOccured = true;
     }
@@ -497,9 +457,9 @@ int evaluate(int argc, char ** argv) {
 //			result = sig->verify();
 	}
 
-	catch (XSECException &e) {
+	catch (const XSECException &e) {
 		char * msg = XMLString::transcode(e.getMsg());
-		cerr << "An error occured during signature loading\n   Message: "
+		cerr << "An error occurred during signature loading\n   Message: "
 		<< msg << endl;
 		XSEC_RELEASE_XMLCH(msg);
 		errorsOccured = true;
@@ -507,7 +467,7 @@ int evaluate(int argc, char ** argv) {
 	}
 	catch (...) {
 
-		cerr << "Unknown Exception type occured.  Cleaning up and exiting\n" << endl;
+		cerr << "Unknown Exception type occurred.  Cleaning up and exiting\n" << endl;
 		return 2;
 
 	}
@@ -517,7 +477,6 @@ int evaluate(int argc, char ** argv) {
 	prov.releaseSignature(sig);
 	// Janitor will clean up the parser
 	return 0;
-
 }
 
 
@@ -549,7 +508,7 @@ int main(int argc, char **argv) {
 	try {
 
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XPathEvaluator::initialize();
 		XalanTransformer::initialize();
 #endif
@@ -567,7 +526,7 @@ int main(int argc, char **argv) {
 	retResult = evaluate(argc, argv);
 
 	XSECPlatformUtils::Terminate();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 	XalanTransformer::terminate();
 	XPathEvaluator::terminate();
 #endif

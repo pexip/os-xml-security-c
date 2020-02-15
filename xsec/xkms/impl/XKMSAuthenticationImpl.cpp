@@ -22,19 +22,23 @@
  *
  * XKMSAuthenticationImpl := Implementation of Authentication elements
  *
- * $Id: XKMSAuthenticationImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSAuthenticationImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
+#include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
 
-#include <xsec/dsig/DSIGReference.hpp>
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSAuthenticationImpl.hpp"
 #include "XKMSNotBoundAuthenticationImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -194,9 +198,9 @@ XKMSNotBoundAuthentication * XKMSAuthenticationImpl::getNotBoundAuthentication(v
 // --------------------------------------------------------------------------------
 
 DSIGSignature * XKMSAuthenticationImpl::addKeyBindingAuthenticationSignature(
-		canonicalizationMethod cm,
-		signatureMethod	sm,
-		hashMethod hm) {
+                const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,	
+		const XMLCh* hashAlgorithm) {
 
 	if (mp_keyBindingId == NULL) {
 		throw XSECException(XSECException::XKMSError,
@@ -204,7 +208,7 @@ DSIGSignature * XKMSAuthenticationImpl::addKeyBindingAuthenticationSignature(
 	}
 
 	DSIGSignature * ret = m_prov.newSignature();
-	DOMElement * elt = ret->createBlankSignature(mp_env->getParentDocument(), cm, sm, hm);
+	DOMElement * elt = ret->createBlankSignature(mp_env->getParentDocument(), c14nAlgorithm, signatureAlgorithm);
 
 	/* Create the enveloping reference */
 	safeBuffer sb;
@@ -212,8 +216,8 @@ DSIGSignature * XKMSAuthenticationImpl::addKeyBindingAuthenticationSignature(
 	sb.sbXMLChAppendCh(chPound);
 	sb.sbXMLChCat(mp_keyBindingId);
 
-	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer());
-	ref->appendCanonicalizationTransform(CANON_C14NE_COM);
+	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer(), hashAlgorithm);
+	ref->appendCanonicalizationTransform(DSIGConstants::s_unicodeStrURIEXC_C14N_COM);
 
 	/* Embed the signature in the document inside a KeyBindingAuthentication element */
 	safeBuffer str;
@@ -245,3 +249,4 @@ void XKMSAuthenticationImpl::setNotBoundAuthentication(
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

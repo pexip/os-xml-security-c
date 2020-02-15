@@ -22,7 +22,7 @@
  *
  * XKMSStatusImpl := Implementation for Status elements (in KeyBinding)
  *
- * $Id: XKMSStatusImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSStatusImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -31,10 +31,14 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSStatusImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -354,3 +358,5 @@ void XKMSStatusImpl::setStatusReason(StatusValue status, StatusReason reason, bo
 	m_statusReasons[status-1][reason-1] = e;
 
 }
+
+#endif /* XSEC_XKMS_ENABLED */

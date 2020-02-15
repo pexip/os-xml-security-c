@@ -21,11 +21,11 @@
  * XSEC
  *
  * InteropResolver := Class to resolve key elements into certificates for
- *						merlin-18 interop test
+ *                      merlin-18 interop test
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: InteropResolver.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: InteropResolver.hpp 1817205 2017-12-05 14:38:05Z scantor $
  *
  */
 
@@ -41,37 +41,37 @@
 #endif
 
 #if defined (XSEC_HAVE_OPENSSL)
-#	include <openssl/x509.h>
+#   include <openssl/x509.h>
 
 class InteropResolver : public XSECKeyInfoResolver {
 
 public :
 
-	InteropResolver(const XMLCh * baseURI);
-	~InteropResolver();
+    InteropResolver(const XMLCh * baseURI);
+    ~InteropResolver();
 
-	// Interface functions
+    // Interface functions
 
-	virtual XSECCryptoKey * resolveKey(DSIGKeyInfoList * lst);
-	virtual XSECKeyInfoResolver * clone(void) const;
+    virtual XSECCryptoKey * resolveKey(const DSIGKeyInfoList * lst) const;
+    virtual XSECKeyInfoResolver * clone(void) const;
 
-	// Internal functions
-	X509 * nextFile2Cert(void);
-	bool checkMatch(DSIGKeyInfoList * lst, X509 * x);
-	XSECCryptoKey * openCertURI(const XMLCh * uri);
+    // Internal functions
+    X509 * nextFile2Cert(void) const;
+    bool checkMatch(const DSIGKeyInfoList * lst, X509 * x) const;
+    XSECCryptoKey * openCertURI(const XMLCh * uri) const;
 
 private:
 
-	XMLCh *			mp_baseURI;
-	bool			m_searchStarted;
-	bool			m_searchFinished;
+    XMLCh *         mp_baseURI;
+    mutable bool    m_searchStarted;
+    mutable bool    m_searchFinished;
 
 #if defined (_WIN32)
-	_finddata_t		m_finder;
-	long			m_handle;
+    mutable _finddata_t m_finder;
+    mutable long    m_handle;
 #else
-    glob_t          m_globbuf;
-    int             m_fcount;
+    mutable glob_t  m_globbuf;
+    mutable int     m_fcount;
 #endif
 
 };

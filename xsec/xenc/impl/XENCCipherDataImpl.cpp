@@ -22,19 +22,19 @@
  *
  * XENCCipherDataImpl := Implementation of CipherData elements 
  *
- * $Id: XENCCipherDataImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherDataImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/framework/XSECEnv.hpp>
 
 #include "XENCCipherDataImpl.hpp"
 #include "XENCCipherValueImpl.hpp"
 #include "XENCCipherReferenceImpl.hpp"
 
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECEnv.hpp>
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLUniDefs.hpp>
 
@@ -94,6 +94,19 @@ static XMLCh s_CipherReference[] = {
 	chLatin_e,
 	chNull,
 };
+
+XENCCipherData* XENCCipherData::create(
+	const XSECEnv* env,
+	XENCCipherData::XENCCipherDataType type,
+	const XMLCh * value)
+{
+
+	XENCCipherDataImpl* ret = new XENCCipherDataImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankCipherData(type, value);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Constructors and Destructors
@@ -242,19 +255,19 @@ DOMElement * XENCCipherDataImpl::createBlankCipherData(
 // --------------------------------------------------------------------------------
 
 	// Interface methods
-XENCCipherDataImpl::XENCCipherDataType XENCCipherDataImpl::getCipherDataType(void) {
+XENCCipherDataImpl::XENCCipherDataType XENCCipherDataImpl::getCipherDataType(void) const {
 
 	return m_cipherDataType;
 
 }
 
-XENCCipherValue * XENCCipherDataImpl::getCipherValue(void) {
+XENCCipherValue * XENCCipherDataImpl::getCipherValue(void) const {
 
 	return mp_cipherValue;
 
 }
 
-XENCCipherReference * XENCCipherDataImpl::getCipherReference(void) {
+XENCCipherReference * XENCCipherDataImpl::getCipherReference(void) const {
 
 	return mp_cipherReference;
 

@@ -46,7 +46,7 @@
  *
  */
 
-class DSIG_EXPORT NSSCryptoKeyHMAC : public XSECCryptoKeyHMAC {
+class XSEC_EXPORT NSSCryptoKeyHMAC : public XSECCryptoKeyHMAC {
 
 public :
 
@@ -85,7 +85,7 @@ public :
 	 * \brief Return the NSS string identifier
 	 */
 
-	virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVNSS;}
+	virtual const XMLCh * getProviderName() const;
 
 	//@}
 

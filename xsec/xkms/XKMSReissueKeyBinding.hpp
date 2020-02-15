@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSKeyBindingAbstractType.hpp>
 
 /**
@@ -55,7 +58,7 @@
 
 class XKMSStatus;
 
-class XKMSReissueKeyBinding : public XKMSKeyBindingAbstractType {
+class XSEC_EXPORT XKMSReissueKeyBinding : public XKMSKeyBindingAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -94,5 +97,7 @@ private:
 	XKMSReissueKeyBinding & operator = (const XKMSReissueKeyBinding &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREISSUEKEYBINDING_INCLUDE */

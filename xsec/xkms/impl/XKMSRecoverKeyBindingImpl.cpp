@@ -31,12 +31,18 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
 
-#include <xercesc/dom/DOM.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSRecoverKeyBindingImpl.hpp"
 #include "XKMSStatusImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
+
+#include <xercesc/dom/DOM.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -128,3 +134,4 @@ XKMSStatus * XKMSRecoverKeyBindingImpl::getStatus(void) const {
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

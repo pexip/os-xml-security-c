@@ -22,7 +22,7 @@
  *
  * XENCEncryptedKey := Definition for holder object for EncryptedKey 
  *
- * $Id: XENCEncryptedKey.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCEncryptedKey.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -35,6 +35,8 @@
 #include <xsec/dsig/DSIGKeyInfo.hpp>
 #include <xsec/xenc/XENCEncryptedType.hpp>
 #include <xsec/xenc/XENCCipherData.hpp>
+
+class XSECEnv;
 
 /**
  * @ingroup xenc
@@ -70,7 +72,7 @@
  */
 
 
-class XENCEncryptedKey : public XENCEncryptedType, public DSIGKeyInfo {
+class XSEC_EXPORT XENCEncryptedKey : public virtual XENCEncryptedType, public DSIGKeyInfo {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -85,6 +87,24 @@ protected:
 public:
 
 	virtual ~XENCEncryptedKey() {};
+
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	*
+	* @param env environment instance
+	* @param type type of cipher data
+	* @param algorithm algorithm to use
+	* @param value value to use
+	*
+	* @returns the new object
+	*/
+	static XENCEncryptedKey* create(
+		const XSECEnv* env,
+		XENCCipherData::XENCCipherDataType type,
+		const XMLCh * algorithm,
+		const XMLCh * value);
 
 	/** @name EncryptedKey Specific Getter Methods */
 	//@{

@@ -24,7 +24,7 @@
  *                     perform a SOAP request and receive response.
  *
  *
- * $Id: XSECSOAPRequestor.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECSOAPRequestor.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -32,6 +32,8 @@
 #define XSECSOAPREQUESTOR_INCLUDE
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 XSEC_DECLARE_XERCES_CLASS(DOMDocument);
 
@@ -62,7 +64,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMDocument);
  */
 
 
-class DSIG_EXPORT XSECSOAPRequestor {
+class XSEC_EXPORT XSECSOAPRequestor {
 
 public :
 
@@ -97,6 +99,5 @@ public :
 
 };
 
-
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XSECSOAPREQUESTOR_INCLUDE */
-

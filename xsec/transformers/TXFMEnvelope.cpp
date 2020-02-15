@@ -22,13 +22,14 @@
  *
  * TXFMEnvelope := Class that calculates an Envelope with an XPath evaluator
  *
- * $Id: TXFMEnvelope.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMEnvelope.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/transformers/TXFMEnvelope.hpp>
 #include <xsec/framework/XSECException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+#include <xsec/transformers/TXFMEnvelope.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -97,19 +98,19 @@ void TXFMEnvelope::setInput(TXFMBase *newInput) {
 
 // Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMEnvelope::getInputType(void) {
+TXFMBase::ioType TXFMEnvelope::getInputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
-TXFMBase::ioType TXFMEnvelope::getOutputType(void) {
+TXFMBase::ioType TXFMEnvelope::getOutputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
-TXFMBase::nodeType TXFMEnvelope::getNodeType(void) {
+TXFMBase::nodeType TXFMEnvelope::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_XPATH_NODESET;
 
@@ -235,26 +236,8 @@ unsigned int TXFMEnvelope::readBytes(XMLByte * const toFill, unsigned int maxToF
 
 }
 
-DOMDocument *TXFMEnvelope::getDocument() {
+DOMDocument *TXFMEnvelope::getDocument() const {
 
 	return mp_document;
-
-}
-
-DOMNode *TXFMEnvelope::getFragmentNode() {
-
-	return NULL;
-
-}
-
-const XMLCh * TXFMEnvelope::getFragmentId() {
-
-	return NULL;	// Empty string
-
-}
-
-XSECXPathNodeList	& TXFMEnvelope::getXPathNodeList() {
-
-	return m_XPathMap;
 
 }

@@ -22,7 +22,7 @@
  *
  * XKMSUnverifiedKeyBinding := Interface for UnverifiedKeyBinding elements
  *
- * $Id: XKMSUnverifiedKeyBinding.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSUnverifiedKeyBinding.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSKeyBindingAbstractType.hpp>
 
 /**
@@ -64,7 +67,7 @@
  */
 
 
-class XKMSUnverifiedKeyBinding : public XKMSKeyBindingAbstractType {
+class XSEC_EXPORT XKMSUnverifiedKeyBinding : public XKMSKeyBindingAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -84,5 +87,7 @@ private:
 	XKMSUnverifiedKeyBinding & operator = (const XKMSUnverifiedKeyBinding &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSUNVERIFIEDKEYBINDING_INCLUDE */

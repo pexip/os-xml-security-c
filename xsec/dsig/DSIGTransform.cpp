@@ -22,13 +22,15 @@
  *
  * DSIGTransform := Base (virtual) class that defines a DSIG Transform
  *
- * $Id: DSIGTransform.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransform.cpp 1830720 2018-05-02 02:11:57Z scantor $
  *
  */
 
 #include <xsec/dsig/DSIGTransform.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/framework/XSECEnv.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -50,6 +52,3 @@ DOMElement * DSIGTransform::createTransformNode() {
 	return ret;
 
 }
-
-
-

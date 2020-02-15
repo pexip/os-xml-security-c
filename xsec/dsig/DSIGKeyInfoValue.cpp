@@ -22,16 +22,17 @@
  *
  * DSIGKeyInfoValue := A value setting
  *
- * $Id: DSIGKeyInfoValue.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoValue.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/dsig/DSIGKeyInfoValue.hpp>
-#include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECException.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
+#include <xsec/framework/XSECException.hpp>
 #include <xsec/framework/XSECEnv.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 

@@ -23,7 +23,7 @@
  * DSIGKeyInfoX509 := A "Super" key that defines a certificate with a sub-key that defines
  *                the signing key
  *
- * $Id: DSIGKeyInfoX509.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoX509.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -51,7 +51,7 @@ XSEC_USING_XERCES(DOMElement);
  */
 
 
-class DSIG_EXPORT DSIGKeyInfoX509 : public DSIGKeyInfo {
+class XSEC_EXPORT DSIGKeyInfoX509 : public DSIGKeyInfo {
 
 public:
 

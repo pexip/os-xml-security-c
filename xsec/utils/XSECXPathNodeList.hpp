@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECXPathNodeList.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECXPathNodeList.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -58,7 +58,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNode)
  *
  */
 
-class DSIG_EXPORT XSECXPathNodeList {
+class XSEC_EXPORT XSECXPathNodeList {
 
 public:
 

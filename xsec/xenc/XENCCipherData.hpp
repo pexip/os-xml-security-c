@@ -22,7 +22,7 @@
  *
  * XENCCipherData := Interface for CipherData elements 
  *
- * $Id: XENCCipherData.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherData.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -35,6 +35,8 @@
 
 #include <xsec/xenc/XENCCipherValue.hpp>
 #include <xsec/xenc/XENCCipherReference.hpp>
+
+class XSECEnv;
 
 /**
  * @ingroup xenc
@@ -65,7 +67,7 @@
  */
 
 
-class XENCCipherData {
+class XSEC_EXPORT XENCCipherData {
 
 public:
 
@@ -92,6 +94,25 @@ public:
 
 	virtual ~XENCCipherData() {};
 
+
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	*
+	* @param env environment instance
+	* @param type type of cipher data
+	* @param algorithm algorithm to use
+	* @param value value to use
+	*
+	* @returns the new object
+	*/
+	static XENCCipherData* create(
+		const XSECEnv* env,
+		XENCCipherData::XENCCipherDataType type,
+		const XMLCh * value);
+
+
 	/** @name Get Interface Methods */
 	//@{
 
@@ -106,7 +127,7 @@ public:
 	 * @returns The type of CipherData
 	 */
 
-	virtual XENCCipherDataType getCipherDataType(void) = 0;
+	virtual XENCCipherDataType getCipherDataType(void) const = 0;
 
 	/**
 	 * \brief Get the CipherValue element
@@ -114,7 +135,7 @@ public:
 	 * @returns the CipherValue element, or NULL if one is not held
 	 */
 
-	virtual XENCCipherValue * getCipherValue(void) = 0;
+	virtual XENCCipherValue * getCipherValue(void) const = 0;
 
 	/**
 	 * \brief Get the CipherReference element
@@ -122,7 +143,7 @@ public:
 	 * @returns the CipherReference element, or NULL if one is not held
 	 */
 
-	virtual XENCCipherReference * getCipherReference(void) = 0;
+	virtual XENCCipherReference * getCipherReference(void) const = 0;
 
 	/**
 	 * \brief Get the DOM Node of this structure
@@ -130,7 +151,7 @@ public:
 	 * @returns the DOM Node representing the \<CipherData\> element
 	 */
 
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void) = 0;
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void) const = 0;
 
 	//@}
 

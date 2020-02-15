@@ -22,7 +22,7 @@
  *
  * DSIGReferenceList := Class for Loading and storing a list of references
  *
- * $Id: DSIGReferenceList.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGReferenceList.hpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -32,7 +32,6 @@
 
 // XSEC Includes
 #include <xsec/framework/XSECDefs.hpp>
-//#include <dsig/DSIGReference.hpp>
 
 // General includes
 #include <vector>
@@ -57,7 +56,7 @@ class DSIGReference;
  *
  */
 
-class DSIG_EXPORT DSIGReferenceList {
+class XSEC_EXPORT DSIGReferenceList {
 
 public:
 
@@ -130,7 +129,7 @@ public:
 	 * @param index The pointer into the list
 	 */
 
-	DSIGReference * item(size_type index);
+	DSIGReference * item(size_type index) const;
 
 	/**
 	 * \brief Find the number of elements in the list
@@ -138,7 +137,7 @@ public:
 	 * @returns The number of elements in the list
 	 */
 
-	size_type	getSize();
+	size_type	getSize() const;
 
 	/**
 	 * \brief Clear out the list

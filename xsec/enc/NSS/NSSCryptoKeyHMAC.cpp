@@ -26,9 +26,10 @@
  *
  */
 
+#include <xsec/dsig/DSIGConstants.hpp>
+#include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/NSS/NSSCryptoKeyHMAC.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/enc/XSECCryptoException.hpp>
 
 #if defined (XSEC_HAVE_NSS)
 
@@ -41,7 +42,12 @@ NSSCryptoKeyHMAC::NSSCryptoKeyHMAC() :m_keyBuf("") {
 	m_keyBuf.isSensitive();
 	m_keyLen = 0;
 
-};
+}
+
+const XMLCh * NSSCryptoKeyHMAC::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVNSS;
+}
+
 
 // --------------------------------------------------------------------------------
 //           Set key

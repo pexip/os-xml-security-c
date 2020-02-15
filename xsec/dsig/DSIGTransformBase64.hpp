@@ -22,7 +22,7 @@
  *
  * DSIGTransformBase64 := Class that holds Base 64 Transform information
  *
- * $Id: DSIGTransformBase64.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformBase64.hpp 1817973 2017-12-13 03:18:57Z scantor $
  *
  */
 
@@ -49,7 +49,7 @@
 
 
 
-class DSIG_EXPORT DSIGTransformBase64 : public DSIGTransform {
+class XSEC_EXPORT DSIGTransformBase64 : public DSIGTransform {
 
 public:
 
@@ -97,15 +97,6 @@ public:
 	/** @name Interface Methods */
 
 	//@{
-
-	/**
-	 * \brief Determine the transform type.
-	 *
-	 * Used to determine what the type of the transform is.
-	 *
-	 */
-
-	virtual transformType getTransformType();
 
 	/**
 	 * \brief Create the Base 64transformer element.

@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: TXFMChain.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMChain.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -44,14 +44,14 @@ class TXFMBase;
  */
 
 
-class DSIG_EXPORT TXFMChain {
+class XSEC_EXPORT TXFMChain {
 
 public:
 
 	// Constructors/destructors
 
 	TXFMChain(TXFMBase * baseTxfm, bool deleteChainWhenDone = true);
-	~TXFMChain();
+	virtual ~TXFMChain();
 
 	// Manipulate
 	void appendTxfm(TXFMBase * txfm);

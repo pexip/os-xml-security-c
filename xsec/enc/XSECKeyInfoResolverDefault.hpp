@@ -61,7 +61,7 @@
  *
  */
 
-class DSIG_EXPORT XSECKeyInfoResolverDefault : public XSECKeyInfoResolver {
+class XSEC_EXPORT XSECKeyInfoResolverDefault : public XSECKeyInfoResolver {
 
 public :
 
@@ -87,7 +87,7 @@ public :
 	 * @see XSECKeyInfoResolver::resolveKey()
 	 */
 
-	virtual XSECCryptoKey * resolveKey(DSIGKeyInfoList * lst);
+	virtual XSECCryptoKey * resolveKey(const DSIGKeyInfoList * lst) const;
 
 	/**
 	 * \brief Clone the resolver to be installed in a new object.

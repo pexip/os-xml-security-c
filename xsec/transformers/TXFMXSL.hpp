@@ -22,7 +22,7 @@
  *
  * TXFMXSL := Class that performs XML Stylesheet Language transforms
  *
- * $Id: TXFMXSL.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMXSL.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -34,7 +34,7 @@
 
 // Xalan
 
-#ifndef XSEC_NO_XPATH
+#ifdef XSEC_HAVE_XPATH
 
 #include <xalanc/XalanDOM/XalanDocument.hpp>
 #include <xalanc/XercesParserLiaison/XercesDOMSupport.hpp>
@@ -51,14 +51,14 @@ XALAN_USING_XALAN(XalanTransformer)
 
 #endif
 
-#ifndef XSEC_NO_XSLT
+#ifdef XSEC_HAVE_XSLT
 
 /**
  * \brief Transformer to handle XSLT transforms
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMXSL : public TXFMBase {
+class XSEC_EXPORT TXFMXSL : public TXFMBase {
 
 private:
 
@@ -80,7 +80,7 @@ private:
 public:
 
 	TXFMXSL(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMXSL();
+	virtual ~TXFMXSL();
 
 	// Methods to set the inputs
 
@@ -88,13 +88,13 @@ public:
 	
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual nodeType getNodeType(void) const;
 
 	// We do our own name spaces - we have a new document!
 	
-	virtual bool nameSpacesExpanded(void);
+	virtual bool nameSpacesExpanded(void) const;
 	virtual void expandNameSpaces(void);
 
 
@@ -105,9 +105,7 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument() const;
 	
 private:
 	TXFMXSL();

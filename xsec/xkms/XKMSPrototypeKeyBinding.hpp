@@ -22,7 +22,7 @@
  *
  * XKMSPrototypeKeyBinding := Interface for KeyBinding elements
  *
- * $Id: XKMSPrototypeKeyBinding.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSPrototypeKeyBinding.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSKeyBindingAbstractType.hpp>
 
 class XKMSValidityInterval;
@@ -67,7 +70,7 @@ class XKMSValidityInterval;
 
 class XKMSStatus;
 
-class XKMSPrototypeKeyBinding : public XKMSKeyBindingAbstractType {
+class XSEC_EXPORT XKMSPrototypeKeyBinding : public XKMSKeyBindingAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -146,5 +149,7 @@ private:
 	XKMSPrototypeKeyBinding & operator = (const XKMSPrototypeKeyBinding &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSPROTOTYPEKEYBINDING_INCLUDE */

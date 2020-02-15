@@ -22,7 +22,7 @@
  *
  * XENCEncryptionMethod := Interface definition for EncryptionMethod element
  *
- * $Id: XENCEncryptionMethod.hpp 1350045 2012-06-13 22:33:10Z scantor $
+ * $Id: XENCEncryptionMethod.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -32,6 +32,8 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+class XSECEnv;
 
 /**
  * @ingroup xenc
@@ -62,13 +64,26 @@
  */
 
 
-class XENCEncryptionMethod {
+class XSEC_EXPORT XENCEncryptionMethod {
 
 public:
 
 	XENCEncryptionMethod() {};
 
 	virtual ~XENCEncryptionMethod() {};
+
+	
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	* 
+	* @param env environment instance
+	* @param algorithm algorithm to use
+	*
+	* @returns the new object
+	*/
+	static XENCEncryptionMethod* create(const XSECEnv* env, const XMLCh* algorithm);
 
 	/** @name Getter Methods */
 	//@{

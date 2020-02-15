@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECPlatformUtils.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECPlatformUtils.cpp 1819851 2018-01-02 15:40:04Z scantor $
  *
  */
 
@@ -41,10 +41,6 @@
 #include "../xenc/impl/XENCCipherImpl.hpp"
 
 XERCES_CPP_NAMESPACE_USE
-
-#if defined(_WIN32)
-#include <xsec/utils/winutils/XSECBinHTTPURIInputStream.hpp>
-#endif
 
 #if defined (XSEC_HAVE_OPENSSL)
 #	include <xsec/enc/OpenSSL/OpenSSLCryptoProvider.hpp>
@@ -109,7 +105,9 @@ void XSECPlatformUtils::Initialise(XSECCryptoProvider * p) {
 
 	// Set up necessary constants
 	DSIGConstants::create();
+#ifdef XSEC_XKMS_ENABLED
 	XKMSConstants::create();
+#endif
 
 	// Initialise the safeBuffer system
 	safeBuffer::init();
@@ -161,11 +159,8 @@ void XSECPlatformUtils::Terminate(void) {
 		delete g_cryptoProvider;
 
 	DSIGConstants::destroy();
+#ifdef XSEC_XKMS_ENABLED
 	XKMSConstants::destroy();
-
-	// Destroy anything platform specific
-#if defined(_WIN32)
-	XSECBinHTTPURIInputStream::Cleanup();
 #endif
 
 }

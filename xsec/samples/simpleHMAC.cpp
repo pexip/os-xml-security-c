@@ -40,12 +40,14 @@
 
 #include <xsec/framework/XSECProvider.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xalan
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 XALAN_USING_XALAN(XalanTransformer)
 #endif
@@ -91,7 +93,7 @@ int main (int argc, char **argv) {
 
 	try {
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XalanTransformer::initialize();
 #endif
 		XSECPlatformUtils::Initialise();
@@ -128,7 +130,9 @@ int main (int argc, char **argv) {
 
 		// Use it to create a blank signature DOM structure from the doc
 
-		sigNode = sig->createBlankSignature(doc, CANON_C14N_COM, SIGNATURE_HMAC, HASH_SHA1);
+		sigNode = sig->createBlankSignature(doc,
+				DSIGConstants::s_unicodeStrURIC14N_NOC,
+				DSIGConstants::s_unicodeStrURIHMAC_SHA1);
 
 		// Inser the signature DOM nodes into the doc
 
@@ -137,12 +141,12 @@ int main (int argc, char **argv) {
 		rootElem->appendChild(doc->createTextNode(MAKE_UNICODE_STRING("\n")));
 
 		// Create an envelope reference for the text to be signed
-		DSIGReference * ref = sig->createReference(MAKE_UNICODE_STRING(""));
+		DSIGReference * ref = sig->createReference(MAKE_UNICODE_STRING(""), DSIGConstants::s_unicodeStrURISHA1);
 		ref->appendEnvelopedSignatureTransform();
 
 		// Set the HMAC Key to be the string "secret"
 
-		OpenSSLCryptoKeyHMAC * hmacKey = new OpenSSLCryptoKeyHMAC();
+		XSECCryptoKeyHMAC* hmacKey = XSECPlatformUtils::g_cryptoProvider->keyHMAC();
 		hmacKey->setKey((unsigned char *) "secret", (unsigned int) strlen("secret"));
 		sig->setSigningKey(hmacKey);
 
@@ -154,9 +158,9 @@ int main (int argc, char **argv) {
 		sig->sign();
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during a signature load\n   Message: "
+		cerr << "An error occurred during a signature load\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 		

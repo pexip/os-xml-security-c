@@ -23,7 +23,7 @@
  * XSECNameSpaceHolder := Container class for holding and managing the name space stack
  *						  Used when running through a DOM document
  *
- * $Id: XSECNameSpaceExpander.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECNameSpaceExpander.hpp 1817224 2017-12-05 19:27:33Z scantor $
  *
  */
 
@@ -92,7 +92,7 @@ struct XSECNameSpaceEntry {
  */
 
 
-class CANON_EXPORT XSECNameSpaceExpander {
+class XSEC_EXPORT XSECNameSpaceExpander {
 
 
 #if defined(XALAN_NO_NAMESPACES)
@@ -140,7 +140,7 @@ public:
 	 * Perform the expansion operation and create a list of all added nodes.
 	 */
 
-	void expandNameSpaces(void);
+	void expandNameSpaces();
 
 	/**
 	 * \brief Collapse name-spaces
@@ -149,14 +149,14 @@ public:
 	 * was created at that time
 	 */
 
-	void deleteAddedNamespaces(void);
+	void deleteAddedNamespaces();
 
 	// Check if a node is an added node
-	bool nodeWasAdded(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *n);
+	bool nodeWasAdded(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *n) const;
 
 private:  // Functions
 
-	XSECNameSpaceExpander(void);					// No default constructor
+	XSECNameSpaceExpander();					// No default constructor
 	void recurse(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *n);
 
 	// data

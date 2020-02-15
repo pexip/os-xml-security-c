@@ -22,23 +22,26 @@
  *
  * XKMSRegisterRequestImpl := Implementation for RegisterRequest Messages
  *
- * $Id: XKMSRegisterRequestImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRegisterRequestImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
 // XSEC Includes
 
-#include <xsec/framework/XSECDefs.hpp>
-
 #include <xsec/dsig/DSIGReference.hpp>
+#include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSRegisterRequestImpl.hpp"
 #include "XKMSAuthenticationImpl.hpp"
 #include "XKMSPrototypeKeyBindingImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -307,12 +310,12 @@ XKMSAuthentication * XKMSRegisterRequestImpl::addAuthentication(void) {
 }
 
 DSIGSignature * XKMSRegisterRequestImpl::addProofOfPossessionSignature(
-		canonicalizationMethod cm,
-		signatureMethod	sm,
-		hashMethod hm) {
+		const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm) {
 
 	DSIGSignature * ret = m_prov.newSignature();
-	DOMElement * elt = ret->createBlankSignature(m_msg.mp_env->getParentDocument(), cm, sm, hm);
+	DOMElement * elt = ret->createBlankSignature(m_msg.mp_env->getParentDocument(), c14nAlgorithm, signatureAlgorithm);
 
 	/* Create the enveloping reference */
 	safeBuffer sb;
@@ -320,8 +323,8 @@ DSIGSignature * XKMSRegisterRequestImpl::addProofOfPossessionSignature(
 	sb.sbXMLChAppendCh(chPound);
 	sb.sbXMLChCat(mp_prototypeKeyBinding->getId());
 
-	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer());
-	ref->appendCanonicalizationTransform(CANON_C14NE_COM);
+	DSIGReference *ref = ret->createReference(sb.rawXMLChBuffer(), hashAlgorithm);
+	ref->appendCanonicalizationTransform(DSIGConstants::s_unicodeStrURIEXC_C14N_COM);
 
 	/* Embed the signature in the document inside a KeyBindingAuthentication element */
 	safeBuffer str;
@@ -344,5 +347,4 @@ DSIGSignature * XKMSRegisterRequestImpl::addProofOfPossessionSignature(
 	return ret;
 }
 
-
-
+#endif /* XSEC_XKMS_ENABLED */

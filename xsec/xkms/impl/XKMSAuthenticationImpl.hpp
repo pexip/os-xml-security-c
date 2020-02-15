@@ -22,7 +22,7 @@
  *
  * XKMSAuthenticationImpl := Implementation of Authentication elements
  *
- * $Id: XKMSAuthenticationImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSAuthenticationImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -34,6 +34,8 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECProvider.hpp>
 #include <xsec/xkms/XKMSAuthentication.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 class XKMSKeyBindingAuthenticationImpl;
 class XKMSNotBoundAuthenticationImpl;
@@ -77,9 +79,9 @@ public:
 	// Interface Set methods
 
 	virtual DSIGSignature * addKeyBindingAuthenticationSignature(
-		canonicalizationMethod cm = CANON_C14NE_NOC,
-		signatureMethod	sm = SIGNATURE_HMAC,
-		hashMethod hm = HASH_SHA1);
+                const XMLCh* c14nAlgorithm,
+		const XMLCh* signatureAlgorithm,
+		const XMLCh* hashAlgorithm);
 	virtual void setNotBoundAuthentication(const XMLCh * uri, const XMLCh * value);
 
 private:
@@ -105,4 +107,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSAUTHENTICATIONIMPL_INCLUDE */

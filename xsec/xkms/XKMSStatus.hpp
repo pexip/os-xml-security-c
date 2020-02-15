@@ -22,7 +22,7 @@
  *
  * XKMSStatus := Interface for Status elements (in KeyBinding)
  *
- * $Id: XKMSStatus.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSStatus.hpp 1826172 2018-03-08 04:40:40Z scantor $
  *
  */
 
@@ -32,6 +32,8 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 /**
  * @ingroup xkms
@@ -73,7 +75,7 @@
  */
 
 
-class XKMSStatus {
+class XSEC_EXPORT XKMSStatus {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -169,5 +171,7 @@ private:
 	XKMSStatus & operator = (const XKMSStatus &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSSTATUS_INCLUDE */

@@ -22,7 +22,7 @@
  *
  * XENCCipherImpl := Implementation of the main encryption worker class
  *
- * $Id: XENCCipherImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherImpl.hpp 1818339 2017-12-15 21:13:08Z scantor $
  *
  */
 
@@ -59,9 +59,9 @@ public:
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * 
 		decryptElementDetached(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element);
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * 
-		decryptElement(void);
+		decryptElement();
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * 
-		decryptElementDetached(void);
+		decryptElementDetached();
 	XSECBinTXFMInputStream * decryptToBinInputStream(
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element
 	);
@@ -80,47 +80,43 @@ public:
 	// Implementation for encryption Elements
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * encryptElement(
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-		encryptionMethod em,
-		const XMLCh * uri = NULL);
+		const XMLCh * uri);
 	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * encryptElementContent(
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL);
+		const XMLCh * algorithmURI);
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * encryptElementDetached(
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-		encryptionMethod em,
-		const XMLCh * uri = NULL);
+		const XMLCh * uri);
 	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * encryptElementContentDetached(
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL);
+		const XMLCh * algorithmURI);
 
 	// Encrypt a key
-	virtual XENCEncryptedKey * encryptKey(
-		const unsigned char * keyBuffer,
+	virtual XENCEncryptedKey* encryptKey(
+		const unsigned char* keyBuffer,
 		unsigned int keyLen,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL
+		const XMLCh* algorithmURI,
+		const XMLCh* mgfURI=NULL,
+		unsigned char* oaepParams=NULL,
+		unsigned int oaepParamsLen=0
 	);
 	// Encrypt octet streams
 	virtual XENCEncryptedData * encryptBinInputStream(
 		XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream * plainText,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL
+		const XMLCh * algorithmURI
 	);
 	virtual XENCEncryptedData * encryptTXFMChain(
 		TXFMChain * plainText,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL
+		const XMLCh * algorithmURI
 	);
 
 	// Getter methods
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * getDocument(void) 
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * getDocument() const
 		{return mp_doc;}
-	const XMLCh * getXENCNSPrefix(void) const;
-	virtual XENCEncryptedData * getEncryptedData(void);
-	bool getPrettyPrint(void);
-	bool getExclusiveC14nSerialisation(void);
+	const XMLCh * getXENCNSPrefix() const;
+	virtual XENCEncryptedData * getEncryptedData() const;
+	bool getPrettyPrint() const;
+	bool getExclusiveC14nSerialisation() const;
 
 	// Setter methods
 	void setKey(XSECCryptoKey * key);
@@ -194,4 +190,3 @@ private:
 };
 
 #endif /* XENCCIPHERIMPL_INCLUDE */
-

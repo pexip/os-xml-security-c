@@ -20,11 +20,11 @@
 /*
  * XSEC
  *
- * XSECCryptoKeyHMAC := HMAC Keys
+ * OpenSSLXSECCryptoKeyHMAC := HMAC Keys
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: OpenSSLCryptoKeyHMAC.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: OpenSSLCryptoKeyHMAC.hpp 1817876 2017-12-12 01:27:14Z scantor $
  *
  */
 
@@ -45,7 +45,7 @@
  * Used to provide HMAC keys to OpenSSLCryptoHashHMAC
  */
 
-class DSIG_EXPORT OpenSSLCryptoKeyHMAC : public XSECCryptoKeyHMAC {
+class XSEC_EXPORT OpenSSLCryptoKeyHMAC : public XSECCryptoKeyHMAC {
 
 public :
 
@@ -79,7 +79,7 @@ public :
 	 * \brief Return the OpenSSL string identifier
 	 */
 
-	virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVOpenSSL;}
+	virtual const XMLCh * getProviderName() const;
 	
 	//@}
 

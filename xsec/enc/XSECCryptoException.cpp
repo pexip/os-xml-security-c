@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoException.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoException.cpp 1807269 2017-09-04 18:10:31Z scantor $
  *
  */
 
@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern const char * XSECCryptoExceptionStrings[] = {
+const char* XSECCryptoExceptionStrings[] = {
 
 	"No Error",
 	"General error occurred somewhere in cryptographic routines",
@@ -101,13 +101,13 @@ XSECCryptoException::~XSECCryptoException() {
 
 }
 
-const char * XSECCryptoException::getMsg(void) {
+const char * XSECCryptoException::getMsg(void) const {
 
 	return msg;
 
 }
 
-XSECCryptoException::XSECCryptoExceptionType XSECCryptoException::getType(void) {
+XSECCryptoException::XSECCryptoExceptionType XSECCryptoException::getType(void) const {
 
 	return type;
 

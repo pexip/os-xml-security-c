@@ -22,7 +22,7 @@
  *
  * XKMSUseKeyWith := Interface for UseKeyWith Messages
  *
- * $Id: XKMSUseKeyWith.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSUseKeyWith.hpp 1826172 2018-03-08 04:40:40Z scantor $
  *
  */
 
@@ -32,6 +32,8 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 /**
  * @ingroup xkms
@@ -58,7 +60,7 @@
 \endverbatim
  */
 
-class XKMSUseKeyWith {
+class XSEC_EXPORT XKMSUseKeyWith {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -129,5 +131,7 @@ private:
 	XKMSUseKeyWith & operator = (const XKMSUseKeyWith &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSUSEKEYWITH_INCLUDE */

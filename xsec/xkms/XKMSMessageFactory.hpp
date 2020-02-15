@@ -22,7 +22,7 @@
  *
  * XKMSMessageFactory := Interface for the factory used to produce XKMS msgs
  *
- * $Id: XKMSMessageFactory.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSMessageFactory.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSMessageAbstractType.hpp>
 #include <xsec/xkms/XKMSResultType.hpp>
 
@@ -84,7 +87,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMElement);
  */
 
 
-class XKMSMessageFactory {
+class XSEC_EXPORT XKMSMessageFactory {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -1038,5 +1041,7 @@ private:
 	XKMSMessageFactory & operator = (const XKMSMessageFactory &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSMESSAGEFACTORY_INCLUDE */

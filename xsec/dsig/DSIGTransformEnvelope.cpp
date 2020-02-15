@@ -22,7 +22,7 @@
  *
  * DSIGTransformEnvelope := Class that calculates an Envelope with an XPath evaluator
  *
- * $Id: DSIGTransformEnvelope.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformEnvelope.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -30,14 +30,15 @@
 
 #include <xsec/dsig/DSIGTransformEnvelope.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
+#include <xsec/framework/XSECException.hpp>
+#include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/transformers/TXFMEnvelope.hpp>
 #include <xsec/transformers/TXFMC14n.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
 #include <xsec/transformers/TXFMXPath.hpp>
-#include <xsec/framework/XSECException.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECError.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -58,13 +59,6 @@ DSIGTransformEnvelope::~DSIGTransformEnvelope() {};
 // --------------------------------------------------------------------------------
 //           Interface Methods
 // --------------------------------------------------------------------------------
-
-
-transformType DSIGTransformEnvelope::getTransformType() {
-
-	return TRANSFORM_ENVELOPED_SIGNATURE;
-
-}
 
 
 void DSIGTransformEnvelope::appendTransformer(TXFMChain * input) {

@@ -22,18 +22,22 @@
  *
  * XKMSStatusResultImpl := Implementation of StatusResult Messages
  *
- * $Id: XKMSStatusResultImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSStatusResultImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSStatusResultImpl.hpp"
 #include "XKMSUnverifiedKeyBindingImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 
@@ -220,4 +224,4 @@ void XKMSStatusResultImpl::setPendingCount(int count) {
 
 }
 
-
+#endif /* XSEC_XKMS_ENABLED */

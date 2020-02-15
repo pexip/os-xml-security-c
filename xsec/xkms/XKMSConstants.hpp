@@ -22,15 +22,17 @@
  *
  * XKMSConstants := Definitions of varius XKMS constants (mainly strings)
  *
- * $Id: XKMSConstants.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSConstants.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
 #ifndef XKMSCONSTANTS_HEADER
 #define XKMSCONSTANTS_HEADER
 
-// Xerces
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 
 // Name Spaces
 
@@ -44,7 +46,7 @@
 //           Constant Strings Class
 // --------------------------------------------------------------------------------
 
-class DSIG_EXPORT XKMSConstants {
+class XSEC_EXPORT XKMSConstants {
 
 public:
 
@@ -151,5 +153,6 @@ public:
 
 };
 
-#endif /* XKMSCONSTANTS_HEADER */
+#endif /* XSEC_XKMS_ENABLED */
 
+#endif /* XKMSCONSTANTS_HEADER */

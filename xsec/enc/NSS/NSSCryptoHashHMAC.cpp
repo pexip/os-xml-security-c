@@ -29,9 +29,10 @@
 #include <xsec/enc/NSS/NSSCryptoHashHMAC.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/NSS/NSSCryptoKeyHMAC.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 
 #if defined (XSEC_HAVE_NSS)
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <memory.h>
 
@@ -122,7 +123,7 @@ void NSSCryptoHashHMAC::reset() {
 //           Key manipulation
 // --------------------------------------------------------------------------------
 
-void NSSCryptoHashHMAC::setKey(XSECCryptoKey *key) {
+void NSSCryptoHashHMAC::setKey(const XSECCryptoKey *key) {
 
   if (key->getKeyType() != XSECCryptoKey::KEY_HMAC) {
 
@@ -153,6 +154,30 @@ void NSSCryptoHashHMAC::setKey(XSECCryptoKey *key) {
 	case (XSECCryptoHash::HASH_SHA1) :
 	
 		hmacType = CKM_SHA_1_HMAC;
+
+		break;
+
+	case (XSECCryptoHash::HASH_SHA224) :
+
+		hmacType = CKM_SHA224_HMAC;
+
+		break;
+
+	case (XSECCryptoHash::HASH_SHA256) :
+
+		hmacType = CKM_SHA256_HMAC;
+
+		break;
+
+	case (XSECCryptoHash::HASH_SHA384) :
+
+		hmacType = CKM_SHA384_HMAC;
+
+		break;
+
+	case (XSECCryptoHash::HASH_SHA512) :
+
+		hmacType = CKM_SHA512_HMAC;
 
 		break;
 

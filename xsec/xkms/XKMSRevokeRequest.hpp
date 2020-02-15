@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSRequestAbstractType.hpp>
 #include <xsec/xkms/XKMSStatus.hpp>
 
@@ -73,7 +76,7 @@ class XKMSRevokeKeyBinding;
 \endverbatim
  */
 
-class XKMSRevokeRequest : public XKMSRequestAbstractType {
+class XSEC_EXPORT XKMSRevokeRequest : public XKMSRequestAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -178,5 +181,7 @@ private:
 	XKMSRevokeRequest & operator = (const XKMSRevokeRequest &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREVOKEREQUEST_INCLUDE */

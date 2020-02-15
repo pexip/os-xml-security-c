@@ -22,7 +22,7 @@
  *
  * XKMSLocateRequest := Interface for LocateRequest Messages
  *
- * $Id: XKMSLocateRequest.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSLocateRequest.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSRequestAbstractType.hpp>
 
 class XKMSQueryKeyBinding;
@@ -65,7 +68,7 @@ class XKMSQueryKeyBinding;
 \endverbatim
  */
 
-class XKMSLocateRequest : public XKMSRequestAbstractType {
+class XSEC_EXPORT XKMSLocateRequest : public XKMSRequestAbstractType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -123,5 +126,7 @@ private:
 	XKMSLocateRequest & operator = (const XKMSLocateRequest &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSLOCATEREQUEST_INCLUDE */

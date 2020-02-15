@@ -22,7 +22,7 @@
  *
  * DSIGXPathHere := Implementation of the "here()" XPath function.
  *
- * $Id: DSIGXPathHere.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGXPathHere.hpp 1807005 2017-09-01 20:42:20Z scantor $
  *
  */
 
@@ -33,7 +33,7 @@
 
 #include <xercesc/util/PlatformUtils.hpp>
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4267)
@@ -61,18 +61,13 @@ XALAN_USING_XALAN(XalanNode);
 XALAN_USING_XALAN(XPathExecutionContext);
 XALAN_USING_XALAN(XalanDOMString);
 XALAN_USING_XALAN(XObjectPtr);
-//XALAN_USING_XALAN(StaticStringToDOMString);
-
-#if defined XSEC_XALAN_REQS_MEMORYMANAGER
-// Xalan 1.9 and above
-    XALAN_USING_XALAN(MemoryManagerType);
-#endif
+XALAN_USING_XALAN(MemoryManagerType);
 
 XSEC_USING_XERCES(Locator);
 
 #endif
 
-#ifndef XSEC_NO_XPATH
+#ifdef XSEC_HAVE_XPATH
 
 // If there is no XPath then let's not even bother with this class.
 
@@ -110,21 +105,11 @@ public:
 #else
 	virtual DSIGXPathHere*
 #endif
-#if defined (XSEC_XALAN_REQS_MEMORYMANAGER)
 	clone(MemoryManagerType& theManager) const;
-#else
-    clone() const;
-#endif
 
 protected:
 
-	const XalanDOMString
-#if defined (XSEC_XALAN_REQS_MEMORYMANAGER)
-    // We cheat - the memory manager happened at the same time as the string
-	&getError(XalanDOMString& theBuffer) const;
-#else
-    getError() const;
-#endif
+	const XalanDOMString& getError(XalanDOMString& theBuffer) const;
 
 private:
 
@@ -139,11 +124,4 @@ private:
 #endif
 
 #endif
-
-
-
-
-
-
-
 

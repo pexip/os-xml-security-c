@@ -22,17 +22,21 @@
  *
  * XKMSStatusRequestImpl := Implementation of StatusRequest Messages
  *
- * $Id: XKMSStatusRequestImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSStatusRequestImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSStatusRequestImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 
@@ -158,4 +162,4 @@ void XKMSStatusRequestImpl::setResponseId(const XMLCh * responseId) {
 
 }
 
-
+#endif /* XSEC_XKMS_ENABLED */

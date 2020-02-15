@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSCryptCryptoBase64.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSCryptCryptoBase64.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -46,7 +46,7 @@
  *
  */
 
-class DSIG_EXPORT XSCryptCryptoBase64 : public XSECCryptoBase64 {
+class XSEC_EXPORT XSCryptCryptoBase64 : public XSECCryptoBase64 {
 
 
 public :

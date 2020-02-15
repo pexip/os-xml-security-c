@@ -22,7 +22,7 @@
  *
  * XKMSCompoundResult := Interface for CompoundResult Messages
  *
- * $Id: XKMSCompoundResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSCompoundResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 
 class XKMSLocateResult;
@@ -85,7 +88,7 @@ class XKMSRequestAbstractType;
 \endverbatim
  */
 
-class XKMSCompoundResult : public XKMSResultType {
+class XSEC_EXPORT XKMSCompoundResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -313,5 +316,7 @@ private:
 	XKMSCompoundResult & operator = (const XKMSCompoundResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSCOMPOUNDRESULT_INCLUDE */

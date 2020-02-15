@@ -22,15 +22,16 @@
  *
  * XSECDOMUtils:= Utilities to manipulate DOM within XML-SECURITY
  *
- * $Id: XSECDOMUtils.cpp 1350044 2012-06-13 22:31:37Z scantor $
+ * $Id: XSECDOMUtils.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC
 
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/xkms/XKMSConstants.hpp>
+
+#include "XSECDOMUtils.hpp"
 
 // Xerces
 
@@ -110,6 +111,7 @@ const XMLCh * getXENC11LocalName(const DOMNode *node) {
 
 }
 
+#ifdef XSEC_XKMS_ENABLED
 const XMLCh * getXKMSLocalName(const DOMNode *node) {
 
 	// XKMS namespace node
@@ -120,7 +122,7 @@ const XMLCh * getXKMSLocalName(const DOMNode *node) {
 		return node->getLocalName();
 
 }
-
+#endif
 
 // --------------------------------------------------------------------------------
 //           Find a nominated DSIG node in a document
@@ -355,29 +357,22 @@ XMLCh * transcodeFromUTF8(const unsigned char * src) {
 	// Grab a transcoder
 	XMLTransService::Codes failReason;
 
-#if defined(XSEC_XERCES_REQUIRES_MEMMGR)
 	XMLTranscoder* t =
 		XMLPlatformUtils::fgTransService->makeNewTranscoderFor("UTF-8",
-															   failReason,
-															   2*1024,
-															   XMLPlatformUtils::fgMemoryManager);
-#else
-	XMLTranscoder* t =
-		XMLPlatformUtils::fgTransService->makeNewTranscoderFor("UTF-8",
-															   failReason,
-															   2*1024);
-#endif
+					   failReason,
+					   2*1024,
+					   XMLPlatformUtils::fgMemoryManager);
 	Janitor<XMLTranscoder> j_t(t);
 
 	// Need to loop through, 2K at a time
-	xsecsize_t bytesEaten, bytesEatenCounter;
-    xsecsize_t charactersEaten;
-	xsecsize_t totalBytesEaten = 0;
-	xsecsize_t bytesToEat = XMLString::stringLen((char *) src);
+	XMLSize_t bytesEaten, bytesEatenCounter;
+	XMLSize_t charactersEaten;
+	XMLSize_t totalBytesEaten = 0;
+	XMLSize_t bytesToEat = XMLString::stringLen((char *) src);
 
 	while (totalBytesEaten < bytesToEat) {
 
-	    xsecsize_t toEat = bytesToEat - totalBytesEaten;
+	    XMLSize_t toEat = bytesToEat - totalBytesEaten;
 
 
 		if (toEat > 2048)
@@ -407,7 +402,7 @@ XMLCh * transcodeFromUTF8(const unsigned char * src) {
 
 }
 
-char DSIG_EXPORT * transcodeToUTF8(const XMLCh * src) {
+char * transcodeToUTF8(const XMLCh * src) {
 
 	// Take a UTF-16 buffer and transcode to UTF-8
 
@@ -417,28 +412,21 @@ char DSIG_EXPORT * transcodeToUTF8(const XMLCh * src) {
 	// Grab a transcoder
 	XMLTransService::Codes failReason;
 
-#if defined(XSEC_XERCES_REQUIRES_MEMMGR)
 	XMLTranscoder* t =
 		XMLPlatformUtils::fgTransService->makeNewTranscoderFor("UTF-8",
-															   failReason,
-															   2*1024,
-															   XMLPlatformUtils::fgMemoryManager);
-#else
-	XMLTranscoder* t =
-		XMLPlatformUtils::fgTransService->makeNewTranscoderFor("UTF-8",
-															   failReason,
-															   2*1024);
-#endif
+						   failReason,
+						   2*1024,
+						   XMLPlatformUtils::fgMemoryManager);
 	Janitor<XMLTranscoder> j_t(t);
 
 	// Need to loop through, 2K at a time
-	xsecsize_t charactersEaten, charactersOutput;
-	xsecsize_t totalCharsEaten = 0;
-	xsecsize_t charsToEat = XMLString::stringLen(src);
+	XMLSize_t charactersEaten, charactersOutput;
+	XMLSize_t totalCharsEaten = 0;
+	XMLSize_t charsToEat = XMLString::stringLen(src);
 
 	while (totalCharsEaten < charsToEat) {
 
-	    xsecsize_t toEat = charsToEat - totalCharsEaten;
+		XMLSize_t toEat = charsToEat - totalCharsEaten;
 
 		if (toEat > 2048)
 			toEat = 2048;
@@ -492,14 +480,14 @@ XMLCh * encodeDName(const XMLCh * toEncode) {
 	// Find where the trailing whitespace starts
 	const XMLCh * ws = &toEncode[XMLString::stringLen(toEncode)];
 
-	*ws--;
+	ws--;
 	while (ws != toEncode &&
 		(*ws == '\t' || *ws == '\r' || *ws ==' ' || *ws == '\n'))
-		*ws--;
+		ws--;
 
 	// Set to first white space character, if we didn't get back to the start
 	if (toEncode != ws)
-		*ws++;
+		ws++;
 
 	// Now run through each character and encode if necessary
 
@@ -537,9 +525,9 @@ XMLCh * encodeDName(const XMLCh * toEncode) {
 
 			// Determine if this is an RDN separator
 			const XMLCh *j = i;
-			*j++;
+			j++;
 			while (*j != chComma && *j != chEqual && *j != chNull)
-				*j++;
+				j++;
 
 			if (*j != chEqual)
 				result.sbXMLChAppendCh(chBackSlash);
@@ -564,7 +552,7 @@ XMLCh * encodeDName(const XMLCh * toEncode) {
 
 		}
 
-		*i++;
+		i++;
 
 	}
 
@@ -576,7 +564,7 @@ XMLCh * encodeDName(const XMLCh * toEncode) {
 		else
 			result.sbXMLChAppendCh(*i);
 
-		*i++;
+		i++;
 
 	}
 
@@ -603,8 +591,8 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 	if (*i == chBackSlash && i[1] == chPound) {
 
 		result.sbXMLChAppendCh(chPound);
-		*i++;
-		*i++;
+		i++;
+		i++;
 
 	}
 
@@ -612,11 +600,11 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 
 		if (*i == chBackSlash) {
 
-			*i++;
+			i++;
 
 			if (*i == chDigit_0) {
 
-				*i++;
+				i++;
 
 				if (*i >= chDigit_0 && *i <= chDigit_9) {
 					result.sbXMLChAppendCh(*i - chDigit_0);
@@ -635,7 +623,7 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 
 			else if (*i == chDigit_1) {
 
-				*i++;
+				i++;
 
 				if (*i >= chDigit_0 && *i <= chDigit_9) {
 					result.sbXMLChAppendCh(16 + *i - chDigit_0);
@@ -654,7 +642,7 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 
 			else if (*i == chDigit_2) {
 
-				*i++;
+				i++;
 
 				if (*i == '0') {
 					result.sbXMLChAppendCh(' ');
@@ -685,7 +673,7 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 
 			}
 
-			*i++;
+			i++;
 
 		}
 
@@ -709,9 +697,9 @@ XMLCh * decodeDName(const XMLCh * toDecode) {
 
 static bool isHexDigit(const XMLCh toCheck)
 {
-    if ((toCheck >= chDigit_0) && (toCheck <= chDigit_9)
-    ||  (toCheck >= chLatin_A) && (toCheck <= chLatin_F)
-    ||  (toCheck >= chLatin_a) && (toCheck <= chLatin_f))
+    if ((toCheck >= chDigit_0 && toCheck <= chDigit_9)
+    ||  (toCheck >= chLatin_A && toCheck <= chLatin_F)
+    ||  (toCheck >= chLatin_a && toCheck <= chLatin_f))
     {
         return true;
     }
@@ -720,6 +708,10 @@ static bool isHexDigit(const XMLCh toCheck)
 
 static unsigned int xlatHexDigit(const XMLCh toXlat)
 {
+	if (!isHexDigit(toXlat)) {
+		throw XSECException(XSECException::ErrorOpeningURI,
+			"Unknown hex char");
+	}
     if ((toXlat >= chDigit_0) && (toXlat <= chDigit_9))
         return (unsigned int)(toXlat - chDigit_0);
 
@@ -732,11 +724,11 @@ static unsigned int xlatHexDigit(const XMLCh toXlat)
 XMLCh * cleanURIEscapes(const XMLCh * uriPath) {
 
     XMLByte *ptr, *utf8Path;
-    xsecsize_t len = XMLString::stringLen(uriPath);
+    XMLSize_t len = XMLString::stringLen(uriPath);
 
     ptr = utf8Path = new XMLByte[len + 1];
 
-    for (xsecsize_t i = 0; i < len; i++) {
+    for (XMLSize_t i = 0; i < len; i++) {
         unsigned int value = uriPath[i];
 
         if (value > 255) {
@@ -763,7 +755,7 @@ XMLCh * cleanURIEscapes(const XMLCh * uriPath) {
         delete[] utf8Path;
         return unicodePath;
     }
-    catch (XMLException&) {
+    catch (const XMLException&) {
     }
 
     delete[] utf8Path;

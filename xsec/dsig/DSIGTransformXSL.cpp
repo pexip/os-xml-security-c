@@ -22,21 +22,22 @@
  *
  * DSIGTransformXSL := Class that Handles DSIG XSLT Transforms
  *
- * $Id: DSIGTransformXSL.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformXSL.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC
 
-#include <xsec/dsig/DSIGTransformXSL.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
+#include <xsec/dsig/DSIGTransformXSL.hpp>
+#include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/framework/XSECException.hpp>
 #include <xsec/transformers/TXFMXSL.hpp>
 #include <xsec/transformers/TXFMC14n.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
-#include <xsec/framework/XSECException.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECError.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/framework/MemBufFormatTarget.hpp>
@@ -65,26 +66,16 @@ XSECDomToSafeBuffer::XSECDomToSafeBuffer(DOMNode* node)
     MemBufFormatTarget* target = new MemBufFormatTarget;
     Janitor<MemBufFormatTarget> j_target(target);
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-    // DOM L3 version as per Xerces 3.0 API
     DOMLSSerializer* theSerializer = impl->createLSSerializer();
     Janitor<DOMLSSerializer> j_theSerializer(theSerializer);
 
     DOMLSOutput *theOutput = impl->createLSOutput();
     Janitor<DOMLSOutput> j_theOutput(theOutput);
     theOutput->setByteStream(target);
-#else
-    DOMWriter* theSerializer = impl->createDOMWriter();
-    Janitor<DOMWriter> j_theSerializer(theSerializer);
-#endif
 
     try
     {
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
         theSerializer->write(node, theOutput);
-#else
-        theSerializer->writeNode(target, *node);
-#endif
         m_buffer.sbMemcpyIn(0, target->getRawBuffer(), target->getLen());
     }
     catch(const XMLException&)
@@ -118,17 +109,10 @@ DSIGTransformXSL::~DSIGTransformXSL() {};
 // --------------------------------------------------------------------------------
 
 
-transformType DSIGTransformXSL::getTransformType() {
-
-	return TRANSFORM_XSLT;
-
-}
-
-
 void DSIGTransformXSL::appendTransformer(TXFMChain * input) {
 
 
-#ifdef XSEC_NO_XSLT
+#ifndef XSEC_HAVE_XSLT
 
 	throw XSECException(XSECException::UnsupportedFunction,
 		"XSLT Transforms not supported in this compilation of the library");
@@ -157,9 +141,9 @@ void DSIGTransformXSL::appendTransformer(TXFMChain * input) {
 	input->appendTxfm(x);
 	
 	// Patch to avoid c14n of stylesheet
-    XSECDomToSafeBuffer sbStyleSheet(mp_stylesheetNode);
-    x->evaluateStyleSheet(sbStyleSheet);
-#endif /* NO_XSLT */
+	XSECDomToSafeBuffer sbStyleSheet(mp_stylesheetNode);
+	x->evaluateStyleSheet(sbStyleSheet);
+#endif /* XSEC_HAVE_XSLT */
 
 }
 
@@ -207,12 +191,12 @@ DOMNode * DSIGTransformXSL::setStylesheet(DOMNode * stylesheet) {
 	DOMNode * ret = mp_stylesheetNode;
 
 	if (mp_stylesheetNode) {
-	    if (stylesheet)
-	        mp_txfmNode->insertBefore(stylesheet, mp_stylesheetNode);
+		if (stylesheet)
+			mp_txfmNode->insertBefore(stylesheet, mp_stylesheetNode);
 		mp_txfmNode->removeChild(mp_stylesheetNode);
 	}
 	else if (stylesheet) {
-	    mp_txfmNode->appendChild(stylesheet);
+		mp_txfmNode->appendChild(stylesheet);
 	}
 
 	mp_stylesheetNode = stylesheet;

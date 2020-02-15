@@ -22,7 +22,7 @@
  *
  * DSIGTransformList := Class for Loading and storing a list of references
  *
- * $Id: DSIGTransformList.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformList.cpp 1817148 2017-12-05 01:59:28Z scantor $
  *
  */
 
@@ -56,7 +56,7 @@ void DSIGTransformList::addTransform(DSIGTransform * ref) {
 
 }
 
-DSIGTransformList::size_type DSIGTransformList::getSize(void) {
+DSIGTransformList::size_type DSIGTransformList::getSize(void) const {
 
 	return m_transformList.size();
 
@@ -77,7 +77,7 @@ void DSIGTransformList::removeTransform(size_type index) {
 	}
 }
 
-DSIGTransform * DSIGTransformList::item(DSIGTransformList::size_type index) {
+DSIGTransform * DSIGTransformList::item(DSIGTransformList::size_type index) const {
 
 	if (index < m_transformList.size())
 		return m_transformList[index];

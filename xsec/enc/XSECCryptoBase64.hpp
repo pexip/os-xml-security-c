@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoBase64.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoBase64.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -54,7 +54,7 @@
  * not need to be able to handle concurrent encode/decode operations.
  */
 
-class DSIG_EXPORT XSECCryptoBase64 {
+class XSEC_EXPORT XSECCryptoBase64 {
 
 
 public :

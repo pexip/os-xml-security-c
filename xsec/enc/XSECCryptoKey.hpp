@@ -26,7 +26,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoKey.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoKey.hpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
@@ -36,7 +36,6 @@
 #define XSECCRYPTOKEY_INCLUDE
 
 #include <xsec/framework/XSECDefs.hpp>
-#include <xsec/dsig/DSIGConstants.hpp>
 
 /**
  * \ingroup crypto
@@ -52,7 +51,7 @@
  * knowing how to directly use it.
  */
 
-class DSIG_EXPORT XSECCryptoKey {
+class XSEC_EXPORT XSECCryptoKey {
 
 public :
 

@@ -22,11 +22,10 @@
  *
  * XENCCipherReference := Implementation for CipherReference element
  *
- * $Id: XENCCipherReferenceImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherReferenceImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/framework/XSECDefs.hpp>
 #include <xsec/dsig/DSIGTransformList.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/dsig/DSIGTransformList.hpp>
@@ -35,15 +34,17 @@
 #include <xsec/dsig/DSIGTransformXPathFilter.hpp>
 #include <xsec/dsig/DSIGTransformXSL.hpp>
 #include <xsec/dsig/DSIGTransformC14n.hpp>
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/utils/XSECSafeBufferFormatter.hpp>
+#include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/utils/XSECSafeBufferFormatter.hpp>
+
+#include "XENCCipherReferenceImpl.hpp"
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLUniDefs.hpp>
 #include <xercesc/util/Janitor.hpp>
 
-#include "XENCCipherReferenceImpl.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -85,6 +86,16 @@ static XMLCh s_Transforms[] = {
 	chLatin_s,
 	chNull
 };
+
+XENCCipherReference* XENCCipherReference::create(const XSECEnv* env, const XMLCh * URI)
+{
+
+	XENCCipherReferenceImpl* ret = new XENCCipherReferenceImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankCipherReference(URI);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Constructors/Destructors
@@ -186,14 +197,14 @@ DSIGTransformXSL * XENCCipherReferenceImpl::appendXSLTransform(DOMNode * stylesh
 
 }
 
-DSIGTransformC14n * XENCCipherReferenceImpl::appendCanonicalizationTransform(canonicalizationMethod cm) {
+DSIGTransformC14n * XENCCipherReferenceImpl::appendCanonicalizationTransform(const XMLCh* uri) {
 
 	DOMElement *txfmElt;
 	DSIGTransformC14n * txfm;
 
 	XSECnew(txfm, DSIGTransformC14n(mp_env));
 	txfmElt = txfm->createBlankTransform(mp_env->getParentDocument());
-	txfm->setCanonicalizationMethod(cm);
+	txfm->setCanonicalizationMethod(uri);
 
 	addTransform(txfm, txfmElt);
 

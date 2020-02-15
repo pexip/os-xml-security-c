@@ -22,7 +22,7 @@
  *
  * XKMSQueryKeyBindingImpl := Implementation for QueryKeyBinding
  *
- * $Id: XKMSQueryKeyBindingImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSQueryKeyBindingImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -30,11 +30,17 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
+
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
+
+#include "XKMSQueryKeyBindingImpl.hpp"
+
 #include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
-
-#include "XKMSQueryKeyBindingImpl.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -85,3 +91,4 @@ DOMElement * XKMSQueryKeyBindingImpl::createBlankQueryKeyBinding(void) {
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

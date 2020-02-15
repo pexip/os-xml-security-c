@@ -22,26 +22,30 @@
  *
  * XKMSRegisterResultImpl := Implementation of RegisterResult Messages
  *
- * $Id: XKMSRegisterResultImpl.cpp 1375700 2012-08-21 18:08:00Z scantor $
+ * $Id: XKMSRegisterResultImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
+#include <xsec/enc/XSECCryptoUtils.hpp>
+#include <xsec/enc/XSECCryptoKey.hpp>
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECAlgorithmMapper.hpp>
 #include <xsec/framework/XSECAlgorithmHandler.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
-#include <xsec/enc/XSECCryptoUtils.hpp>
-#include <xsec/enc/XSECCryptoKey.hpp>
 #include <xsec/xenc/XENCEncryptedData.hpp>
 #include <xsec/xenc/XENCEncryptionMethod.hpp>
 #include <xsec/xenc/XENCCipher.hpp>
 
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
+
 #include "XKMSRegisterResultImpl.hpp"
 #include "XKMSKeyBindingImpl.hpp"
 #include "XKMSRSAKeyPairImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 
@@ -263,9 +267,7 @@ XKMSRSAKeyPair * XKMSRegisterResultImpl::getRSAKeyPair(const char * passPhrase) 
 	}
 
 	// Now find if we can get an algorithm for this URI
-	XSECAlgorithmHandler *handler;
-
-	handler = 
+	const XSECAlgorithmHandler *handler = 
 		XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(
 			xed->getEncryptionMethod()->getAlgorithm());
 
@@ -308,31 +310,15 @@ XENCEncryptedData * XKMSRegisterResultImpl::setRSAKeyPair(const char * passPhras
 		XMLCh * DQ,
 		XMLCh * InverseQ,
 		XMLCh * D,
-		encryptionMethod em,
 		const XMLCh * algorithmURI) {
 
 	// Try to set up the key first - if this fails, don't want to have added the
 	// XML
 
-	const XMLCh * uri;
-	safeBuffer algorithmSB;
-
-	if (em != ENCRYPT_NONE) {
-		if (encryptionMethod2URI(algorithmSB, em) != true) {
-			throw XSECException(XSECException::XKMSError, 
-				"XKMSRegisterResult::setRSAKeyPair - Unknown encryption method");
-		}
-		uri = algorithmSB.sbStrToXMLCh();
-	}
-    else
-        uri = algorithmURI;
-
 	// Find if we can get an algorithm for this URI
-	XSECAlgorithmHandler *handler;
-
-	handler = 
+	const XSECAlgorithmHandler *handler =
 		XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(
-			uri);
+			algorithmURI);
 
 	if (handler == NULL) {
 		throw XSECException(XSECException::XKMSError,
@@ -342,14 +328,14 @@ XENCEncryptedData * XKMSRegisterResultImpl::setRSAKeyPair(const char * passPhras
 	unsigned char kbuf[XSEC_MAX_HASH_SIZE];
 	unsigned int len = CalculateXKMSKEK((unsigned char *) passPhrase, (int) strlen(passPhrase), kbuf, XSEC_MAX_HASH_SIZE);
 
-    if (len == 0) {
+	if (len == 0) {
 		throw XSECException(XSECException::XKMSError,
 			"XKMSRegisterResult::setRSAKeyPair - error deriving KEK");
-    }
+	}
 
 
 	XSECCryptoKey * sk = handler->createKeyForURI(
-					uri,
+					algorithmURI,
 					(XMLByte *) kbuf,
 					len);
 
@@ -386,10 +372,11 @@ XENCEncryptedData * XKMSRegisterResultImpl::setRSAKeyPair(const char * passPhras
 	// Encrypt all of this for future use
 	XENCCipher * cipher = m_prov.newCipher(m_msg.mp_env->getParentDocument());
 	cipher->setKey(sk);
-	cipher->encryptElementContent(pk, ENCRYPT_NONE, uri);
+	cipher->encryptElementContent(pk, algorithmURI);
 
 	// Now load the encrypted data back in
 	return cipher->loadEncryptedData(findFirstElementChild(pk));
 
 }	
 
+#endif /* XSEC_XKMS_ENABLED */

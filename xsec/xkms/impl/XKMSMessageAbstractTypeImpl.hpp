@@ -22,7 +22,7 @@
  *
  * XKMSMessageAbstractTypeImpl := Implementation class for base XKMS messages
  *
- * $Id: XKMSMessageAbstractTypeImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSMessageAbstractTypeImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -34,6 +34,8 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xkms/XKMSMessageAbstractType.hpp>
 #include <xsec/framework/XSECProvider.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 class XSECEnv;
 class DSIGSignature;
@@ -89,9 +91,9 @@ public:
 	virtual void setService(const XMLCh * service);
 	virtual void setNonce(const XMLCh * uri);
 	virtual DSIGSignature * addSignature(
-		canonicalizationMethod cm = CANON_C14N_NOC,
-		signatureMethod	sm = SIGNATURE_DSA,
-		hashMethod hm = HASH_SHA1);
+		const XMLCh* c14nAlgorithm,
+                const XMLCh* signatureAlgorithm,
+                const XMLCh* hashAlgorithm);
 
 	/* Opaque Client Data interface */
 	virtual int getOpaqueClientDataSize(void);
@@ -151,10 +153,10 @@ private:
 	virtual void setNonce(const XMLCh * uri) \
 		{m_msg.setNonce(uri);} \
 	virtual DSIGSignature * addSignature( \
-		canonicalizationMethod cm = CANON_C14N_NOC, \
-		signatureMethod	sm = SIGNATURE_DSA, \
-		hashMethod hm = HASH_SHA1) \
-		{return m_msg.addSignature(cm,sm,hm);} \
+		const XMLCh* c14nAlgorithm, \
+		const XMLCh* signatureAlgorithm, \
+		const XMLCh* hashAlgorithm) \
+		{return m_msg.addSignature(c14nAlgorithm,signatureAlgorithm,hashAlgorithm);} \
 	virtual int getOpaqueClientDataSize(void) \
 		{return m_msg.getOpaqueClientDataSize();} \
 	virtual const XMLCh * getOpaqueClientDataItemStr(int item) \
@@ -162,4 +164,5 @@ private:
 	virtual void appendOpaqueClientDataItem(const XMLCh * item) \
 		{m_msg.appendOpaqueClientDataItem(item);}
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSMESSAGEABSTRACTTYPEIMPL_INCLUDE */

@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: txfmout.cpp 1655934 2015-01-30 04:36:29Z scantor $
+ * $Id: txfmout.cpp 1832576 2018-05-30 23:45:26Z scantor $
  *
  */
 
@@ -37,15 +37,11 @@
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/framework/XSECURIResolver.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/utils/XSECBinTXFMInputStream.hpp>
 
-#if defined(_WIN32)
-#include <xsec/utils/winutils/XSECURIResolverGenericWin32.hpp>
-#else
-#include <xsec/utils/unixutils/XSECURIResolverGenericUnix.hpp>
-#endif
+#include "../../utils/XSECDOMUtils.hpp"
 
 // General
 
@@ -81,7 +77,7 @@ using std::cerr;
 using std::endl;
 using std::ofstream;
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 // XALAN
 
@@ -91,9 +87,7 @@ using std::ofstream;
 XALAN_USING_XALAN(XPathEvaluator)
 XALAN_USING_XALAN(XalanTransformer)
 
-#endif
-
-#ifdef XSEC_NO_XALAN
+#else
 
 std::ostream& operator<< (std::ostream& target, const XMLCh * s)
 {
@@ -308,11 +302,10 @@ void outputReferenceList (DSIGReferenceList * lst, outputter & theOutputter, int
 			try {
 				is = ref->makeBinInputStream();
 			}
-			catch (NetAccessorException e) {
+			catch (const NetAccessorException&) {
 
 				cerr << "Network error in reference " << theOutputter.getIndex() << endl;
 				is = 0;
-				
 			}
 
 
@@ -410,7 +403,7 @@ int main(int argc, char **argv) {
 	try {
 
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XPathEvaluator::initialize();
 		XalanTransformer::initialize();
 #endif
@@ -435,7 +428,7 @@ int main(int argc, char **argv) {
 	// Now parse out file
 
 	bool errorsOccured = false;
-	xsecsize_t errorCount = 0;
+	XMLSize_t errorCount = 0;
     try
     {
     	parser->parse(filename);
@@ -446,7 +439,7 @@ int main(int argc, char **argv) {
 
     catch (const XMLException& e)
     {
-        cerr << "An error occured during parsing\n   Message: "
+        cerr << "An error occurred during parsing\n   Message: "
              << e.getMessage() << endl;
         errorsOccured = true;
     }
@@ -454,7 +447,7 @@ int main(int argc, char **argv) {
 
     catch (const DOMException& e)
     {
-       cerr << "A DOM error occured during parsing\n   DOMException code: "
+       cerr << "A DOM error occurred during parsing\n   DOMException code: "
              << e.code << endl;
         errorsOccured = true;
     }
@@ -493,13 +486,6 @@ int main(int argc, char **argv) {
 	DSIGSignature * sig = prov.newSignatureFromDOM(theDOM, sigNode);
 	sig->registerIdAttributeName(MAKE_UNICODE_STRING("ID"));
 
-#if defined(_WIN32)
-	XSECURIResolverGenericWin32 
-#else
-	XSECURIResolverGenericUnix 
-#endif
-		theResolver;
-		 
 	// Map out base path of the file
 #if XSEC_HAVE_GETCWD_DYN
 	char *path = getcwd(NULL, 0);
@@ -528,12 +514,11 @@ int main(int argc, char **argv) {
 	// The last "\\" must prefix the filename
 	baseURI[lastSlash + 1] = '\0';
 
-	theResolver.setBaseURI(MAKE_UNICODE_STRING(baseURI));
+	sig->getURIResolver()->setBaseURI(MAKE_UNICODE_STRING(baseURI));
 #if XSEC_HAVE_GETCWD_DYN
 	free(path);
 	free(baseURI);
 #endif
-	sig->setURIResolver(&theResolver);
 
 
 	try {
@@ -570,9 +555,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	catch (XSECException &e) {
+	catch (const XSECException &e) {
 		char * m = XMLString::transcode(e.getMsg());
-		cerr << "An error occured during signature processing\n   Message: "
+		cerr << "An error occurred during signature processing\n   Message: "
 		<< m << endl;
 		XSEC_RELEASE_XMLCH(m);
 		errorsOccured = true;

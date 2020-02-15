@@ -24,17 +24,19 @@
  *                         HTTP wrapper for testing the client code.
  *
  *
- * $Id: XSECSOAPRequestorSimple.cpp 1493962 2013-06-17 22:32:41Z scantor $
+ * $Id: XSECSOAPRequestorSimple.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/utils/XSECSafeBuffer.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/utils/XSECSOAPRequestorSimple.hpp>
 #include <xsec/xkms/XKMSConstants.hpp>
 
-#include "../utils/XSECAutoPtr.hpp"
+#ifdef XSEC_XKMS_ENABLED
+
+#include "XSECAutoPtr.hpp"
+#include "XSECDOMUtils.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -110,36 +112,21 @@ char * XSECSOAPRequestorSimple::wrapAndSerialise(DOMDocument * request) {
 	XMLCh tempStr[100];
 	XMLString::transcode("Core", tempStr, 99);    
 	DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(tempStr);
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-    // DOM L3 version as per Xerces 3.0 API
-    DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
-    Janitor<DOMLSSerializer> j_theSerializer(theSerializer);
+	DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+	Janitor<DOMLSSerializer> j_theSerializer(theSerializer);
 
-    // Get the config so we can set up pretty printing
-    DOMConfiguration *dc = theSerializer->getDomConfig();
-    dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+	// Get the config so we can set up pretty printing
+	DOMConfiguration *dc = theSerializer->getDomConfig();
+	dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
 
-    // Now create an output object to format to UTF-8
-    DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-    Janitor<DOMLSOutput> j_theOutput(theOutput);
+	// Now create an output object to format to UTF-8
+	DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+	Janitor<DOMLSOutput> j_theOutput(theOutput);
 	MemBufFormatTarget *formatTarget = new MemBufFormatTarget;
 	Janitor<MemBufFormatTarget> j_formatTarget(formatTarget);
 
-    theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-    theOutput->setByteStream(formatTarget);
-
-#else
-	DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
-	Janitor<DOMWriter> j_theSerializer(theSerializer);
-
-	theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-	if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false))
-		theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false);
-
-	MemBufFormatTarget *formatTarget = new MemBufFormatTarget;
-	Janitor<MemBufFormatTarget> j_formatTarget(formatTarget);
-
-#endif
+	theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+	theOutput->setByteStream(formatTarget);
 
 	if (m_envelopeType != ENVELOPE_NONE) {
 
@@ -191,20 +178,12 @@ char * XSECSOAPRequestorSimple::wrapAndSerialise(DOMDocument * request) {
 		// OK - Now we have the SOAP request as a document, we serialise to a string buffer
 		// and return
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-        theSerializer->write(doc, theOutput);
-#else
-		theSerializer->writeNode(formatTarget, *doc);
-#endif
+		theSerializer->write(doc, theOutput);
 		doc->release();
 
 	}
 	else {
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-        theSerializer->write(request, theOutput);
-#else
-		theSerializer->writeNode(formatTarget, *request);
-#endif
+		theSerializer->write(request, theOutput);
 	}
 
 	// Now replicate the buffer
@@ -231,7 +210,7 @@ DOMDocument * XSECSOAPRequestorSimple::parseAndUnwrap(const char * buf, unsigned
 	MemBufInputSource memIS((const XMLByte*) buf, len, "XSECMem");
 
 	parser.parse(memIS);
-	xsecsize_t errorCount = parser.getErrorCount();
+	XMLSize_t errorCount = parser.getErrorCount();
     if (errorCount > 0)
 		throw XSECException(XSECException::HTTPURIInputStreamError,
 							"Error parsing response message");
@@ -335,3 +314,5 @@ void XSECSOAPRequestorSimple::setEnvelopeType(envelopeType et) {
 	m_envelopeType = et;
 
 }
+
+#endif /* XSEC_XKMS_ENABLED */

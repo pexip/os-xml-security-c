@@ -23,18 +23,19 @@
  * DSIGObject := Defines the container class used by dsig to hold objects
  *				 inside a signture
  *
- * $Id: DSIGObject.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGObject.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC Includes
 
+#include <xsec/dsig/DSIGConstants.hpp>
+#include <xsec/dsig/DSIGObject.hpp>
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/dsig/DSIGConstants.hpp>
-#include <xsec/dsig/DSIGObject.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -136,11 +137,7 @@ void DSIGObject::load(void) {
 
 	mp_idAttr = ((DOMElement *) mp_objectNode)->getAttributeNodeNS(NULL, s_Id);
 	if (mp_idAttr) {
-#if defined (XSEC_XERCES_HAS_SETIDATTRIBUTE)
-	    ((DOMElement *) mp_objectNode)->setIdAttributeNS(NULL, s_Id);
-#elif defined (XSEC_XERCES_HAS_BOOLSETIDATTRIBUTE)
 		((DOMElement *) mp_objectNode)->setIdAttributeNS(NULL, s_Id, true);
-#endif
 	}
 
 	mp_mimeTypeAttr = ((DOMElement *) mp_objectNode)->getAttributeNodeNS(NULL, s_MimeType);
@@ -174,7 +171,7 @@ DOMElement * DSIGObject::createBlankObject(void) {
 // --------------------------------------------------------------------------------
 
 
-const XMLCh * DSIGObject::getId(void) {
+const XMLCh * DSIGObject::getId(void) const {
 
 	if (mp_idAttr != NULL)
 		return mp_idAttr->getNodeValue();
@@ -183,7 +180,7 @@ const XMLCh * DSIGObject::getId(void) {
 
 }
 
-const XMLCh * DSIGObject::getMimeType(void) {
+const XMLCh * DSIGObject::getMimeType(void) const {
 
 	if (mp_mimeTypeAttr != NULL)
 		return mp_mimeTypeAttr->getNodeValue();
@@ -193,7 +190,7 @@ const XMLCh * DSIGObject::getMimeType(void) {
 }
 
 
-const XMLCh * DSIGObject::getEncoding(void) {
+const XMLCh * DSIGObject::getEncoding(void) const {
 
 	if (mp_encodingAttr != NULL)
 		return mp_encodingAttr->getNodeValue();
@@ -202,7 +199,7 @@ const XMLCh * DSIGObject::getEncoding(void) {
 
 }
 
-const DOMElement * DSIGObject::getElement(void) {
+const DOMElement * DSIGObject::getElement(void) const {
 
 	return (DOMElement *) mp_objectNode;
 
@@ -225,11 +222,7 @@ void DSIGObject::setId(const XMLCh * id) {
 
 		((DOMElement *) mp_objectNode)->setAttributeNS(NULL, s_Id, id);
 		// Mark as an ID
-#if defined (XSEC_XERCES_HAS_SETIDATTRIBUTE)
-		((DOMElement *) mp_objectNode)->setIdAttributeNS(NULL, s_Id);
-#elif defined (XSEC_XERCES_HAS_BOOLSETIDATTRIBUTE)
 		((DOMElement *) mp_objectNode)->setIdAttributeNS(NULL, s_Id, true);
-#endif
 		mp_idAttr = ((DOMElement *) mp_objectNode)->getAttributeNodeNS(NULL, s_Id);
 
 	}

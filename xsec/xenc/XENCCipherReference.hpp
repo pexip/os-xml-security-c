@@ -22,7 +22,7 @@
  *
  * XENCCipherReference := Interface definition for CipherReference element
  *
- * $Id: XENCCipherReference.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherReference.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -34,6 +34,7 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/dsig/DSIGConstants.hpp>
 
+class XSECEnv;
 class DSIGTransformList;
 class DSIGTransformBase64;
 class DSIGTransformXPath;
@@ -80,7 +81,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNode);
  */
 
 
-class XENCCipherReference {
+class XSEC_EXPORT XENCCipherReference {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -92,6 +93,18 @@ protected:
 public:
 
 	virtual ~XENCCipherReference() {};
+
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	*
+	* @param env environment instance
+	* @param URI reference
+	*
+	* @returns the new object
+	*/
+	static XENCCipherReference* create(const XSECEnv* env, const XMLCh* URI);
 
 	/** @name Get Interface Methods */
 	//@{
@@ -182,13 +195,13 @@ public:
 	/**
 	 * \brief Append a Canonicalization Transform to the Reference.
 	 *
-	 * @param cm The type of canonicalisation to be added.
-	 * @returns The newly create canonicalisation transform
+	 * @param uri The type of canonicalization to be added.
+	 * @returns The newly create canonicalization transform
 	 * @todo Move to DSIGTransformList rather than re-implement in both DSIGReference
 	 * and XENCCipherReference
 	 */
 
-	virtual DSIGTransformC14n * appendCanonicalizationTransform(canonicalizationMethod cm) = 0;
+	virtual DSIGTransformC14n * appendCanonicalizationTransform(const XMLCh* uri) = 0;
 
 	//@}
 

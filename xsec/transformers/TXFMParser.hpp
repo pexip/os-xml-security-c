@@ -22,7 +22,7 @@
  *
  * TXFMParser := A transformer used to transform a byte stream to DOM Nodes
  *
- * $Id: TXFMParser.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMParser.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -44,20 +44,20 @@
  */
 
 
-class DSIG_EXPORT TXFMParser : public TXFMBase {
+class XSEC_EXPORT TXFMParser : public TXFMBase {
 
 public:
 
 	// Constructors and destructors
 
 	TXFMParser(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *);
-	~TXFMParser();
+	virtual ~TXFMParser();
 
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual nodeType getNodeType(void) const;
 
 	// Methods to set input data
 
@@ -66,12 +66,10 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument() const;
 
 	// Name space management
-	virtual bool nameSpacesExpanded(void);
+	virtual bool nameSpacesExpanded(void) const;
 	virtual void expandNameSpaces(void);
 
 	

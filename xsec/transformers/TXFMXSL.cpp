@@ -22,15 +22,15 @@
  *
  * TXFMXSL := Class that performs XPath transforms
  *
- * $Id: TXFMXSL.cpp 1493962 2013-06-17 22:32:41Z scantor $
+ * $Id: TXFMXSL.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/transformers/TXFMXSL.hpp>
 #include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/framework/XSECError.hpp>
+#include <xsec/transformers/TXFMXSL.hpp>
 
-#ifndef XSEC_NO_XSLT
+#ifdef XSEC_HAVE_XSLT
 
 // Xerces
 #include <xercesc/dom/DOM.hpp>
@@ -75,7 +75,7 @@ CallbackSizeType TransformXSLOutputFn(const char * s, CallbackSizeType sz, void 
 //  For expanding name spaces when necessary
 // -----------------------------------------------------------------------
 
-bool TXFMXSL::nameSpacesExpanded(void) {
+bool TXFMXSL::nameSpacesExpanded(void) const {
 
 	// NOTE : Do not check inputs as this has its own document
 
@@ -104,16 +104,7 @@ void TXFMXSL::expandNameSpaces(void) {
 
 
 TXFMXSL::TXFMXSL(DOMDocument *doc) : 
-	TXFMBase(doc),
-#if XALAN_VERSION_MAJOR == 1 && XALAN_VERSION_MINOR > 10
-xds(xpl)
-#else
-#if defined XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT
-xpl(xds) 
-#else
-xpl()
-#endif
-#endif
+	TXFMBase(doc), xds(xpl)
 {
 
 	// Zeroise all the pointers
@@ -203,7 +194,7 @@ void TXFMXSL::evaluateStyleSheet(const safeBuffer &sbStyleSheet) {
 	parser->parse(*memIS);
     errorCount = parser->getErrorCount();
     if (errorCount > 0)
-		throw XSECException(XSECException::XSLError, "Errors occured when XSL result was parsed back to DOM_Nodes");
+		throw XSECException(XSECException::XSLError, "Errors occurred when XSL result was parsed back to DOM_Nodes");
 
     docOut = parser->adoptDocument();
 
@@ -213,18 +204,18 @@ void TXFMXSL::evaluateStyleSheet(const safeBuffer &sbStyleSheet) {
 
 // Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMXSL::getInputType(void) {
+TXFMBase::ioType TXFMXSL::getInputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
-TXFMBase::ioType TXFMXSL::getOutputType(void) {
+TXFMBase::ioType TXFMXSL::getOutputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
-TXFMBase::nodeType TXFMXSL::getNodeType(void) {
+TXFMBase::nodeType TXFMXSL::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_DOCUMENT;
 
@@ -238,22 +229,10 @@ unsigned int TXFMXSL::readBytes(XMLByte * const toFill, unsigned int maxToFill) 
 
 }
 
-DOMDocument * TXFMXSL::getDocument() {
+DOMDocument * TXFMXSL::getDocument() const {
 
 	return docOut;
 
 }
 
-DOMNode * TXFMXSL::getFragmentNode() {
-
-	return NULL;
-
-}
-
-const XMLCh * TXFMXSL::getFragmentId() {
-
-	return NULL;	// Empty string
-
-}
-
-#endif /* NO_XSLT */
+#endif /* XSEC_HAVE_XSLT */

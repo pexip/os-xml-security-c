@@ -22,7 +22,7 @@
  *
  * XKMSUseKeyWithImpl := Implementation of UseKeyWith Messages
  *
- * $Id: XKMSUseKeyWithImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSUseKeyWithImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -31,12 +31,17 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 
-#include <xercesc/dom/DOM.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSUseKeyWithImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
+
+#include <xercesc/dom/DOM.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -200,3 +205,5 @@ void XKMSUseKeyWithImpl::setIdentifier(const XMLCh * identifier) {
 	mp_identifierAttr->setNodeValue(identifier);
 
 }
+
+#endif /* XSEC_XKMS_ENABLED */

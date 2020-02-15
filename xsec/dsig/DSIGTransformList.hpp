@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGTransformList.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformList.hpp 1817148 2017-12-05 01:59:28Z scantor $
  *
  */
 
@@ -55,7 +55,7 @@ class DSIGTransform;
  */
 
 
-class DSIG_EXPORT DSIGTransformList {
+class XSEC_EXPORT DSIGTransformList {
 
 public:
 
@@ -118,19 +118,19 @@ public:
 	void removeTransform(size_type index);
 
 	/**
-	 * \brief Delete the transform at the indicated position.
+	 * \brief Access the transform at the indicated position.
 	 *
-	 * @param index The position to delete from.
+	 * @param index position
 	 */
 
-	DSIGTransform * item(size_type index);
+	DSIGTransform * item(size_type index) const;
 
 	/** 
 	 * \brief Get the number of items.
 	 *
 	 */
 
-	size_type	getSize();
+	size_type	getSize() const;
 
 	/**
 	 * \brief Remove all elements - but delete none.

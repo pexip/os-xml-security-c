@@ -22,24 +22,21 @@
  *
  * TXFMDocObject := Class that takes an input Document object ID to start a txfm pipe
  *
- * $Id: TXFMDocObject.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMDocObject.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-#include <xsec/transformers/TXFMDocObject.hpp>
 #include <xsec/framework/XSECException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+#include <xsec/transformers/TXFMDocObject.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
 // Construct/Destruct
 
-TXFMDocObject::TXFMDocObject(DOMDocument *doc) : TXFMBase(doc) {
-
-	input = NULL;
-	fragmentId = NULL;
-	type = TXFMBase::DOM_NODE_NONE;	// No nodes currently held
-	mp_env = NULL;
+TXFMDocObject::TXFMDocObject(DOMDocument *doc)
+	: TXFMBase(doc), fragmentId(NULL), document(NULL), fragmentObject(NULL), type(TXFMBase::DOM_NODE_NONE), mp_env(NULL) {
 
 }
 
@@ -170,19 +167,19 @@ void TXFMDocObject::setInput(DOMDocument *doc) {
 
 	// Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMDocObject::getInputType(void) {
+TXFMBase::ioType TXFMDocObject::getInputType(void) const {
 
 	return TXFMBase::NONE;
 
 }
 
-TXFMBase::ioType TXFMDocObject::getOutputType(void) {
+TXFMBase::ioType TXFMDocObject::getOutputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
-TXFMBase::nodeType TXFMDocObject::getNodeType(void) {
+TXFMBase::nodeType TXFMDocObject::getNodeType(void) const {
 
 	return type;
 
@@ -196,20 +193,20 @@ unsigned int TXFMDocObject::readBytes(XMLByte * const toFill, unsigned int maxTo
 
 }
 
-DOMDocument * TXFMDocObject::getDocument() {
+DOMDocument * TXFMDocObject::getDocument() const {
 
 	return document;
 
 }
 
-DOMNode * TXFMDocObject::getFragmentNode() {
+DOMNode * TXFMDocObject::getFragmentNode() const {
 
 	return fragmentObject;
 
 }
 
-const XMLCh * TXFMDocObject::getFragmentId() {
+const XMLCh * TXFMDocObject::getFragmentId() const {
 
-	return fragmentId;	
+	return fragmentId;
 
 }

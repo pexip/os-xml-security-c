@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECError.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECError.hpp 1807011 2017-09-01 22:51:20Z scantor $
  *
  */
 
@@ -59,11 +59,11 @@ extern const char * XSECExceptionStrings [];
 			throw XSECException (XSECException::MemoryAllocationFail); \
 		}\
 	} \
-	catch (XSECCryptoException &e) \
+	catch (const XSECCryptoException &e) \
 	{\
 		throw XSECException (XSECException::InternalError, e.getMsg()); \
 	} \
-	catch (std::bad_alloc&) { \
+	catch (const std::bad_alloc&) { \
 		throw XSECException (XSECException::MemoryAllocationFail); \
 	}
 
@@ -75,11 +75,11 @@ extern const char * XSECExceptionStrings [];
 			throw XSECException (XSECException::MemoryAllocationFail); \
 		} \
 	} \
-	catch (XSECCryptoException &e) \
+	catch (const XSECCryptoException &e) \
 	{\
 		throw XSECException (XSECException::InternalError, e.getMsg()); \
 	} \
-	catch (std::bad_alloc&) { \
+	catch (const std::bad_alloc&) { \
 		throw XSECException (XSECException::MemoryAllocationFail); \
 	}
 
