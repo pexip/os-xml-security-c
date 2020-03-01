@@ -2,3 +2,5 @@ Refresh-ax_pthread.m4-and-target-its-usage.patch
 Initialize-Libtool-in-the-modern-way-and-after-the-compil.patch
 Don-t-change-the-C-XX-FLAGS-provided-by-the-user.patch
 DSA-pad-r-and-s-to-20-bytes.patch
+
+Provide-BN_bn2binpad-missing-in-OpenSSL-1.0.patch

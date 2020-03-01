@@ -1,0 +1,34 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Wed, 20 Mar 2019 18:58:14 +0100
+Subject: Provide BN_bn2binpad() missing in OpenSSL 1.0
+
+---
+ xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp b/xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp
+index 98899e7..2f5970a 100644
+--- a/xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp
++++ b/xsec/enc/OpenSSL/OpenSSLCryptoKeyDSA.cpp
+@@ -359,6 +359,21 @@ bool OpenSSLCryptoKeyDSA::verifyBase64Signature(unsigned char * hashBuf,
+ //           Sign and encode result as a Base64 string
+ // --------------------------------------------------------------------------------
+ 
++// This function appeared in OpenSSL 1.1 only
++static int BN_bn2binpad(const BIGNUM *a, unsigned char *to, int tolen)
++{
++    int bytes = BN_num_bytes(a);
++
++    if (bytes > tolen) {
++        return -1;
++    }
++    while (bytes < tolen) {
++        *to++ = 0;
++        bytes++;
++    }
++    BN_bn2bin(a, to);
++    return tolen;
++}
+ 
+ unsigned int OpenSSLCryptoKeyDSA::signBase64Signature(unsigned char * hashBuf,
+         unsigned int hashLen,

@@ -1,3 +1,11 @@
+xml-security-c (2.0.2-3pexip1) pexip; urgency=medium
+
+  * Migrate to Buster
+  * Add Debian backports patch to allow building with openssl 1.0 :
+    Provide-BN_bn2binpad-missing-in-OpenSSL-1.0.patch
+
+ -- Vincent Sanders <vince@pexip.com>  Sun, 01 Mar 2020 21:50:54 +0000
+
 xml-security-c (2.0.2-3) unstable; urgency=medium
 
   * [494511e] We now use Xalan
