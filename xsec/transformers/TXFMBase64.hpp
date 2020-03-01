@@ -22,7 +22,7 @@
  *
  * TXFMBase64 := Class that performs a Base64 transforms
  *
- * $Id: TXFMBase64.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMBase64.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -36,20 +36,20 @@
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMBase64 : public TXFMBase {
+class XSEC_EXPORT TXFMBase64 : public TXFMBase {
 
 public:
 
 	// Constructors and destructors
 
 	TXFMBase64(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc, bool decode = true);
-	~TXFMBase64();
+	virtual ~TXFMBase64();
 
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual nodeType getNodeType(void) const;
 
 	// Methods to set input data
 
@@ -58,9 +58,6 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
 	
 private:
 	TXFMBase64();

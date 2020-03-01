@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECC14n20010315.cpp 1493975 2013-06-17 23:43:09Z scantor $
+ * $Id: XSECC14n20010315.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -33,8 +33,9 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/canon/XSECC14n20010315.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/utils/XSECSafeBufferFormatter.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xerces includes
 #include <xercesc/dom/DOMElement.hpp>
@@ -44,7 +45,7 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 // Xalan includes
 #include <xalanc/XalanDOM/XalanDocument.hpp>
@@ -445,7 +446,7 @@ bool XSECC14n20010315::getCommentsProcessing(void) {
 
 int XSECC14n20010315::XPathSelectNodes(const char * XPathExpr) {
 
-#ifdef XSEC_NO_XPATH
+#ifndef XSEC_HAVE_XPATH
 
 	throw XSECException(XSECException::UnsupportedFunction,
 		"This library has been compiled without XPath support");
@@ -456,17 +457,8 @@ int XSECC14n20010315::XPathSelectNodes(const char * XPathExpr) {
 
 	// We use Xalan to process the Xerces DOM tree and get the XPath nodes
 
-#if XALAN_VERSION_MAJOR == 1 && XALAN_VERSION_MINOR > 10
 	XercesParserLiaison theParserLiaison;
 	XercesDOMSupport theDOMSupport(theParserLiaison);
-#else
-	XercesDOMSupport theDOMSupport;
-#if defined XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT
-	XercesParserLiaison theParserLiaison(theDOMSupport);
-#else
-	XercesParserLiaison theParserLiaison;
-#endif
-#endif // XALAN_VERSION_MAJOR == 1 && XALAN_VERSION_MINOR > 10
 
 	if (mp_doc == 0) {
 		throw XSECException(XSECException::UnsupportedFunction,
@@ -507,11 +499,9 @@ int XSECC14n20010315::XPathSelectNodes(const char * XPathExpr) {
 	XalanDOMString ed = XalanDOMString(XPathExpr);
 	const XalanDOMChar * expr = ed.c_str();
 
-#if defined XSEC_SELECTNODELIST_REQS_NODEREFLIST
-
 	NodeRefList output;
 
-	NodeRefList	theResult(
+	NodeRefList theResult(
 		theEvaluator.selectNodeList(
 		output,
 		theDOMSupport,
@@ -519,18 +509,7 @@ int XSECC14n20010315::XPathSelectNodes(const char * XPathExpr) {
 		expr,
 		theDoc->getElementById(XalanDOMString("ns"))));
 
-#else
 
-	NodeRefList	theResult(
-		theEvaluator.selectNodeList(
-		theDOMSupport,
-		theContextNode,
-		expr,
-		theDoc->getElementById(XalanDOMString("ns"))));
-		//theDoc->getDocumentElement()));
-#endif
-
-	//XercesDocumentBridge *theBridge = theParserLiaison.mapDocument(theDoc);
 	XercesDocumentWrapper *theWrapper = theParserLiaison.mapDocumentToWrapper(theDoc);
 	XercesWrapperNavigator theWrapperNavigator(theWrapper);
 
@@ -575,10 +554,10 @@ safeBuffer c14nCleanText(safeBuffer &input) {
 
 	*/
 
-	xsecsize_t len = input.sbStrlen();
+	XMLSize_t len = input.sbStrlen();
 	safeBuffer ret;
 
-	xsecsize_t i, j;
+	XMLSize_t i, j;
 	unsigned char c;
 
 	j = 0;
@@ -657,10 +636,10 @@ safeBuffer c14nCleanAttribute(safeBuffer &input) {
 
 	*/
 
-	xsecsize_t len = input.sbStrlen();
+	XMLSize_t len = input.sbStrlen();
 	safeBuffer ret;
 
-	xsecsize_t i, j;
+	XMLSize_t i, j;
 	unsigned char c;
 
 	j = 0;
@@ -757,9 +736,9 @@ bool XSECC14n20010315::checkRenderNameSpaceNode(DOMNode *e, DOMNode *a) {
 	if (m_XPathSelection && ! m_XPathMap.hasNode(a))
 		return false;
 
-    // BUGFIX: we need to skip xmlns:xml if the value is http://www.w3.org/XML/1998/namespace
-    if (strEquals(a->getLocalName(), "xml") && strEquals(a->getNodeValue(), "http://www.w3.org/XML/1998/namespace"))
-        return false;
+	// BUGFIX: we need to skip xmlns:xml if the value is http://www.w3.org/XML/1998/namespace
+	if (strEquals(a->getLocalName(), "xml") && strEquals(a->getNodeValue(), "http://www.w3.org/XML/1998/namespace"))
+		return false;
 
 	// First - are we exclusive?
 
@@ -937,7 +916,7 @@ bool XSECC14n20010315::checkRenderNameSpaceNode(DOMNode *e, DOMNode *a) {
 
 // This is the main worker function of this class
 
-xsecsize_t XSECC14n20010315::processNextNode() {
+XMLSize_t XSECC14n20010315::processNextNode() {
 
 	// The information currently in the buffer has all been used.  We now process the
 	// next node.

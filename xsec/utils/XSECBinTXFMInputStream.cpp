@@ -75,22 +75,17 @@ XSECBinTXFMInputStream::~XSECBinTXFMInputStream() {
 
 void XSECBinTXFMInputStream::reset(void) {}
 
-#ifdef XSEC_XERCES_64BITSAFE
-XMLFilePos
-#else
-unsigned int
-#endif
-XSECBinTXFMInputStream::curPos() const {
+XMLFilePos XSECBinTXFMInputStream::curPos() const {
 	return m_currentIndex;
 }
 
-xsecsize_t XSECBinTXFMInputStream::readBytes(XMLByte* const  toFill,
-					   const xsecsize_t maxToRead) {
+XMLSize_t XSECBinTXFMInputStream::readBytes(XMLByte* const  toFill,
+					   const XMLSize_t maxToRead) {
 
 	if (m_done == true)
 		return 0;
 
-	xsecsize_t bytesRead = mp_txfm->readBytes(toFill, maxToRead);
+	XMLSize_t bytesRead = mp_txfm->readBytes(toFill, maxToRead);
 
 	if (bytesRead == 0) {
 
@@ -113,8 +108,6 @@ xsecsize_t XSECBinTXFMInputStream::readBytes(XMLByte* const  toFill,
 
 }
 
-#ifdef XSEC_XERCES_INPUTSTREAM_HAS_CONTENTTYPE
 const XMLCh* XSECBinTXFMInputStream::getContentType() const {
     return NULL;
 }
-#endif

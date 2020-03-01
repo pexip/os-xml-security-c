@@ -23,7 +23,7 @@
  * TXFMConcatChain := Takes multiple input chains and then provides
  *					  BYTE_STREAM output for each chain in order.
  *
- * $Id: TXFMConcatChains.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMConcatChains.cpp 1817117 2017-12-04 19:03:16Z scantor $
  *
  */
 
@@ -74,19 +74,19 @@ void TXFMConcatChains::setInput(TXFMChain *newInputChain) {
 
 }
 	
-TXFMBase::ioType TXFMConcatChains::getInputType(void) {
+TXFMBase::ioType TXFMConcatChains::getInputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
 
-TXFMBase::ioType TXFMConcatChains::getOutputType(void) {
+TXFMBase::ioType TXFMConcatChains::getOutputType(void) const {
 
 	return TXFMBase::BYTE_STREAM;
 
 }
 
-TXFMBase::nodeType TXFMConcatChains::getNodeType(void) {
+TXFMBase::nodeType TXFMConcatChains::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_NONE;
 
@@ -135,21 +135,3 @@ unsigned int TXFMConcatChains::readBytes(XMLByte * const toFill, const unsigned 
 	return bytesRead;
 
 }
-
-DOMDocument *TXFMConcatChains::getDocument() {
-
-	return NULL;
-
-}
-DOMNode *TXFMConcatChains::getFragmentNode() {
-
-	return NULL;
-
-}
-
-const XMLCh * TXFMConcatChains::getFragmentId() {
-
-	return NULL;
-
-}
-	

@@ -23,18 +23,18 @@
  * DSIGKeyX509 := A "Super" key that defines a certificate with a sub-key that defines
  *                the signing key
  *
- * $Id: DSIGKeyInfoX509.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoX509.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/dsig/DSIGKeyInfoX509.hpp>
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
 
 #include "../utils/XSECAutoPtr.hpp"
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -165,7 +165,7 @@ void DSIGKeyInfoX509::load(void) {
 	                    h->mp_cryptoX509 = cryptoX509;
 	                    break;
 				    }
-				    catch (XSECCryptoException&) {
+			catch (const XSECCryptoException&) {
 	                    certElt = findNextChildOfType(certElt, DOMNode::TEXT_NODE);
 	                    if (!certElt) {
 	                        delete cryptoX509;

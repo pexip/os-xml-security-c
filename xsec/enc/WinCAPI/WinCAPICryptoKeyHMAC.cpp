@@ -24,10 +24,11 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoKeyHMAC.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoKeyHMAC.cpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
+#include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/enc/WinCAPI/WinCAPICryptoKeyHMAC.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
@@ -42,6 +43,10 @@ WinCAPICryptoKeyHMAC::WinCAPICryptoKeyHMAC(HCRYPTPROV prov) :m_keyBuf("") {
 	m_p = prov;
 
 };
+
+const XMLCh * WinCAPICryptoKeyHMAC::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVWinCAPI;
+}
 
 void WinCAPICryptoKeyHMAC::setKey(unsigned char * inBuf, unsigned int inLength) {
 

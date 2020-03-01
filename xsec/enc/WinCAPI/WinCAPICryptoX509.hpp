@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: WinCAPICryptoX509.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: WinCAPICryptoX509.hpp 1817863 2017-12-11 22:47:43Z scantor $
  *
  */
 
@@ -49,7 +49,7 @@ class WinCAPICryptoProvider;
  *
  */
 
-class DSIG_EXPORT WinCAPICryptoX509 : public XSECCryptoX509 {
+class XSEC_EXPORT WinCAPICryptoX509 : public XSECCryptoX509 {
 
 public :
 
@@ -113,7 +113,7 @@ public :
 	 * \brief Returns a string that identifies the crypto owner of this library.
 	 */
 
-    virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVWinCAPI;}
+    virtual const XMLCh * getProviderName() const;
 
 	//@}
 

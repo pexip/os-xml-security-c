@@ -22,7 +22,7 @@
  *
  * XKMSRegisterResult := Interface for RegisterResult Messages
  *
- * $Id: XKMSRegisterResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRegisterResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 #include <xsec/xkms/XKMSStatus.hpp>
 
@@ -70,7 +73,7 @@ class XENCCipherData;
 \endverbatim
  */
 
-class XKMSRegisterResult : public XKMSResultType {
+class XSEC_EXPORT XKMSRegisterResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -172,12 +175,7 @@ public:
 	 * @param DQ Base64 encoded string with dq
 	 * @param InverseQ Base64 encoded string with inverseq
 	 * @param D Base64 encoded string with d
-	 * @param em The encryptionMethod to use for this encryption.  Use
-	 * ENCRYPT_NONE if a user defined type is required.
-	 * @param algorithmURI If ENCRYPT_NONE is passed in, this will be
-	 * used to set the algorithm URI.  If this is also NULL - no
-	 * EncryptionMethod will be set.  <b>NULL Value Unsupported if em not
-	 * set!  It's use could cause problems!</b>
+	 * @param algorithmURI algorithm URI
 	 * @returns The encrypted result of adding the info
 	 */
 
@@ -190,8 +188,7 @@ public:
 		XMLCh * DQ,
 		XMLCh * InverseQ,
 		XMLCh * D,
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL) = 0;
+		const XMLCh * algorithmURI) = 0;
 
 	//@}
 
@@ -203,5 +200,7 @@ private:
 	XKMSRegisterResult & operator = (const XKMSRegisterResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSREGISTERRESULT_INCLUDE */

@@ -22,18 +22,19 @@
  *
  * TXFMXPath := Class that performs XPath transforms
  *
- * $Id: TXFMXPath.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMXPath.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 
+#include <xsec/dsig/DSIGConstants.hpp>
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/transformers/TXFMXPath.hpp>
 #include <xsec/transformers/TXFMParser.hpp>
-#include <xsec/dsig/DSIGConstants.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECError.hpp>
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4267)
@@ -71,7 +72,7 @@ XALAN_USING_XALAN(XSLException)
 
 XERCES_CPP_NAMESPACE_USE
 
-#if !defined(XSEC_NO_XPATH)
+#ifdef XSEC_HAVE_XPATH
 
 #include <iostream>
 
@@ -80,10 +81,10 @@ XERCES_CPP_NAMESPACE_USE
 // Helper function
 
 void setXPathNS(DOMDocument *d, 
-				DOMNamedNodeMap *xAtts, 
-			    XSECXPathNodeList &addedNodes,
-				XSECSafeBufferFormatter *formatter,
-				XSECNameSpaceExpander * nse) {
+		DOMNamedNodeMap *xAtts, 
+		XSECXPathNodeList &addedNodes,
+		XSECSafeBufferFormatter *formatter,
+		XSECNameSpaceExpander * nse) {
 
 	// if set then set the name spaces in the attribute list else clear them
 
@@ -287,11 +288,7 @@ void TXFMXPath::evaluateExpr(DOMNode *h, safeBuffer inexpr) {
 
 	XPathProcessorImpl	xppi;					// The processor
 	XercesParserLiaison xpl;
-#if XALAN_VERSION_MAJOR == 1 && XALAN_VERSION_MINOR > 10
 	XercesDOMSupport	xds(xpl);
-#else
-	XercesDOMSupport	xds;
-#endif
 	XPathEvaluator		xpe;
 	XPathFactoryDefault xpf;
 	XPathConstructionContextDefault xpcc;
@@ -421,11 +418,10 @@ void TXFMXPath::evaluateExpr(DOMNode *h, safeBuffer inexpr) {
 
 		// THIS IS A KLUDGE AND SHOULD BE DONE BETTER
 
-		int offset = 0;
 		safeBuffer k(KLUDGE_PREFIX);
 		k.sbStrcatIn(":");
 
-		offset = inexpr.sbStrstr("here()");
+		XMLSSize_t offset = inexpr.sbStrstr("here()");
 
 		while (offset >= 0) {
 
@@ -486,7 +482,7 @@ void TXFMXPath::evaluateExpr(DOMNode *h, safeBuffer inexpr) {
 		}
 	}
 
-	catch (XSLException &e) {
+	catch (const XSLException &e) {
 
 		safeBuffer msg;
 
@@ -495,11 +491,7 @@ void TXFMXPath::evaluateExpr(DOMNode *h, safeBuffer inexpr) {
 	
 		// Collate the exception message into an XSEC message.		
 		msg.sbTranscodeIn("Xalan Exception : ");
-#if defined (XSEC_XSLEXCEPTION_RETURNS_DOMSTRING)
-		msg.sbXMLChCat(e.getType().c_str());
-#else
 		msg.sbXMLChCat(e.getType());
-#endif
 		msg.sbXMLChCat(" caught.  Message : ");
 		msg.sbXMLChCat(e.getMessage().c_str());
 
@@ -548,18 +540,18 @@ void TXFMXPath::evaluateEnvelope(DOMNode *t) {
 	
 // Methods to get tranform output type and input requirement
 
-TXFMBase::ioType TXFMXPath::getInputType(void) {
+TXFMBase::ioType TXFMXPath::getInputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
-TXFMBase::ioType TXFMXPath::getOutputType(void) {
+TXFMBase::ioType TXFMXPath::getOutputType(void) const {
 
 	return TXFMBase::DOM_NODES;
 
 }
 
-TXFMBase::nodeType TXFMXPath::getNodeType(void) {
+TXFMBase::nodeType TXFMXPath::getNodeType(void) const {
 
 	return TXFMBase::DOM_NODE_XPATH_NODESET;
 
@@ -573,28 +565,10 @@ unsigned int TXFMXPath::readBytes(XMLByte * const toFill, unsigned int maxToFill
 
 }
 
-DOMDocument *TXFMXPath::getDocument() {
+DOMDocument *TXFMXPath::getDocument() const {
 
 	return document;
 
 }
 
-DOMNode *TXFMXPath::getFragmentNode() {
-
-	return NULL;
-
-}
-
-const XMLCh * TXFMXPath::getFragmentId() {
-
-	return NULL;	// Empty string
-
-}
-
-XSECXPathNodeList	& TXFMXPath::getXPathNodeList() {
-
-	return m_XPathMap;
-
-}
-
-#endif /* NO_XPATH */
+#endif /* XSEC_HAVE_XPATH */

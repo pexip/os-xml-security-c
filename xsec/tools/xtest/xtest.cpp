@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: xtest.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: xtest.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -58,7 +58,7 @@
 
 // XALAN
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 #include <xalanc/XPath/XPathEvaluator.hpp>
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
@@ -70,31 +70,32 @@ XALAN_USING_XALAN(XalanTransformer)
 
 // XSEC
 
-#include <xsec/utils/XSECPlatformUtils.hpp>
-#include <xsec/framework/XSECProvider.hpp>
 #include <xsec/canon/XSECC14n20010315.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
-#include <xsec/framework/XSECError.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
-#include <xsec/utils/XSECNameSpaceExpander.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/utils/XSECBinTXFMInputStream.hpp>
-#include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/dsig/DSIGKeyInfoX509.hpp>
 #include <xsec/dsig/DSIGKeyInfoName.hpp>
 #include <xsec/dsig/DSIGKeyInfoPGPData.hpp>
 #include <xsec/dsig/DSIGKeyInfoSPKIData.hpp>
 #include <xsec/dsig/DSIGKeyInfoMgmtData.hpp>
+#include <xsec/enc/XSECCryptoException.hpp>
+#include <xsec/enc/XSECCryptoSymmetricKey.hpp>
+#include <xsec/framework/XSECError.hpp>
+#include <xsec/framework/XSECProvider.hpp>
 #include <xsec/xenc/XENCCipher.hpp>
 #include <xsec/xenc/XENCEncryptedData.hpp>
 #include <xsec/xenc/XENCEncryptedKey.hpp>
 #include <xsec/xenc/XENCEncryptionMethod.hpp>
+#include <xsec/utils/XSECNameSpaceExpander.hpp>
+#include <xsec/utils/XSECBinTXFMInputStream.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
 
-#include <xsec/enc/XSECCryptoSymmetricKey.hpp>
+#include "../../utils/XSECDOMUtils.hpp"
 
 #if defined (XSEC_HAVE_OPENSSL)
 #	include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
 #	include <xsec/enc/OpenSSL/OpenSSLCryptoKeyRSA.hpp>
+#   include <xsec/enc/OpenSSL/OpenSSLCryptoKeyEC.hpp>
 #	include <openssl/rand.h>
 #	include <openssl/evp.h>
 #	include <openssl/pem.h>
@@ -128,10 +129,12 @@ XERCES_CPP_NAMESPACE_USE
 //           Global variables
 // --------------------------------------------------------------------------------
 
-bool	g_printDocs = false;
-bool	g_useWinCAPI = false;
-bool	g_useNSS = false;
-bool    g_haveAES = true;
+bool g_printDocs = false;
+bool g_useWinCAPI = false;
+bool g_useNSS = false;
+bool g_haveAES = true;
+bool g_testGCM = true;
+
 
 // --------------------------------------------------------------------------------
 //           Known "Good" Values
@@ -306,6 +309,14 @@ RlGANAzymDfXwNLFLuG+fAb+zK5FCSnRl12TvUabIzPIRnbptDVKPDRjcQJBALn8\n\
 mWKCxS+9fPiy1iI+G+B9xkw2gJ9i8P81t7fsOvdTDFA=\n\
 -----END RSA PRIVATE KEY-----";
 
+char s_tstECPrivateKey[] = "\n\
+-----BEGIN PRIVATE KEY-----\n\
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAGJjEIHP3P1fDZV9lG\n\
+lVfblOulUksJ+QdX9SeOswKIiQ9Oc5l6NTswN2bm+IRhaouhZANiAARrJ/UeKETr\n\
+cFdFSM9sjB31PDIB6IdjtwyzMUIAJHlqoQ6IJo3887jvgUZyevY0+CUoS0N3L+9W\n\
+mPgOiq9TRw6O5mrjSk1rmCx+2o2bnk+tWEysp7AWswUgNGgVkhumq9A=\n\
+-----END PRIVATE KEY-----";
+
 static char s_keyStr[] = "abcdefghijklmnopqrstuvwxyzabcdef";
 
 
@@ -427,39 +438,23 @@ void outputDoc(DOMImplementation * impl, DOMDocument * doc) {
 
 	XMLFormatTarget *formatTarget = new StdOutFormatTarget();
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
+	// DOM L3 version as per Xerces 3.0 API
+	DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
 
-    // DOM L3 version as per Xerces 3.0 API
-    DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+	// Get the config so we can set up pretty printing
+	DOMConfiguration *dc = theSerializer->getDomConfig();
+	dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
 
-    // Get the config so we can set up pretty printing
-    DOMConfiguration *dc = theSerializer->getDomConfig();
-    dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+	// Now create an output object to format to UTF-8
+	DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+	Janitor<DOMLSOutput> j_theOutput(theOutput);
 
-    // Now create an output object to format to UTF-8
-    DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-    Janitor<DOMLSOutput> j_theOutput(theOutput);
-
-    theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-    theOutput->setByteStream(formatTarget);
-
-#else
-
-	DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
-
-	theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-	if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false))
-		theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false);
-
-#endif
-
+	theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+	theOutput->setByteStream(formatTarget);
+		
 	cerr << endl;
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-    theSerializer->write(doc, theOutput);
-#else
-	theSerializer->writeNode(formatTarget, *doc);
-#endif
+	theSerializer->write(doc, theOutput);
 	
 	cout << endl;
 
@@ -481,39 +476,24 @@ bool reValidateSig(DOMImplementation *impl, DOMDocument * inDoc, XSECCryptoKey *
 	try {
 
 		MemBufFormatTarget *formatTarget = new MemBufFormatTarget();
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
 
-        // DOM L3 version as per Xerces 3.0 API
-        DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+		DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
 
-        // Get the config so we can set up pretty printing
-        DOMConfiguration *dc = theSerializer->getDomConfig();
-        dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+		// Get the config so we can set up pretty printing
+		DOMConfiguration *dc = theSerializer->getDomConfig();
+		dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+
+		// Now create an output object to format to UTF-8
+		DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+		Janitor<DOMLSOutput> j_theOutput(theOutput);
         
-        // Now create an output object to format to UTF-8
-        DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-        Janitor<DOMLSOutput> j_theOutput(theOutput);
-        
-        theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-        theOutput->setByteStream(formatTarget);
+		theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+		theOutput->setByteStream(formatTarget);
 
-        theSerializer->write(inDoc,theOutput);
-#else
-
-		DOMWriter *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
-
-		theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-
-		if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false))
-			theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false);
-
-
-		theSerializer->writeNode(formatTarget, *inDoc);
-
-#endif
+		theSerializer->write(inDoc,theOutput);
 
 		// Copy to a new buffer
-		xsecsize_t len = formatTarget->getLen();
+		XMLSize_t len = formatTarget->getLen();
 		char * mbuf = new char [len + 1];
 		memcpy(mbuf, formatTarget->getRawBuffer(), len);
 		mbuf[len] = '\0';
@@ -557,18 +537,18 @@ bool reValidateSig(DOMImplementation *impl, DOMDocument * inDoc, XSECCryptoKey *
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -669,18 +649,18 @@ void unitTestEnvelopingSignature(DOMImplementation * impl) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -709,9 +689,6 @@ void unitTestBase64NodeSignature(DOMImplementation * impl) {
 		sig = prov.newSignature();
 		sig->setDSIGNSPrefix(MAKE_UNICODE_STRING("ds"));
 		sig->setPrettyPrint(true);
-#if defined (XSEC_XERCES_HAS_SETIDATTRIBUTE)
-		sig->setIdByAttributeName(false);		// Do not search by name
-#endif
 		sigNode = sig->createBlankSignature(doc, 
 			DSIGConstants::s_unicodeStrURIC14N_COM,
 			DSIGConstants::s_unicodeStrURIHMAC_SHA1);
@@ -782,18 +759,18 @@ void unitTestBase64NodeSignature(DOMImplementation * impl) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -806,7 +783,7 @@ void unitTestLongSHA(DOMImplementation * impl) {
 	
 	// This tests an enveloping signature as the root node, using SHA224/256/384/512
 
-	cerr << "Creating long SHA references using SHA512 HMAC... ";
+	cerr << "Creating long SHA references using HMAC... ";
 	
 	try {
 		
@@ -826,7 +803,7 @@ void unitTestLongSHA(DOMImplementation * impl) {
 		sig->setPrettyPrint(true);
 
 		sigNode = sig->createBlankSignature(doc, 
-			DSIGConstants::s_unicodeStrURIC14N_COM,
+			DSIGConstants::s_unicodeStrURIEXC_C14N_COM,
 			DSIGConstants::s_unicodeStrURIHMAC_SHA512);
 
 		doc->appendChild(sigNode);
@@ -842,18 +819,39 @@ void unitTestLongSHA(DOMImplementation * impl) {
 		// Add a Reference
 		if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA224)) {
 			cerr << "224 ... ";
-			ref[0] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"), 
+			ref[0] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
 				DSIGConstants::s_unicodeStrURISHA224);
 		}
-		cerr << "256 ... ";
-		ref[1] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"), 
-			DSIGConstants::s_unicodeStrURISHA256);
-		cerr << "384 ... ";
-		ref[2] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
-			DSIGConstants::s_unicodeStrURISHA384);
-		cerr << "512 ... ";
-		ref[3] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
-			DSIGConstants::s_unicodeStrURISHA512);
+		else {
+		    ref[0] = NULL;
+		}
+
+        if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA256)) {
+            cerr << "256 ... ";
+            ref[1] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
+                DSIGConstants::s_unicodeStrURISHA256);
+        }
+        else {
+            ref[1] = NULL;
+        }
+
+        if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA384)) {
+            cerr << "384 ... ";
+            ref[2] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
+                DSIGConstants::s_unicodeStrURISHA384);
+        }
+        else {
+            ref[2] = NULL;
+        }
+
+        if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA512)) {
+            cerr << "512 ... ";
+            ref[3] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"),
+                DSIGConstants::s_unicodeStrURISHA512);
+        }
+        else {
+            ref[3] = NULL;
+        }
 
 		// Get a key
 		cerr << "signing ... ";
@@ -888,7 +886,7 @@ void unitTestLongSHA(DOMImplementation * impl) {
 
 		}
 
-		cerr << "OK (verify false) ... serialise and re-verify ... ";
+		cerr << "OK (verify false) ... serialize and re-verify ... ";
 		if (reValidateSig(impl, doc, createHMACKey((unsigned char *) "secret"))) {
 
 			cerr << "bad - should have failed" << endl;
@@ -919,6 +917,9 @@ void unitTestLongSHA(DOMImplementation * impl) {
 
 		int i;
 		for (i = 0; i < 4; ++i) {
+		    if (ref[i] == NULL) {
+		        continue;
+		    }
 
 			cerr << "    Calculating hash for reference " << shastrings[i] << " ... ";
 
@@ -952,27 +953,27 @@ void unitTestLongSHA(DOMImplementation * impl) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
 
 }
 
-void unitTestRSASig(DOMImplementation * impl, XSECCryptoKeyRSA * k, const XMLCh * AlgURI) {
+void unitTestSig(DOMImplementation * impl, XSECCryptoKey * k, const XMLCh * AlgURI) {
 
-	// Given a specific RSA key and particular algorithm URI, sign and validate a document
+	// Given a specific RSA/EC key and particular algorithm URI, sign and validate a document
 
 	try {
 		
@@ -985,7 +986,6 @@ void unitTestRSASig(DOMImplementation * impl, XSECCryptoKeyRSA * k, const XMLCh 
 		XSECProvider prov;
 		DSIGSignature *sig;
 		DOMElement *sigNode;
-		DSIGReference *ref[4];
 		
 		sig = prov.newSignature();
 		sig->setDSIGNSPrefix(MAKE_UNICODE_STRING("ds"));
@@ -1004,10 +1004,6 @@ void unitTestRSASig(DOMImplementation * impl, XSECCryptoKeyRSA * k, const XMLCh 
 		// Create a text node
 		DOMText * txt= doc->createTextNode(MAKE_UNICODE_STRING("A test string"));
 		obj->appendChild(txt);
-
-		// Add a Reference
-		ref[0] = sig->createReference(MAKE_UNICODE_STRING("#ObjectId"), 
-			DSIGConstants::s_unicodeStrURISHA1);
 
 		// Get a key
 		cerr << "signing ... ";
@@ -1033,33 +1029,6 @@ void unitTestRSASig(DOMImplementation * impl, XSECCryptoKeyRSA * k, const XMLCh 
 
 		cerr << "OK";
 
-#if 0
-#if defined XSEC_HAVE_OPENSSL
-
-		if (g_useWinCAPI || g_useNSS) {
-
-			cerr << " ... validate against OpenSSL" << endl;
-
-			BIO * bioMem = BIO_new(BIO_s_mem());
-			BIO_puts(bioMem, s_tstRSAPrivateKey);
-			EVP_PKEY * pk = PEM_read_bio_PrivateKey(bioMem, NULL, NULL, NULL);
-
-			OpenSSLCryptoKeyRSA * rsaKey = new OpenSSLCryptoKeyRSA(pk);
-
-			sig->setSigningKey(rsaKey);
-			if (!sig->verify()) {
-				cerr << "bad verify!" << endl;
-				exit (1);
-			}
-
-			cerr << "OK";
-
-			BIO_free(bioMem);
-			EVP_PKEY_free(pk);
-		}
-#endif
-#endif
-
 		cerr << "\n";	
 
 		outputDoc(impl, doc);
@@ -1068,18 +1037,18 @@ void unitTestRSASig(DOMImplementation * impl, XSECCryptoKeyRSA * k, const XMLCh 
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -1156,31 +1125,79 @@ void unitTestRSA(DOMImplementation * impl) {
 #endif
 
 	cerr << "Unit testing RSA-SHA1 signature ... ";
-	unitTestRSASig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA1);
+	unitTestSig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA1);
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA224)) {
+        cerr << "Unit testing RSA-SHA224 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyRSA *)rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA224);
+    }
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA256)) {
+        cerr << "Unit testing RSA-SHA256 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyRSA *)rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA256);
+    }
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA384)) {
+        cerr << "Unit testing RSA-SHA384 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyRSA *)rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA384);
+    }
 
 	if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA512)) {
-		cerr << "Unit testing RSA-SHA224 signature ... ";
-		unitTestRSASig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA224);
-		cerr << "Unit testing RSA-SHA256 signature ... ";
-		unitTestRSASig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA256);
-		cerr << "Unit testing RSA-SHA384 signature ... ";
-		unitTestRSASig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA384);
 		cerr << "Unit testing RSA-SHA512 signature ... ";
-		unitTestRSASig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA512);
+		unitTestSig(impl, (XSECCryptoKeyRSA *) rsaKey->clone(), DSIGConstants::s_unicodeStrURIRSA_SHA512);
 	}
-	else
-		cerr << "Skipping non SHA 224/256/384/512 RSA signatures" << endl;
 
 	cerr << "Unit testing RSA-MD5 signature ... ";
-	unitTestRSASig(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_MD5);
-	
-		
+	unitTestSig(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_MD5);
 }
+
+void unitTestEC(DOMImplementation * impl) {
+#if defined (XSEC_HAVE_OPENSSL) && defined (XSEC_OPENSSL_HAVE_EC)
+
+    /* First we load some keys to use! */
+
+    XSECCryptoKeyEC * ecKey;
+
+    // Load the key
+    BIO * bioMem = BIO_new(BIO_s_mem());
+    BIO_puts(bioMem, s_tstECPrivateKey);
+    EVP_PKEY * pk = PEM_read_bio_PrivateKey(bioMem, NULL, NULL, NULL);
+
+    ecKey = new OpenSSLCryptoKeyEC(pk);
+
+    BIO_free(bioMem);
+    EVP_PKEY_free(pk);
+
+    cerr << "Unit testing ECDSA-SHA1 signature ... ";
+    unitTestSig(impl, (XSECCryptoKeyEC *) ecKey->clone(), DSIGConstants::s_unicodeStrURIECDSA_SHA1);
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA224)) {
+        cerr << "Unit testing ECDSA-SHA224 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyEC *)ecKey->clone(), DSIGConstants::s_unicodeStrURIECDSA_SHA224);
+    }
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA256)) {
+        cerr << "Unit testing ECDSA-SHA256 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyEC *)ecKey->clone(), DSIGConstants::s_unicodeStrURIECDSA_SHA256);
+    }
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA384)) {
+        cerr << "Unit testing ECDSA-SHA384 signature ... ";
+        unitTestSig(impl, (XSECCryptoKeyEC *)ecKey->clone(), DSIGConstants::s_unicodeStrURIECDSA_SHA384);
+    }
+
+    if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA512)) {
+        cerr << "Unit testing ECDSA-SHA512 signature ... ";
+    }
+        unitTestSig(impl, (XSECCryptoKeyEC *) ecKey->clone(), DSIGConstants::s_unicodeStrURIECDSA_SHA512);
+#endif
+}
+
 void unitTestSignature(DOMImplementation * impl) {
 
 	// Test an enveloping signature
 	unitTestEnvelopingSignature(impl);
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 	unitTestBase64NodeSignature(impl);
 #else
 	cerr << "Skipping base64 node test (Requires XPath)" << endl;
@@ -1194,6 +1211,9 @@ void unitTestSignature(DOMImplementation * impl) {
 
 	// Test RSA Signatures
 	unitTestRSA(impl);
+
+    // Test EC Signatures
+    unitTestEC(impl);
 }
 
 // --------------------------------------------------------------------------------
@@ -1280,7 +1300,7 @@ void testSignature(DOMImplementation *impl) {
 			DSIGConstants::s_unicodeStrURIEXC_C14N_COM);
 		ce->addInclusiveNamespace("foo");
 
-#ifdef XSEC_NO_XALAN
+#ifndef XSEC_HAVE_XALAN
 
 		cerr << "WARNING : No testing of XPath being performed as Xalan not present" << endl;
 		refCount = 7;
@@ -1295,7 +1315,7 @@ void testSignature(DOMImplementation *impl) {
 			DSIGConstants::s_unicodeStrURISHA1);
 		sig->setXPFNSPrefix(MAKE_UNICODE_STRING("xpf"));
 		DSIGTransformXPathFilter * xpf = ref[7]->appendXPathFilterTransform();
-		xpf->appendFilter(FILTER_INTERSECT, MAKE_UNICODE_STRING("//ADoc/category"));
+		xpf->appendFilter(DSIGXPathFilterExpr::FILTER_INTERSECT, MAKE_UNICODE_STRING("//ADoc/category"));
 
 		ref[8] = sig->createReference(MAKE_UNICODE_STRING(""),
 			DSIGConstants::s_unicodeStrURISHA1);
@@ -1342,7 +1362,7 @@ count(ancestor-or-self::dsig:Signature)");
 		cerr << endl << "Doc signed OK - Checking values against Known Good" << endl;
 
 		unsigned char buf[128];
-		xsecsize_t len;
+		XMLSize_t len;
 
 		/*
 		 * Validate the reference hash values from known good
@@ -1417,33 +1437,20 @@ count(ancestor-or-self::dsig:Signature)");
 
 		MemBufFormatTarget *formatTarget = new MemBufFormatTarget();
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
+		DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
 
-        // DOM L3 version as per Xerces 3.0 API
-        DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
-
-        // Get the config so we can set up pretty printing
-        DOMConfiguration *dc = theSerializer->getDomConfig();
-        dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+		// Get the config so we can set up pretty printing
+		DOMConfiguration *dc = theSerializer->getDomConfig();
+		dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
         
-        // Now create an output object to format to UTF-8
-        DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-        Janitor<DOMLSOutput> j_theOutput(theOutput);
+		// Now create an output object to format to UTF-8
+		DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+		Janitor<DOMLSOutput> j_theOutput(theOutput);
         
-        theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-        theOutput->setByteStream(formatTarget);
+		theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+		theOutput->setByteStream(formatTarget);
 
-        theSerializer->write(doc,theOutput);
-#else
-
-		DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
-
-		theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-		if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false))
-			theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false);
-
-		theSerializer->writeNode(formatTarget, *doc);
-#endif
+		theSerializer->write(doc,theOutput);
 
 		// Copy to a new buffer
 		len = formatTarget->getLen();
@@ -1574,18 +1581,18 @@ count(ancestor-or-self::dsig:Signature)");
 		}
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -1629,9 +1636,7 @@ void unitTestCipherReference(DOMImplementation * impl) {
 		DOMElement * cipherVal = doc->createElement(MAKE_UNICODE_STRING("MyCipherValue"));
 		rootElem->appendChild(cipherVal);
 		cipherVal->setAttributeNS(NULL, MAKE_UNICODE_STRING("Id"), MAKE_UNICODE_STRING("CipherText"));
-#if defined(XSEC_XERCES_HAS_SETIDATTRIBUTE)
-		cipherVal->setIdAttribute(MAKE_UNICODE_STRING("Id"));
-#endif
+		cipherVal->setIdAttributeNS(NULL, MAKE_UNICODE_STRING("Id"), true);
 
 		cipherVal->appendChild(doc->createTextNode(MAKE_UNICODE_STRING((char *) s_tstBase64EncodedString)));
 
@@ -1668,7 +1673,7 @@ void unitTestCipherReference(DOMImplementation * impl) {
 
 		cerr << "done ... comparing to known good ... ";
 
-		xsecsize_t bytesRead = is->readBytes(buf, 1024);
+		XMLSize_t bytesRead = is->readBytes(buf, 1024);
 		buf[bytesRead] = '\0';
 		if (strcmp((char *) buf, s_tstDecryptedString) == 0) {
 			cerr << "OK" << endl;
@@ -1679,20 +1684,20 @@ void unitTestCipherReference(DOMImplementation * impl) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
 		cerr << "failed\n";
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
 		cerr << "failed\n";
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -1703,7 +1708,7 @@ void unitTestCipherReference(DOMImplementation * impl) {
 }
 
 
-void unitTestElementContentEncrypt(DOMImplementation *impl, XSECCryptoKey * key, encryptionMethod em, bool doElementContent) {
+void unitTestElementContentEncrypt(DOMImplementation *impl, XSECCryptoKey * key, const XMLCh* algorithm, bool doElementContent) {
 
 	if (doElementContent)
 		cerr << "Encrypting Element Content ... ";
@@ -1742,9 +1747,9 @@ void unitTestElementContentEncrypt(DOMImplementation *impl, XSECCryptoKey * key,
 	
 		// Now encrypt!
 		if (doElementContent)
-			cipher->encryptElementContent(doc->getDocumentElement(), em);
+			cipher->encryptElementContent(doc->getDocumentElement(), algorithm);
 		else
-			cipher->encryptElement((DOMElement *) categoryNode, em);
+			cipher->encryptElement((DOMElement *) categoryNode, algorithm);
 
 		cerr << "done ... check encrypted ... ";
 
@@ -1790,18 +1795,18 @@ void unitTestElementContentEncrypt(DOMImplementation *impl, XSECCryptoKey * key,
 		outputDoc(impl, doc);
 
 	}
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during encryption processing\n   Message: ";
+		cerr << "An error occurred during encryption processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during encryption processing\n   Message: "
+		cerr << "A cryptographic error occurred during encryption processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -1852,7 +1857,7 @@ void unitTestSmallElement(DOMImplementation *impl) {
 		cipher->setKey(ks->clone());
 	
 		// Now encrypt!
-		cipher->encryptElementContent(productNode, ENCRYPT_3DES_CBC);
+		cipher->encryptElementContent(productNode, DSIGConstants::s_unicodeStrURI3DES_CBC);
 
 		cerr << "done ... check encrypted ... ";
 
@@ -1899,18 +1904,18 @@ void unitTestSmallElement(DOMImplementation *impl) {
 		outputDoc(impl, doc);
 
 	}
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during encryption processing\n   Message: ";
+		cerr << "An error occurred during encryption processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during encryption processing\n   Message: "
+		cerr << "A cryptographic error occurred during encryption processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -1920,7 +1925,14 @@ void unitTestSmallElement(DOMImplementation *impl) {
 }
 
 
-void unitTestKeyEncrypt(DOMImplementation *impl, XSECCryptoKey * k, encryptionMethod em) {
+void unitTestKeyEncrypt(
+        DOMImplementation* impl,
+        XSECCryptoKey* k,
+        const XMLCh* algorithm,
+        const XMLCh* mgf=NULL,
+        unsigned char* oaepParams=NULL,
+        unsigned int oaepParamsLen=0
+        ) {
 
 	// Create a document that we will embed the encrypted key in
 	DOMDocument *doc = impl->createDocument(
@@ -1951,7 +1963,9 @@ void unitTestKeyEncrypt(DOMImplementation *impl, XSECCryptoKey * k, encryptionMe
 		cipher->setKEK(k);
 
 		XENCEncryptedKey * encryptedKey;
-		encryptedKey = cipher->encryptKey(toEncryptStr, (unsigned int) strlen((char *) toEncryptStr), em);
+		encryptedKey = cipher->encryptKey(
+		        toEncryptStr, (unsigned int) strlen((char *) toEncryptStr), algorithm, mgf, oaepParams, oaepParamsLen
+		        );
 		Janitor<XENCEncryptedKey> j_encryptedKey(encryptedKey);
 
 		rootElem->appendChild(encryptedKey->getElement());
@@ -1993,20 +2007,20 @@ void unitTestKeyEncrypt(DOMImplementation *impl, XSECCryptoKey * k, encryptionMe
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
 		cerr << "failed\n";
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
 		cerr << "failed\n";
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -2033,19 +2047,46 @@ void unitTestEncrypt(DOMImplementation *impl) {
 
 			OpenSSLCryptoKeyRSA * k = new OpenSSLCryptoKeyRSA(pk);
 
-			unitTestKeyEncrypt(impl, k, ENCRYPT_RSA_15);
+			unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_1_5);
 
 			cerr << "RSA OAEP key wrap... ";
 			k = new OpenSSLCryptoKeyRSA(pk);
-			unitTestKeyEncrypt(impl, k, ENCRYPT_RSA_OAEP_MGFP1);
+			unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP_MGFP1, DSIGConstants::s_unicodeStrURIMGF1_SHA1);
 
 			cerr << "RSA OAEP key wrap + params... ";
 			k = new OpenSSLCryptoKeyRSA(pk);
-			k->setOAEPparams(s_tstOAEPparams, (unsigned int) strlen((char *) s_tstOAEPparams));
+			unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP_MGFP1, DSIGConstants::s_unicodeStrURIMGF1_SHA1,
+			        s_tstOAEPparams, (unsigned int) strlen((char *) s_tstOAEPparams));
 
-			unitTestKeyEncrypt(impl, k, ENCRYPT_RSA_OAEP_MGFP1);
+            cerr << "RSA OAEP 1.1 key wrap... ";
+            k = new OpenSSLCryptoKeyRSA(pk);
+            unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP, DSIGConstants::s_unicodeStrURIMGF1_SHA1);
 
-			BIO_free(bioMem);
+            if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA224)) {
+                cerr << "RSA OAEP 1.1 key wrap with MGF1+SHA224... ";
+                k = new OpenSSLCryptoKeyRSA(pk);
+                unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP, DSIGConstants::s_unicodeStrURIMGF1_SHA224);
+            }
+
+            if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA256)) {
+                cerr << "RSA OAEP 1.1 key wrap with MGF1+SHA256... ";
+                k = new OpenSSLCryptoKeyRSA(pk);
+                unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP, DSIGConstants::s_unicodeStrURIMGF1_SHA256);
+            }
+
+            if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA384)) {
+                cerr << "RSA OAEP 1.1 key wrap with MGF1+SHA384... ";
+                k = new OpenSSLCryptoKeyRSA(pk);
+                unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP, DSIGConstants::s_unicodeStrURIMGF1_SHA384);
+            }
+
+            if (XSECPlatformUtils::g_cryptoProvider->algorithmSupported(XSECCryptoHash::HASH_SHA512)) {
+                cerr << "RSA OAEP 1.1 key wrap with MGF1+SHA512... ";
+                k = new OpenSSLCryptoKeyRSA(pk);
+                unitTestKeyEncrypt(impl, k, DSIGConstants::s_unicodeStrURIRSA_OAEP, DSIGConstants::s_unicodeStrURIMGF1_SHA512);
+            }
+
+            BIO_free(bioMem);
 			EVP_PKEY_free(pk);
 		}
 #endif
@@ -2058,12 +2099,16 @@ void unitTestEncrypt(DOMImplementation *impl) {
 			HCRYPTPROV p = cp->getApacheKeyStore();
 			
 			WinCAPICryptoKeyRSA * rsaKey = new WinCAPICryptoKeyRSA(p, AT_KEYEXCHANGE, true);
-			unitTestKeyEncrypt(impl, rsaKey, ENCRYPT_RSA_15);
+			unitTestKeyEncrypt(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_1_5);
 
 			cerr << "RSA OAEP key wrap... ";
 			rsaKey = new WinCAPICryptoKeyRSA(p, AT_KEYEXCHANGE, true);
-			unitTestKeyEncrypt(impl, rsaKey, ENCRYPT_RSA_OAEP_MGFP1);
-		}
+			unitTestKeyEncrypt(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_OAEP_MGFP1);
+
+            cerr << "RSA OAEP 1.1 key wrap... ";
+            rsaKey = new WinCAPICryptoKeyRSA(p, AT_KEYEXCHANGE, true);
+            unitTestKeyEncrypt(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_OAEP);
+        }
 
 #endif
 
@@ -2099,7 +2144,7 @@ void unitTestEncrypt(DOMImplementation *impl) {
 
 			// Now use the key!
 			NSSCryptoKeyRSA * rsaKey = new NSSCryptoKeyRSA(pubKey, prvKey);
-			unitTestKeyEncrypt(impl, rsaKey, ENCRYPT_RSA_15);
+			unitTestKeyEncrypt(impl, rsaKey, DSIGConstants::s_unicodeStrURIRSA_1_5);
 
 			if (slot) 
 				// Actual keys will be deleted by the provider
@@ -2118,21 +2163,21 @@ void unitTestEncrypt(DOMImplementation *impl) {
 			ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_128);
 			ks->setKey((unsigned char *) s_keyStr, 16);
 		
-			unitTestKeyEncrypt(impl, ks, ENCRYPT_KW_AES128);
+			unitTestKeyEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIKW_AES128);
 
 			cerr << "AES 192 key wrap... ";
 
 			ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_192);
 			ks->setKey((unsigned char *) s_keyStr, 24);
 		
-			unitTestKeyEncrypt(impl, ks, ENCRYPT_KW_AES192);
+			unitTestKeyEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIKW_AES192);
 
 			cerr << "AES 256 key wrap... ";
 
 			ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_256);
 			ks->setKey((unsigned char *) s_keyStr, 32);
 		
-			unitTestKeyEncrypt(impl, ks, ENCRYPT_KW_AES256);
+			unitTestKeyEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIKW_AES256);
 		}
 
 		else 
@@ -2143,7 +2188,7 @@ void unitTestEncrypt(DOMImplementation *impl) {
 		ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_3DES_192);
 		ks->setKey((unsigned char *) s_keyStr, 24);
 		
-		unitTestKeyEncrypt(impl, ks, ENCRYPT_KW_3DES);
+		unitTestKeyEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIKW_3DES);
 
 		// Now do Element encrypts
 
@@ -2153,37 +2198,67 @@ void unitTestEncrypt(DOMImplementation *impl) {
 			ks->setKey((unsigned char *) s_keyStr, 16);
 
 			cerr << "Unit testing AES 128 bit CBC encryption" << endl;
-			unitTestElementContentEncrypt(impl, ks->clone(), ENCRYPT_AES128_CBC, false);
-			unitTestElementContentEncrypt(impl, ks, ENCRYPT_AES128_CBC, true);
+			unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES128_CBC, false);
+			unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES128_CBC, true);
 
 			//192 AES
 			ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_192);
 			ks->setKey((unsigned char *) s_keyStr, 24);
 
 			cerr << "Unit testing AES 192 bit CBC encryption" << endl;
-			unitTestElementContentEncrypt(impl, ks->clone(), ENCRYPT_AES192_CBC, false);
-			unitTestElementContentEncrypt(impl, ks, ENCRYPT_AES192_CBC, true);
+			unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES192_CBC, false);
+			unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES192_CBC, true);
 
-		// 256 AES
+		    // 256 AES
 			ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_256);
 			ks->setKey((unsigned char *) s_keyStr, 32);
 
 			cerr << "Unit testing AES 256 bit CBC encryption" << endl;
-			unitTestElementContentEncrypt(impl, ks->clone(), ENCRYPT_AES256_CBC, false);
-			unitTestElementContentEncrypt(impl, ks, ENCRYPT_AES256_CBC, true);
+			unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES256_CBC, false);
+			unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES256_CBC, true);
+
+            if (g_testGCM) {
+                // 128 AES-GCM
+                ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_128);
+                ks->setKey((unsigned char *)s_keyStr, 16);
+
+                cerr << "Unit testing AES 128 bit GCM encryption" << endl;
+                unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES128_GCM, false);
+                unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES128_GCM, true);
+
+                //192 AES-GCM
+                ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_192);
+                ks->setKey((unsigned char *)s_keyStr, 24);
+
+                cerr << "Unit testing AES 192 bit GCM encryption" << endl;
+                unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES192_GCM, false);
+                unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES192_GCM, true);
+
+                // 256 AES-GCM
+                ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_256);
+                ks->setKey((unsigned char *)s_keyStr, 32);
+
+                cerr << "Unit testing AES 256 bit GCM encryption" << endl;
+                unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURIAES256_GCM, false);
+                unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURIAES256_GCM, true);
+            }
+            else {
+                cerr << "Skipped AES-GCM Element tests" << endl;
+            }
 		}
 
-		else
-			cerr << "Skipped AES Element tests" << endl;
+        else {
+            cerr << "Skipped AES Element tests" << endl;
+        }
 
 		// 192 3DES
 		ks = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_3DES_192);
 		ks->setKey((unsigned char *) s_keyStr, 24);
 
 		cerr << "Unit testing 3DES CBC encryption" << endl;
-		unitTestElementContentEncrypt(impl, ks->clone(), ENCRYPT_3DES_CBC, false);
-		unitTestElementContentEncrypt(impl, ks, ENCRYPT_3DES_CBC, true);
-#ifndef XSEC_NO_XALAN
+		unitTestElementContentEncrypt(impl, ks->clone(), DSIGConstants::s_unicodeStrURI3DES_CBC, false);
+		unitTestElementContentEncrypt(impl, ks, DSIGConstants::s_unicodeStrURI3DES_CBC, true);
+#ifdef XSEC_HAVE_XALAN
 		if (g_haveAES) {
 			cerr << "Unit testing CipherReference creation and decryption" << endl;
 			unitTestCipherReference(impl);
@@ -2197,10 +2272,10 @@ void unitTestEncrypt(DOMImplementation *impl) {
 		cerr << "Misc. encryption tests" << endl;
 		unitTestSmallElement(impl);
 	}
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
 		cerr << "failed\n";
-		cerr << "A cryptographic error occured during encryption unit tests\n   Message: "
+		cerr << "A cryptographic error occurred during encryption unit tests\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -2259,7 +2334,7 @@ void testEncrypt(DOMImplementation *impl) {
 	
 		// Now encrypt!
 		cerr << "Performing 3DES encryption on <category> element ... ";
-		cipher->encryptElement((DOMElement *) categoryNode, ENCRYPT_3DES_CBC);
+		cipher->encryptElement((DOMElement *) categoryNode, DSIGConstants::s_unicodeStrURI3DES_CBC);
 
 		// Add a KeyInfo
 		cerr << "done\nAppending a <KeyName> ... ";
@@ -2307,9 +2382,9 @@ void testEncrypt(DOMImplementation *impl) {
 
 		XENCEncryptedKey * encryptedKey;
 		if (g_haveAES)
-			encryptedKey = cipher->encryptKey(randomBuffer, 24, ENCRYPT_KW_AES128);
+			encryptedKey = cipher->encryptKey(randomBuffer, 24, DSIGConstants::s_unicodeStrURIKW_AES128);
 		else
-			encryptedKey = cipher->encryptKey(randomBuffer, 24, ENCRYPT_KW_3DES);
+			encryptedKey = cipher->encryptKey(randomBuffer, 24, DSIGConstants::s_unicodeStrURIKW_3DES);
 		cerr << "done!" << endl;
 
 		cerr << "Adding CarriedKeyName and Recipient to encryptedKey ... " << endl;
@@ -2330,7 +2405,6 @@ void testEncrypt(DOMImplementation *impl) {
 		XSECCryptoSymmetricKey * k2;
 		
 		if (g_haveAES) {
-
 			k2 = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_AES_128);
 			k2->setKey((unsigned char *) s_keyStr, 16);
 		}
@@ -2338,7 +2412,6 @@ void testEncrypt(DOMImplementation *impl) {
 		else {
 			k2 = XSECPlatformUtils::g_cryptoProvider->keySymmetric(XSECCryptoSymmetricKey::KEY_3DES_192);
 			k2->setKey((unsigned char *) s_keyStr, 24);
-
 		}
 
 		cipher2->setKEK(k2);
@@ -2448,18 +2521,18 @@ void testEncrypt(DOMImplementation *impl) {
 		cerr << "OK" << endl;
 
 	}
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during signature processing\n   Message: ";
+		cerr << "An error occurred during signature processing\n   Message: ";
 		char * ce = XMLString::transcode(e.getMsg());
 		cerr << ce << endl;
 		delete ce;
 		exit(1);
 		
 	}	
-	catch (XSECCryptoException &e)
+	catch (const XSECCryptoException &e)
 	{
-		cerr << "A cryptographic error occured during signature processing\n   Message: "
+		cerr << "A cryptographic error occurred during signature processing\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}
@@ -2468,31 +2541,6 @@ void testEncrypt(DOMImplementation *impl) {
 	doc->release();
 
 }
-
-// --------------------------------------------------------------------------------
-//           Test XKMS basics
-// --------------------------------------------------------------------------------
-#if 0
-void testXKMS(DOMImplementation *impl) {
-
-	// This is really a place holder
-
-	cerr << "Making POST call to server ...  " << endl;
-	
-	// Create a document
-    
-	DOMDocument * doc = createTestDoc(impl);
-	DOMNode * categoryNode = findNode(doc, MAKE_UNICODE_STRING("category"));
-
-	/*
-	XSECSOAPRequestorSimpleWin32 req(MAKE_UNICODE_STRING("http://zeus/post.php"));
-
-	req.doRequest(doc);
-	*/
-
-	doc->release();
-}
-#endif
 	
 // --------------------------------------------------------------------------------
 //           Print usage instructions
@@ -2522,9 +2570,8 @@ void printUsage(void) {
 	cerr << "         Only run basic encryption test\n\n";
 	cerr << "     --encryption-unit-only/-u\n";
 	cerr << "         Only run encryption unit tests\n\n";
-//	cerr << "     --xkms-only/-x\n";
-//	cerr << "         Only run basic XKMS test\n\n";
-
+    cerr << "     --no-gcm\n";
+    cerr << "         Exclude AES-GCM tests\n\n";
 }
 // --------------------------------------------------------------------------------
 //           Main
@@ -2545,7 +2592,13 @@ int main(int argc, char **argv) {
 	bool		doEncryptionUnitTests = true;
 	bool		doSignatureTest = true;
 	bool		doSignatureUnitTests = true;
-	bool		doXKMSTest = true;
+
+	// Testing for which Crypto API to use by default - only really useful on windows
+#if !defined(XSEC_HAVE_OPENSSL)
+#if defined(XSEC_HAVE_WINCAPI)
+	g_useWinCAPI = true;
+#endif
+#endif
 
 	int paramCount = 1;
 
@@ -2566,7 +2619,7 @@ int main(int argc, char **argv) {
 		}
 #endif
 #if defined(XSEC_HAVE_NSS)
-		else if (stricmp(argv[paramCount], "--nss") == 0 || stricmp(argv[paramCount], "-n") == 0) {
+		else if (_stricmp(argv[paramCount], "--nss") == 0 || _stricmp(argv[paramCount], "-n") == 0) {
 			g_useNSS = true;
 			paramCount++;
 		}
@@ -2576,31 +2629,31 @@ int main(int argc, char **argv) {
 			doEncryptionTest = false;
 			doEncryptionUnitTests = false;
 			doSignatureUnitTests = false;
-			doXKMSTest = false;
 			paramCount++;
 		}
 		else if (_stricmp(argv[paramCount], "--encryption-only") == 0 || _stricmp(argv[paramCount], "-e") == 0) {
 			doSignatureTest = false;
 			doEncryptionUnitTests = false;
 			doSignatureUnitTests = false;
-			doXKMSTest = false;
 			paramCount++;
 		}
 		else if (_stricmp(argv[paramCount], "--encryption-unit-only") == 0 || _stricmp(argv[paramCount], "-u") == 0) {
 			doEncryptionTest = false;
 			doSignatureTest = false;
 			doSignatureUnitTests = false;
-			doXKMSTest = false;
 			paramCount++;
 		}
 		else if (_stricmp(argv[paramCount], "--signature-unit-only") == 0 || _stricmp(argv[paramCount], "-t") == 0) {
 			doEncryptionTest = false;
 			doSignatureTest = false;
 			doEncryptionUnitTests = false;
-			doXKMSTest = false;
 			paramCount++;
 		}
-/*		else if (stricmp(argv[paramCount], "--xkms-only") == 0 || stricmp(argv[paramCount], "-x") == 0) {
+        else if (_stricmp(argv[paramCount], "--no-gcm") == 0) {
+            g_testGCM = false;
+            paramCount++;
+        }
+        /*		else if (stricmp(argv[paramCount], "--xkms-only") == 0 || stricmp(argv[paramCount], "-x") == 0) {
 			doEncryptionTest = false;
 			doSignatureTest = false;
 			doEncryptionUnitTests = false;
@@ -2632,7 +2685,7 @@ int main(int argc, char **argv) {
 	try {
 
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XPathEvaluator::initialize();
 		XalanTransformer::initialize();
 #endif
@@ -2723,23 +2776,12 @@ int main(int argc, char **argv) {
 
 			unitTestEncrypt(impl);
 		}
-/*
-		// Running XKMS Base test
-		if (doXKMSTest) {
-			cerr << endl << "====================================";
-			cerr << endl << "Performing XKMS Function";
-			cerr << endl << "====================================";
-			cerr << endl << endl;
-
-			testXKMS(impl);
-		}
-*/
 		cerr << endl << "All tests passed" << endl;
 
 	}
 
 	XSECPlatformUtils::Terminate();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 	XalanTransformer::terminate();
 	XPathEvaluator::terminate();
 #endif

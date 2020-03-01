@@ -23,7 +23,7 @@
  * XENCEncryptedData := Definition for holder object for EncryptedData 
  * element
  *
- * $Id: XENCEncryptedData.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCEncryptedData.hpp 1826046 2018-03-06 21:06:58Z scantor $
  *
  */
 
@@ -35,6 +35,8 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xenc/XENCEncryptedType.hpp>
 #include <xsec/xenc/XENCCipherData.hpp>
+
+class XSECEnv;
 
 /**
  * @ingroup xenc
@@ -65,7 +67,7 @@
  */
 
 
-class XENCEncryptedData : public XENCEncryptedType {
+class XSEC_EXPORT XENCEncryptedData : public virtual XENCEncryptedType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -77,6 +79,25 @@ protected:
 public:
 
 	virtual ~XENCEncryptedData() {};
+
+
+	/**
+	* \brief Create a new object.
+	*
+	* Create a new object.
+	*
+	* @param env environment instance
+	* @param type type of cipher data
+	* @param algorithm algorithm to use
+	* @param value value to use
+	*
+	* @returns the new object
+	*/
+	static XENCEncryptedData* create(
+		const XSECEnv* env,
+		XENCCipherData::XENCCipherDataType type,
+		const XMLCh * algorithm,
+		const XMLCh * value);
 
 	/** @name Get Interface Methods */
 	//@{

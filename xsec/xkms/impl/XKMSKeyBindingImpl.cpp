@@ -22,7 +22,7 @@
  *
  * XKMSKeyBindingImpl := Implementation for KeyBinding
  *
- * $Id: XKMSKeyBindingImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSKeyBindingImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -31,12 +31,16 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
 
-#include <xercesc/dom/DOM.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 #include "XKMSKeyBindingImpl.hpp"
 #include "XKMSStatusImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
+
+#include <xercesc/dom/DOM.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -125,3 +129,4 @@ XKMSStatus * XKMSKeyBindingImpl::getStatus(void) const {
 
 }
 
+#endif /* XSEC_XKMS_ENABLED */

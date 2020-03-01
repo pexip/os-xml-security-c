@@ -22,7 +22,7 @@
  *
  * XENCCipherDataImpl := Implementation of CipherData elements 
  *
- * $Id: XENCCipherDataImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherDataImpl.hpp 1817224 2017-12-05 19:27:33Z scantor $
  *
  */
 
@@ -61,10 +61,10 @@ public:
 
 
 	// Interface methods
-	virtual XENCCipherDataType getCipherDataType(void);
-	virtual XENCCipherValue * getCipherValue(void);
-	virtual XENCCipherReference * getCipherReference(void);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void)
+	virtual XENCCipherDataType getCipherDataType(void) const;
+	virtual XENCCipherValue * getCipherValue(void) const;
+	virtual XENCCipherReference * getCipherReference(void) const;
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void) const
 		{return mp_cipherDataElement;}
 
 

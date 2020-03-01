@@ -22,7 +22,7 @@
  *
  * TXFMXPath := Class that performs XPath transforms
  *
- * $Id: TXFMXPath.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMXPath.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -42,7 +42,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNamedNodeMap);
 
 // Xalan
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 #include <xalanc/XalanDOM/XalanDocument.hpp>
 #include <xalanc/XercesParserLiaison/XercesDocumentWrapper.hpp>
@@ -58,7 +58,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNamedNodeMap);
 
 #endif
 
-#ifndef XSEC_NO_XPATH
+#ifdef XSEC_HAVE_XPATH
 
 /**
  * \brief Transformer to handle XPath transforms
@@ -66,7 +66,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMNamedNodeMap);
  */
 
 
-class DSIG_EXPORT TXFMXPath : public TXFMBase {
+class XSEC_EXPORT TXFMXPath : public TXFMBase {
 
 private:
 
@@ -83,7 +83,7 @@ private:
 public:
 
 	TXFMXPath(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMXPath();
+	virtual ~TXFMXPath();
 
 	// Methods to set the inputs
 
@@ -91,9 +91,9 @@ public:
 	
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual TXFMBase::nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual TXFMBase::nodeType getNodeType(void) const;
 
 	// XPath unique
 
@@ -104,10 +104,7 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
-	virtual XSECXPathNodeList	& getXPathNodeList();
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument() const;
 private:
 	TXFMXPath();
 };

@@ -1,9 +1,9 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: http://santuario.apache.org/cindex.html
 Upstream-Name: Apache Santuario XML-Security-C library
 
 Files: *
-Copyright: 2010-2013 The Apache Software Foundation
+Copyright: 2010-2018 The Apache Software Foundation
 License: Apache-2.0
 
 Files: */Makefile.in
@@ -94,7 +94,7 @@ License: FSF-configure-unlimited
 Files: debian/*
 Copyright: 2006-2013
     The Board of Trustees of the Leland Stanford Junior University
-  2015-2016 Ferenc Wágner <wferi@debian.org>
+  2015-2018 Ferenc Wágner <wferi@debian.org>
 License: Expat
 
 Files: m4/ax_pthread.m4

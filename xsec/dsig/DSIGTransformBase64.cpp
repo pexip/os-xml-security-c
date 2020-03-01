@@ -22,7 +22,7 @@
  *
  * DSIGTransformBase64 := Class that holds a Base64 transform structure
  *
- * $Id: DSIGTransformBase64.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformBase64.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
@@ -30,14 +30,15 @@
 
 #include <xsec/dsig/DSIGTransformBase64.hpp>
 #include <xsec/dsig/DSIGSignature.hpp>
+#include <xsec/framework/XSECException.hpp>
+#include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/transformers/TXFMBase64.hpp>
 #include <xsec/transformers/TXFMC14n.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
 #include <xsec/transformers/TXFMXPath.hpp>
-#include <xsec/framework/XSECException.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECError.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -60,13 +61,6 @@ DSIGTransformBase64::~DSIGTransformBase64() {};
 // --------------------------------------------------------------------------------
 
 
-transformType DSIGTransformBase64::getTransformType() {
-
-	return TRANSFORM_BASE64;
-
-}
-
-
 void DSIGTransformBase64::appendTransformer(TXFMChain * input) {
 
 	// If the input is a Nodeset then we need to find the text from the input
@@ -75,7 +69,7 @@ void DSIGTransformBase64::appendTransformer(TXFMChain * input) {
 
 		if (input->getLastTxfm()->getNodeType() != TXFMBase::DOM_NODE_XPATH_NODESET) {
 
-#ifdef XSEC_NO_XPATH
+#ifndef XSEC_HAVE_XPATH
 
 			throw XSECException(XSECException::UnsupportedFunction,
 				"Unable to extract Base64 text from Nodes without XPath support");

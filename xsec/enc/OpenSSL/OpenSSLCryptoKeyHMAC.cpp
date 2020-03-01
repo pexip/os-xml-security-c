@@ -20,26 +20,30 @@
 /*
  * XSEC
  *
- * XSECCryptoKeyHMAC := Raw HMAC buffers
+ * OpenSSLXSECCryptoKeyHMAC := Raw HMAC buffers
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: OpenSSLCryptoKeyHMAC.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: OpenSSLCryptoKeyHMAC.cpp 1817876 2017-12-12 01:27:14Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
+
 #if defined (XSEC_HAVE_OPENSSL)
 
+#include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
 #include <xsec/framework/XSECError.hpp>
 
-OpenSSLCryptoKeyHMAC::OpenSSLCryptoKeyHMAC() :m_keyBuf("") {
+OpenSSLCryptoKeyHMAC::OpenSSLCryptoKeyHMAC() : m_keyBuf(""), m_keyLen(0) {
 
 	m_keyBuf.isSensitive();
-	m_keyLen = 0;
+}
 
-};
+const XMLCh* OpenSSLCryptoKeyHMAC::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVOpenSSL;
+}
 
 void OpenSSLCryptoKeyHMAC::setKey(unsigned char * inBuf, unsigned int inLength) {
 

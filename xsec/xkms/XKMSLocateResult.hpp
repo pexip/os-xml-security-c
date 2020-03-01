@@ -22,7 +22,7 @@
  *
  * XKMSLocateResult := Interface for LocateResult Messages
  *
- * $Id: XKMSLocateResult.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSLocateResult.hpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
@@ -32,6 +32,9 @@
 // XSEC Includes
 
 #include <xsec/framework/XSECDefs.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
 #include <xsec/xkms/XKMSResultType.hpp>
 
 class XKMSQueryKeyBinding;
@@ -67,7 +70,7 @@ class XKMSUnverifiedKeyBinding;
 \endverbatim
  */
 
-class XKMSLocateResult : public XKMSResultType {
+class XSEC_EXPORT XKMSLocateResult : public XKMSResultType {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -133,5 +136,7 @@ private:
 	XKMSLocateResult & operator = (const XKMSLocateResult &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSLOCATERESULT_INCLUDE */

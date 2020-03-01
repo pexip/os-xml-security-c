@@ -34,13 +34,13 @@
 
 // XML-Security-C (XSEC)
 
-#include <xsec/framework/XSECProvider.hpp>
 #include <xsec/dsig/DSIGReference.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
-#include <xsec/framework/XSECException.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoX509.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
+#include <xsec/framework/XSECProvider.hpp>
+#include <xsec/framework/XSECException.hpp>
+#include <xsec/utils/XSECPlatformUtils.hpp>
 
+#include "../utils/XSECDOMUtils.hpp"
 
 // Xerces
 
@@ -50,13 +50,9 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-#ifndef XSEC_NO_XALAN
-
-// Xalan
-
+#ifdef XSEC_HAVE_XALAN
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 XALAN_USING_XALAN(XalanTransformer)
-
 #endif
 
 char docToValidate [4096] = "\
@@ -115,7 +111,7 @@ int main (int argc, char **argv) {
 
 	try {
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XalanTransformer::initialize();
 #endif
 		XSECPlatformUtils::Initialise();
@@ -138,7 +134,7 @@ int main (int argc, char **argv) {
 
 	MemBufInputSource* memIS = new MemBufInputSource ((const XMLByte*) docToValidate, (unsigned int) strlen(docToValidate), "XSECMem");
 
-	xsecsize_t errorCount = 0;
+	XMLSize_t errorCount = 0;
 
 	parser->parse(*memIS);
     errorCount = parser->getErrorCount();
@@ -176,9 +172,8 @@ int main (int argc, char **argv) {
 
 
 	try {
-		// Use the OpenSSL interface objects to get a signing key
-
-		OpenSSLCryptoX509 * x509 = new OpenSSLCryptoX509();
+		// Use the interface objects to get a signing key
+		XSECCryptoX509* x509 = XSECPlatformUtils::g_cryptoProvider->X509();
 		x509->loadX509Base64Bin(cert, (unsigned int) strlen(cert));
 		
 		sig->load();
@@ -243,15 +238,15 @@ int main (int argc, char **argv) {
 
 	}
 
-	catch (XSECException &e)
+	catch (const XSECException &e)
 	{
-		cerr << "An error occured during a signature load\n   Message: "
+		cerr << "An error occurred during a signature load\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 		
 	}
-	catch (XSECCryptoException &e) {
-		cerr << "An error occured in the XML-Security-C Crypto routines\n   Message: "
+	catch (const XSECCryptoException &e) {
+		cerr << "An error occurred in the XML-Security-C Crypto routines\n   Message: "
 		<< e.getMsg() << endl;
 		exit(1);
 	}

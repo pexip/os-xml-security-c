@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: threadtest.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: threadtest.cpp 1832576 2018-05-30 23:45:26Z scantor $
  *
  */
 
@@ -43,6 +43,8 @@
 #		error No crypto provider available
 #	endif
 #endif
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/dom/DOM.hpp>
@@ -108,31 +110,21 @@ void outputDoc (DOMImplementation *impl, DOMDocument * doc) {
 
 	XMLFormatTarget *formatTarget = new StdOutFormatTarget();
 
-    // Output a doc to stdout
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-    // DOM L3 version as per Xerces 3.0 API
-    DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+	// Output a doc to stdout
+	DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
 
-    // Get the config so we can set up pretty printing
-    DOMConfiguration *dc = theSerializer->getDomConfig();
-    dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
+	// Get the config so we can set up pretty printing
+	DOMConfiguration *dc = theSerializer->getDomConfig();
+	dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
 
-    // Now create an output object to format to UTF-8
-    DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-    Janitor<DOMLSOutput> j_theOutput(theOutput);
+	// Now create an output object to format to UTF-8
+	DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+	Janitor<DOMLSOutput> j_theOutput(theOutput);
 
-    theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-    theOutput->setByteStream(formatTarget);
-    
-    theSerializer->write(doc, theOutput);
-#else
-    DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
+	theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+	theOutput->setByteStream(formatTarget);
 
-	theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-	if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true))
-		theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
-	theSerializer->writeNode(formatTarget, *doc);
-#endif
+	theSerializer->write(doc, theOutput);
 
 	cout << endl;
 
@@ -147,34 +139,24 @@ void addDocToQueue (DOMImplementation *impl, DOMDocument * doc) {
 
 	MemBufFormatTarget *formatTarget = new MemBufFormatTarget();
 
-#if defined (XSEC_XERCES_DOMLSSERIALIZER)
-    // DOM L3 version as per Xerces 3.0 API
-    DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+	// DOM L3 version as per Xerces 3.0 API
+	DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
 
-    // Get the config so we can set up pretty printing
-    DOMConfiguration *dc = theSerializer->getDomConfig();
-    dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
+	// Get the config so we can set up pretty printing
+	DOMConfiguration *dc = theSerializer->getDomConfig();
+	dc->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, false);
 
-    // Now create an output object to format to UTF-8
-    DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
-    Janitor<DOMLSOutput> j_theOutput(theOutput);
+	// Now create an output object to format to UTF-8
+	DOMLSOutput *theOutput = ((DOMImplementationLS*)impl)->createLSOutput();
+	Janitor<DOMLSOutput> j_theOutput(theOutput);
 
-    theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-    theOutput->setByteStream(formatTarget);
-    
-    theSerializer->write(doc, theOutput);
-#else
-	DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
+	theOutput->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
+	theOutput->setByteStream(formatTarget);
 
-	theSerializer->setEncoding(MAKE_UNICODE_STRING("UTF-8"));
-	if (theSerializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false))
-		theSerializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, false);
-
-	theSerializer->writeNode(formatTarget, *doc);
-#endif
+	theSerializer->write(doc, theOutput);
 
 	// Copy to a new buffer
-	xsecsize_t len = formatTarget->getLen();
+	XMLSize_t len = formatTarget->getLen();
 	char * buf = new char [len + 1];
 	memcpy(buf, formatTarget->getRawBuffer(), len);
 	buf[len] = '\0';
@@ -271,10 +253,10 @@ DWORD WINAPI doSignThread (LPVOID Param) {
 		DOMElement * sigNode;
 
 		sig->setDSIGNSPrefix(MAKE_UNICODE_STRING("ds"));
-		sigNode = sig->createBlankSignature(myDoc, CANON_C14N_COM, SIGNATURE_HMAC, HASH_SHA1);
+		sigNode = sig->createBlankSignature(myDoc, DSIGConstants::s_unicodeStrURIC14N_COM, DSIGConstants::s_unicodeStrURIHMAC_SHA1);
 		myRootElem->appendChild(sigNode);
 		myRootElem->appendChild(myDoc->createTextNode(DSIGConstants::s_unicodeStrNL));
-		ref = sig->createReference(MAKE_UNICODE_STRING(""));
+		ref = sig->createReference(MAKE_UNICODE_STRING(""), DSIGConstants::s_unicodeStrURISHA1);
 		ref->appendEnvelopedSignatureTransform();
 
 		sig->appendKeyName(MAKE_UNICODE_STRING("The secret key is \"secret\""));

@@ -22,7 +22,7 @@
  *
  * TXFMEnvelope := Class that calculates an Envelope with an XPath evaluator
  *
- * $Id: TXFMEnvelope.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMEnvelope.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -40,7 +40,7 @@
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMEnvelope : public TXFMBase {
+class XSEC_EXPORT TXFMEnvelope : public TXFMBase {
 
 private:
 
@@ -50,7 +50,7 @@ private:
 public:
 
 	TXFMEnvelope(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMEnvelope();
+	virtual ~TXFMEnvelope();
 
 	// Methods to set the inputs
 
@@ -58,9 +58,9 @@ public:
 	
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual TXFMBase::nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual TXFMBase::nodeType getNodeType(void) const;
 
 	// Envelope unique
 
@@ -69,10 +69,7 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
-	virtual XSECXPathNodeList	& getXPathNodeList();
+	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument() const;
 private:
 	TXFMEnvelope();
 };

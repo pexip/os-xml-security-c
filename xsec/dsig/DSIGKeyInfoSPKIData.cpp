@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGKeyInfoSPKIData.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGKeyInfoSPKIData.cpp 1830720 2018-05-02 02:11:57Z scantor $
  *
  */
 
@@ -34,6 +34,8 @@
 #include <xsec/framework/XSECEnv.hpp>
 
 #include <xercesc/dom/DOM.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 XERCES_CPP_NAMESPACE_USE
 

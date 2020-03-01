@@ -22,7 +22,7 @@
  *
  * XENCEncryptedDataImpl := Implementation for holder object for EncryptedData 
  *
- * $Id: XENCEncryptedDataImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCEncryptedDataImpl.hpp 1820684 2018-01-09 17:46:14Z scantor $
  *
  */
 
@@ -37,6 +37,9 @@
 #include "XENCCipherImpl.hpp"
 #include "XENCEncryptedTypeImpl.hpp"
 
+#pragma warning(push)
+#pragma warning(disable: 4250)
+
 XSEC_DECLARE_XERCES_CLASS(DOMNode);
 
 class XENCEncryptedDataImpl : public XENCEncryptedData, public XENCEncryptedTypeImpl {
@@ -50,7 +53,7 @@ public:
 	);
 	virtual ~XENCEncryptedDataImpl();
 
-	void load(void);
+	void load();
 
 	// Create a blank EncryptedData DOM structure
 
@@ -59,57 +62,15 @@ public:
 								 const XMLCh * algorithm,
 								 const XMLCh * value);
 
-	// Interface methods
-
-	// Inherited from XENCEncryptedData - need to re-implement
-	virtual XENCCipherData * getCipherData(void) const
-		{return XENCEncryptedTypeImpl::getCipherData();}
-	virtual DSIGKeyInfoList * getKeyInfoList(void)
-		{return XENCEncryptedTypeImpl::getKeyInfoList();}
-	virtual XENCEncryptionMethod * getEncryptionMethod(void) const
-		{return XENCEncryptedTypeImpl::getEncryptionMethod();}
-	virtual void clearKeyInfo(void)
-		{XENCEncryptedTypeImpl::clearKeyInfo();}
-	virtual DSIGKeyInfoValue * appendDSAKeyValue(const XMLCh * P, 
-						   const XMLCh * Q, 
-						   const XMLCh * G, 
-						   const XMLCh * Y)
-	    {return XENCEncryptedTypeImpl::appendDSAKeyValue(P, Q, G, Y);}
-	virtual DSIGKeyInfoValue * appendRSAKeyValue(const XMLCh * modulus, 
-						   const XMLCh * exponent)
-	    {return XENCEncryptedTypeImpl::appendRSAKeyValue(modulus, exponent);}
-	virtual DSIGKeyInfoX509 * appendX509Data(void)
-	    {return XENCEncryptedTypeImpl::appendX509Data();}
-	virtual DSIGKeyInfoName * appendKeyName(const XMLCh * name, bool isDName = false)
-		{return XENCEncryptedTypeImpl::appendKeyName(name, isDName);}
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * getElement(void) const
-		{return XENCEncryptedTypeImpl::getElement();}
-	virtual void appendEncryptedKey(XENCEncryptedKey * encryptedKey)
-		{XENCEncryptedTypeImpl::appendEncryptedKey(encryptedKey);}
-
-	// Get methods
-	virtual const XMLCh * getType(void) const
-		{return XENCEncryptedTypeImpl::getType();}
-	virtual const XMLCh * getMimeType(void) const
-		{return XENCEncryptedTypeImpl::getMimeType();}
-	virtual const XMLCh * getEncoding(void) const
-		{return XENCEncryptedTypeImpl::getEncoding();}
-
-	// Set methods
-	virtual void setType(const XMLCh * uri)
-		{XENCEncryptedTypeImpl::setType(uri);}
-	virtual void setMimeType(const XMLCh * mimeType)
-		{XENCEncryptedTypeImpl::setMimeType(mimeType);}
-	virtual void setEncoding(const XMLCh * uri)
-		{XENCEncryptedTypeImpl::setEncoding(uri);}
-
 private:
 
 	// Unimplemented
-	XENCEncryptedDataImpl(void);
+	XENCEncryptedDataImpl();
 	XENCEncryptedDataImpl(const XENCEncryptedDataImpl &);
 	XENCEncryptedDataImpl & operator = (const XENCEncryptedDataImpl &);
 
 };
+
+#pragma warning(pop)
 
 #endif /* XENCENCRYPTEDDATAIMPL_INCLUDE */

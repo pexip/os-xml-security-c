@@ -24,7 +24,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: DSIGTransform.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransform.hpp 1817973 2017-12-13 03:18:57Z scantor $
  *
  */
 
@@ -61,7 +61,7 @@ class TXFMChain;
  */
 
 
-class DSIG_EXPORT DSIGTransform {
+class XSEC_EXPORT DSIGTransform {
 
 public:
 
@@ -119,15 +119,6 @@ public:
 
 	//@{
 
-	/**
-	 * \brief Determine the transform type.
-	 *
-	 * Used to determine what the type of the transform is.
-	 *
-	 */
-
-	virtual transformType getTransformType() = 0;
-	
 	/**
 	 * \brief Create the transformer element and append to an existing Chain.
 	 *

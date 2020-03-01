@@ -22,7 +22,7 @@
  *
  * XKMSAuthentication := Interface for ValidityInterval elements
  *
- * $Id: XKMSAuthentication.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSAuthentication.hpp 1826172 2018-03-08 04:40:40Z scantor $
  *
  */
 
@@ -33,6 +33,8 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/dsig/DSIGConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 class DSIGSignature;
 class XKMSNotBoundAuthentication;
@@ -66,7 +68,7 @@ class XKMSNotBoundAuthentication;
 \endverbatim
  */
 
-class XKMSAuthentication {
+class XSEC_EXPORT XKMSAuthentication {
 
 	/** @name Constructors and Destructors */
 	//@{
@@ -127,9 +129,9 @@ public:
 	 */
 
 	virtual DSIGSignature * addKeyBindingAuthenticationSignature(
-		canonicalizationMethod cm = CANON_C14NE_NOC,
-		signatureMethod	sm = SIGNATURE_HMAC,
-		hashMethod hm = HASH_SHA1) = 0;
+                const XMLCh* c14nAlgorithm,
+                const XMLCh* signatureAlgorithm,
+                const XMLCh* hashAlgorithm) = 0;
 
 	/**
 	 * \brief Set the NotBoundAuthentication value
@@ -151,5 +153,7 @@ private:
 	XKMSAuthentication & operator = (const XKMSAuthentication &);
 
 };
+
+#endif /* XSEC_XKMS_ENABLED */
 
 #endif /* XKMSAUTHENTICATION_INCLUDE */

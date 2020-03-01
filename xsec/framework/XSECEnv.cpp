@@ -23,16 +23,17 @@
  * XSECEnv := Configuration class - used by the other classes to retrieve
  *            information on the environment they are working under
  *
- * $Id: XSECEnv.cpp 1478615 2013-05-03 00:07:02Z scantor $
+ * $Id: XSECEnv.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC Includes
+#include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECURIResolver.hpp>
-#include <xsec/dsig/DSIGConstants.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
+
+#include "../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/util/XMLUniDefs.hpp>
 
@@ -98,6 +99,7 @@ const XMLCh s_defaultXENC11Prefix[] = {
 
 };
 
+#ifdef XSEC_XKMS_ENABLED
 const XMLCh s_defaultXKMSPrefix[] = {
 
 	chLatin_x,
@@ -107,6 +109,7 @@ const XMLCh s_defaultXKMSPrefix[] = {
 	chNull
 
 };
+#endif
 
 // --------------------------------------------------------------------------------
 //           Default Id names
@@ -145,8 +148,9 @@ XSECEnv::XSECEnv(DOMDocument *doc) {
 	mp_xpfPrefixNS = XMLString::replicate(s_defaultXPFPrefix);
 	mp_xencPrefixNS = XMLString::replicate(s_defaultXENCPrefix);
     mp_xenc11PrefixNS = XMLString::replicate(s_defaultXENC11Prefix);
+#ifdef XSEC_XKMS_ENABLED
 	mp_xkmsPrefixNS = XMLString::replicate(s_defaultXKMSPrefix);
-
+#endif
 	m_prettyPrintFlag = true;
 
 	mp_URIResolver = NULL;
@@ -156,7 +160,7 @@ XSECEnv::XSECEnv(DOMDocument *doc) {
 												XMLFormatter::UnRep_CharRef));
 
 	// Set up IDs
-	m_idByAttributeNameFlag = true;		// At the moment this is on by default
+	m_idByAttributeNameFlag = false;		// Now off by default.
 	// Register "Id" and "id" as valid Attribute names
 	registerIdAttributeName(s_Id);
 	registerIdAttributeName(s_id);
@@ -173,8 +177,9 @@ XSECEnv::XSECEnv(const XSECEnv & theOther) {
 	mp_xpfPrefixNS = XMLString::replicate(theOther.mp_xpfPrefixNS);
 	mp_xencPrefixNS = XMLString::replicate(theOther.mp_xencPrefixNS);
     mp_xenc11PrefixNS = XMLString::replicate(s_defaultXENC11Prefix);
+#ifdef XSEC_XKMS_ENABLED
 	mp_xkmsPrefixNS = XMLString::replicate(theOther.mp_xkmsPrefixNS);
-
+#endif
 	m_prettyPrintFlag = theOther.m_prettyPrintFlag;
 
 	if (theOther.mp_URIResolver != NULL)
@@ -225,9 +230,11 @@ XSECEnv::~XSECEnv() {
 		XSEC_RELEASE_XMLCH(mp_xenc11PrefixNS);
 	}
 
+#ifdef XSEC_XKMS_ENABLED
 	if (mp_xkmsPrefixNS != NULL) {
 		XSEC_RELEASE_XMLCH(mp_xkmsPrefixNS);
 	}
+#endif
 
 	if (mp_URIResolver != NULL) {
 		delete mp_URIResolver;
@@ -329,6 +336,7 @@ void XSECEnv::setXENC11NSPrefix(const XMLCh * prefix) {
 
 }
 
+#ifdef XSEC_XKMS_ENABLED
 void XSECEnv::setXKMSNSPrefix(const XMLCh * prefix) {
 
 	if (mp_xkmsPrefixNS != NULL)
@@ -337,6 +345,7 @@ void XSECEnv::setXKMSNSPrefix(const XMLCh * prefix) {
 	mp_xkmsPrefixNS = XMLString::replicate(prefix);
 
 }
+#endif
 
 // --------------------------------------------------------------------------------
 //           Id Attribute Names Handling

@@ -22,21 +22,21 @@
  *
  * DSIGTransformXPath := Class that holds XPath transforms
  *
- * $Id: DSIGTransformXPath.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformXPath.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
-
+#include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/dsig/DSIGTransformXPath.hpp>
 #include <xsec/transformers/TXFMXPath.hpp>
+#include <xsec/framework/XSECEnv.hpp>
+#include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECException.hpp>
 #include <xsec/transformers/TXFMC14n.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
-#include <xsec/framework/XSECError.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/dsig/DSIGSignature.hpp>
 
-#include <xercesc/util/Janitor.hpp>
+#include "../utils/XSECDOMUtils.hpp"
+
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -69,16 +69,10 @@ DSIGTransformXPath::~DSIGTransformXPath() {};
 // --------------------------------------------------------------------------------
 //           Interface Methods
 // --------------------------------------------------------------------------------
-	
-transformType DSIGTransformXPath::getTransformType() {
-
-	return TRANSFORM_XPATH;
-
-}
 
 void DSIGTransformXPath::appendTransformer(TXFMChain * input) {
 
-#ifdef XSEC_NO_XPATH
+#ifndef XSEC_HAVE_XPATH
 
 	throw XSECException(XSECException::UnsupportedFunction,
 		"XPath transforms are not supported in this compilation of the XSEC library");
@@ -96,7 +90,7 @@ void DSIGTransformXPath::appendTransformer(TXFMChain * input) {
 	x->setNameSpace(mp_NSMap);
 	x->evaluateExpr(mp_txfmNode, m_expr);
 	
-#endif /* NO_XPATH */
+#endif /* XSEC_HAVE_XPATH */
 
 }
 
@@ -176,7 +170,7 @@ void DSIGTransformXPath::load(void) {
 //           XPath Transform Specific Methods
 // --------------------------------------------------------------------------------
 
-void DSIGTransformXPath::setExpression(const char * expr) {
+void DSIGTransformXPath::setExpression(const char* expr) {
 
 	mp_exprTextNode->setNodeValue(MAKE_UNICODE_STRING(expr));
 
@@ -186,7 +180,7 @@ void DSIGTransformXPath::setExpression(const char * expr) {
 
 
 
-const char * DSIGTransformXPath::getExpression(void) {
+const char* DSIGTransformXPath::getExpression() const {
 
 	return m_expr.rawCharBuffer();
 

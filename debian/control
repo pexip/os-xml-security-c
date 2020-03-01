@@ -1,40 +1,34 @@
 Source: xml-security-c
 Section: libs
-Priority: extra
+Priority: optional
 Maintainer: Pexip AS <packaging@pexip.com>
 XSBC-Pexip-Original-Maintainer: Debian Shib Team <pkg-shibboleth-devel@lists.alioth.debian.org>
 XSBC-Pexip-Original-Uploaders:
- Russ Allbery <rra@debian.org>,
  Ferenc Wágner <wferi@debian.org>,
  Etienne Dysli Metref <etienne.dysli-metref@switch.ch>,
 Build-Depends:
- debhelper (>= 9),
- dh-autoreconf,
- libssl1.0-dev (>= 1.0.1),
+ debhelper (>= 11~),
+ libssl1.0-dev | libssl-dev (<< 1.1),
+ libxalan-c-dev,
  libxerces-c-dev,
  pkg-config,
-Standards-Version: 3.9.8
+Standards-Version: 4.2.1
 Homepage: http://santuario.apache.org/cindex.html
-Vcs-Git: https://anonscm.debian.org/git/pkg-shibboleth/xml-security-c.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-shibboleth/xml-security-c.git
+Vcs-Git: https://salsa.debian.org/shib-team/xml-security-c.git
+Vcs-Browser: https://salsa.debian.org/shib-team/xml-security-c
+X-Common-Description: Apache XML Security for C++ is a library for the XML
+ Digital Security specification.  It provides processing and handling of XML
+ Key Management Specifications (XKMS) messages.
 XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
 
-Package: libxml-security-c17v5
+Package: libxml-security-c20
 Architecture: any
 Multi-Arch: same
-Pre-Depends:
- ${misc:Pre-Depends},
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
-Conflicts:
- libxml-security-c17,
-Replaces:
- libxml-security-c17,
 Description: C++ library for XML Digital Signatures (runtime)
- Apache XML Security for C++ is a library for the XML Digital Security
- specification.  It provides processing and handling of XML Key Management
- Specifications (XKMS) messages.
+ ${S:X-Common-Description}
  .
  This package contains the files necessary for running applications that
  use the Apache XML Security for C++ library.
@@ -44,14 +38,13 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends:
- libssl1.0-dev,
+ libssl-dev,
+ libxalan-c-dev,
  libxerces-c-dev,
- libxml-security-c17v5 (= ${binary:Version}),
+ libxml-security-c20 (= ${binary:Version}),
  ${misc:Depends},
 Description: C++ library for XML Digital Signatures (development)
- Apache XML Security for C++ is a library for the XML Digital Security
- specification.  It provides processing and handling of XML Key Management
- Specifications (XKMS) messages.
+ ${S:X-Common-Description}
  .
  This package contains the Apache XML Security for C++ development files.
 
@@ -63,9 +56,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: C++ library for XML Digital Signatures (utilities)
- Apache XML Security for C++ is a library for the XML Digital Security
- specification.  It provides processing and handling of XML Key Management
- Specifications (XKMS) messages.
+ ${S:X-Common-Description}
  .
  This package contains the Apache XML Security for C++ utilities, which
  support signing and verifying XML files from the command line among

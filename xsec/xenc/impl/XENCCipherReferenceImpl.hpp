@@ -22,7 +22,7 @@
  *
  * XENCCipherReference := Implementation for CipherReference element
  *
- * $Id: XENCCipherReferenceImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XENCCipherReferenceImpl.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -68,7 +68,7 @@ public:
 	virtual DSIGTransformXPath * appendXPathTransform(const char * expr);
 	virtual DSIGTransformXPathFilter * appendXPathFilterTransform(void);
 	virtual DSIGTransformXSL * appendXSLTransform(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *stylesheet);
-	virtual DSIGTransformC14n * appendCanonicalizationTransform(canonicalizationMethod cm);
+	virtual DSIGTransformC14n * appendCanonicalizationTransform(const XMLCh* uri);
 
 
 private:

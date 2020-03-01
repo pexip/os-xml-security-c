@@ -23,7 +23,7 @@
  * XSECAlgorithmHandler := Interface class to define handling of
  *						   encryption and signature algorithms
  *
- * $Id: XSECAlgorithmHandler.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECAlgorithmHandler.hpp 1826172 2018-03-08 04:40:40Z scantor $
  *
  */
 
@@ -70,7 +70,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMDocument);
  * thread safe!
  */
 
-class XSECAlgorithmHandler {
+class XSEC_EXPORT XSECAlgorithmHandler {
 
 public:
 	
@@ -116,10 +116,10 @@ public:
 	virtual bool encryptToSafeBuffer(
 		TXFMChain * plainText,
 		XENCEncryptionMethod * encryptionMethod,
-		XSECCryptoKey * key,
+		const XSECCryptoKey * key,
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * doc,
 		safeBuffer & result
-	) = 0;
+	) const = 0;
 
 	//@}
 
@@ -151,10 +151,10 @@ public:
 	virtual unsigned int decryptToSafeBuffer(
 		TXFMChain * cipherText,
 		XENCEncryptionMethod * encryptionMethod,
-		XSECCryptoKey * key,
+		const XSECCryptoKey * key,
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * doc,
 		safeBuffer & result
-	) = 0;
+	) const = 0;
 
 	/**
 	 * \brief Append an appropriate decrypt TXFMer to a cipher txfm chain.
@@ -181,9 +181,9 @@ public:
 	virtual bool appendDecryptCipherTXFM(
 		TXFMChain * cipherText,
 		XENCEncryptionMethod * encryptionMethod,
-		XSECCryptoKey * key,
+		const XSECCryptoKey * key,
 		XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument * doc
-	) = 0;
+	) const = 0;
 
 
 	//@}
@@ -216,10 +216,10 @@ public:
 	virtual unsigned int signToSafeBuffer(
 		TXFMChain * inputBytes,
 		const XMLCh * URI,
-		XSECCryptoKey * key,
+		const XSECCryptoKey * key,
 		unsigned int outputLength,
 		safeBuffer & result
-	) = 0;
+	) const = 0;
 
 	/**
 	 * \brief Validate a signature using an input TXFMChain
@@ -245,8 +245,8 @@ public:
 		const XMLCh * URI,
 		const char * sig,
 		unsigned int outputLength,
-		XSECCryptoKey * key
-	) = 0;
+		const XSECCryptoKey * key
+	) const = 0;
 
 	//@}
 
@@ -268,8 +268,8 @@ public:
 	virtual bool appendSignatureHashTxfm(
 		TXFMChain * inputBytes,
 		const XMLCh * URI,
-		XSECCryptoKey * key
-	) = 0;
+		const XSECCryptoKey * key
+	) const = 0;
 
 	/**
 	 * \brief Append a hash to a TXFM Chain based on URI
@@ -286,7 +286,7 @@ public:
 	virtual bool appendHashTxfm(
 		TXFMChain * inputBytes,
 		const XMLCh * URI
-	) = 0;
+	) const = 0;
 
 	//@}
 
@@ -308,7 +308,7 @@ public:
 		const XMLCh * uri,
 		const unsigned char * keyBuffer,
 		unsigned int keyLen
-	) = 0;
+	) const = 0;
 
 	//@}
 

@@ -22,7 +22,7 @@
  *
  * XKMSMessageFactoryImpl := Implementation of the XKMSMessageFactory class
  *
- * $Id: XKMSMessageFactoryImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSMessageFactoryImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -33,6 +33,8 @@
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xkms/XKMSMessageFactory.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 class XSECProvider;
 class XKMSCompoundRequest;
@@ -280,4 +282,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSMESSAGEFACTORYIMPL_INCLUDE */

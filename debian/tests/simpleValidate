@@ -1,0 +1,8 @@
+#!/bin/sh -ex
+
+cd xsec/samples
+g++ $(pkg-config --cflags xml-security-c xerces-c) \
+    -o xsec-simpleValidate \
+    simpleValidate.cpp IOStreamOutputter.cpp \
+    $(pkg-config --libs xml-security-c xerces-c) -lxalan-c
+./xsec-simpleValidate

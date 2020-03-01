@@ -22,17 +22,21 @@
  *
  * XKMSValidateRequestImpl := Implementation of ValidateRequest Messages
  *
- * $Id: XKMSValidateRequestImpl.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSValidateRequestImpl.cpp 1833340 2018-06-11 15:40:13Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/framework/XSECEnv.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/xkms/XKMSConstants.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
+
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include "XKMSValidateRequestImpl.hpp"
+
+#include <xsec/xkms/XKMSConstants.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 
@@ -165,3 +169,5 @@ XKMSQueryKeyBinding * XKMSValidateRequestImpl::addQueryKeyBinding(void) {
 	return mp_queryKeyBinding;
 
 }
+
+#endif /* XSEC_XKMS_ENABLED */

@@ -35,6 +35,8 @@
 #include <xsec/xkms/XKMSRecoverResult.hpp>
 #include <xsec/framework/XSECProvider.hpp>
 
+#ifdef XSEC_XKMS_ENABLED
+
 #include "XKMSResultTypeImpl.hpp"
 
 #include <vector>
@@ -86,8 +88,7 @@ public:
 		XMLCh * DQ,
 		XMLCh * InverseQ,
 		XMLCh * D,		
-		encryptionMethod em,
-		const XMLCh * algorithmURI = NULL);
+		const XMLCh * algorithmURI);
 
 
 
@@ -124,4 +125,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSRECOVERRESULTIMPL_INCLUDE */

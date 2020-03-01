@@ -48,7 +48,7 @@
  */
 
 
-class DSIG_EXPORT OpenSSLCryptoKeyEC : public XSECCryptoKeyEC {
+class XSEC_EXPORT OpenSSLCryptoKeyEC : public XSECCryptoKeyEC {
 
 public :
 
@@ -84,7 +84,7 @@ public :
 	 *\brief Return the OpenSSL string identifier
 	 */
 
-	virtual const XMLCh * getProviderName() const {return DSIGConstants::s_unicodeStrPROVOpenSSL;}
+	virtual const XMLCh * getProviderName() const;
 
 	/**
 	 * \brief Replicate key
@@ -114,7 +114,7 @@ public :
 	virtual unsigned int signBase64SignatureDSA(unsigned char * hashBuf,
 		unsigned int hashLen,
 		char * base64SignatureBuf,
-		unsigned int base64SignatureBufLen);
+		unsigned int base64SignatureBufLen) const;
 
 	/**
 	 * \brief Verify an EC-DSA signature
@@ -132,7 +132,7 @@ public :
 	virtual bool verifyBase64SignatureDSA(unsigned char * hashBuf, 
 							 unsigned int hashLen,
 							 char * base64Signature,
-							 unsigned int sigLen);
+							 unsigned int sigLen) const;
 	
 	//@}
 
@@ -180,7 +180,6 @@ public :
 
 private:
 
-	XSECCryptoKey::KeyType			m_keyType;
 	EC_KEY					        * mp_ecKey;
 	
 };

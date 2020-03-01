@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECC14n20010315.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECC14n20010315.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -81,7 +81,7 @@ struct XSECNodeListElt {
 //           XSECC14n20010315 Object definition
 // --------------------------------------------------------------------------------
 
-class CANON_EXPORT XSECC14n20010315 : public XSECCanon {
+class XSEC_EXPORT XSECC14n20010315 : public XSECCanon {
 
 #if defined(XALAN_NO_NAMESPACES)
 	typedef vector<char *>				CharListVectorType;
@@ -127,7 +127,7 @@ public:
 protected:
 
 	// Implementation of virtual function
-	xsecsize_t processNextNode();
+	XMLSize_t processNextNode();
 
 	// Test whether a name space is in the non-exclusive list
 	bool inNonExclNSList(safeBuffer &ns);
@@ -151,7 +151,6 @@ private:
 	bool m_returnedFromChild;						// Did we get to this node from below?
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode * mp_firstElementNode;			// The root element of the document
 	bool			m_firstElementProcessed;		// Has the first node been handled?
-	unsigned char	* mp_charBuffer;
 
 	// For XPath evaluation
 	bool			  m_XPathSelection;				// Are we doing an XPath?

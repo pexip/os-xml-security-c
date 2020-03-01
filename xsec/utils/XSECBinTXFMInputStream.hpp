@@ -60,7 +60,7 @@ class TXFMBase;
  */
 
 
-class DSIG_EXPORT XSECBinTXFMInputStream : public XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream
+class XSEC_EXPORT XSECBinTXFMInputStream : public XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream
 {
 
 public :
@@ -112,11 +112,7 @@ public :
 	 * @returns Bytes already returned.
 	 */
 
-#ifdef XSEC_XERCES_64BITSAFE
     virtual XMLFilePos curPos() const;
-#else
-    virtual unsigned int curPos() const;
-#endif
 
 	/**
 	 * \brief Retrieve the required number of bytes and return
@@ -132,13 +128,11 @@ public :
 	 * @returns The number of bytes read or 0 if complete.
 	 */
 
-    virtual xsecsize_t readBytes(XMLByte* const  toFill,
-		const xsecsize_t maxToRead);
+    virtual XMLSize_t readBytes(XMLByte* const  toFill,
+		const XMLSize_t maxToRead);
 
 
-#ifdef XSEC_XERCES_INPUTSTREAM_HAS_CONTENTTYPE
     const XMLCh* getContentType() const;
-#endif
 
 private :
 
@@ -147,7 +141,7 @@ private :
 	bool						m_deleteWhenDone;	// Do we delete?
 	bool						m_deleted;			// Have we deleted?
 	bool						m_done;				// Are we done?
-    xsecsize_t				    m_currentIndex;		// How much read?
+    XMLSize_t				    m_currentIndex;		// How much read?
 
 };
 

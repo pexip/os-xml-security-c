@@ -23,7 +23,7 @@
  * TXFMConcatChain := Takes multiple input chains and then provides
  *					  BYTE_STREAM output for each chain in order.
  *
- * $Id: TXFMConcatChains.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: TXFMConcatChains.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -37,7 +37,7 @@ class TXFMChain;
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMConcatChains : public TXFMBase {
+class XSEC_EXPORT TXFMConcatChains : public TXFMBase {
 
 	#if defined(XSEC_NO_NAMESPACES)
 	typedef vector<TXFMChain *>			TXFMChainVectorType
@@ -54,7 +54,7 @@ class DSIG_EXPORT TXFMConcatChains : public TXFMBase {
 public:
 
 	TXFMConcatChains(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *doc);
-	~TXFMConcatChains();
+	virtual ~TXFMConcatChains();
 
 	// Methods to set the inputs.  For the concat class, this will
 	// append the input to the last appended chain
@@ -64,16 +64,13 @@ public:
 	
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual TXFMBase::nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual TXFMBase::nodeType getNodeType(void) const;
 
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
 	
 private:
 	TXFMConcatChains();

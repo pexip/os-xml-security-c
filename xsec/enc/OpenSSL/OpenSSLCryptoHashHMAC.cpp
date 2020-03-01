@@ -24,122 +24,141 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: OpenSSLCryptoHashHMAC.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: OpenSSLCryptoHashHMAC.cpp 1817876 2017-12-12 01:27:14Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
+
 #if defined (XSEC_HAVE_OPENSSL)
 
-
-#include <xsec/enc/OpenSSL/OpenSSLCryptoHashHMAC.hpp>
+#include <xsec/dsig/DSIGConstants.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/XSECCryptoKeyHMAC.hpp>
+#include <xsec/enc/OpenSSL/OpenSSLCryptoHashHMAC.hpp>
 
 #include <memory.h>
 
 // Constructors/Destructors
 
-OpenSSLCryptoHashHMAC::OpenSSLCryptoHashHMAC(HashType alg) {
+OpenSSLCryptoHashHMAC::OpenSSLCryptoHashHMAC(HashType alg) : m_mdLen(0),
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+    mp_hctx(&m_hctx_store)
+#else
+    mp_hctx(HMAC_CTX_new())
+#endif
+	, m_keyLen(0)
+ {
 
-	// Initialise the digest
+    if (!mp_hctx)
+        throw XSECCryptoException(XSECCryptoException::ECError, "OpenSSL::CryptoHashHMAC - cannot allocate contexts");
 
-	switch (alg) {
+    // Initialise the digest
 
-	case (XSECCryptoHash::HASH_SHA1) :
-	
-		mp_md = EVP_get_digestbyname("SHA1");
-		break;
+    switch (alg) {
 
-	case (XSECCryptoHash::HASH_MD5) :
-	
-		mp_md = EVP_get_digestbyname("MD5");
-		break;
+    case (XSECCryptoHash::HASH_SHA1) :
+    
+        mp_md = EVP_get_digestbyname("SHA1");
+        break;
 
-	case (XSECCryptoHash::HASH_SHA224) :
-	
-		mp_md = EVP_get_digestbyname("SHA224");
-		if (mp_md == NULL) {
-			throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:Hash - SHA224 not supported by this version of OpenSSL"); 
-		}
+    case (XSECCryptoHash::HASH_MD5) :
+    
+        mp_md = EVP_get_digestbyname("MD5");
+        break;
 
-		break;
+    case (XSECCryptoHash::HASH_SHA224) :
+    
+        mp_md = EVP_get_digestbyname("SHA224");
+        if (mp_md == NULL) {
+            throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:Hash - SHA224 not supported by this version of OpenSSL"); 
+        }
 
-	case (XSECCryptoHash::HASH_SHA256) :
-	
-		mp_md = EVP_get_digestbyname("SHA256");
-		if (mp_md == NULL) {
-			throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:Hash - SHA256 not supported by this version of OpenSSL"); 
-		}
+        break;
 
-		break;
+    case (XSECCryptoHash::HASH_SHA256) :
+    
+        mp_md = EVP_get_digestbyname("SHA256");
+        if (mp_md == NULL) {
+            throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:Hash - SHA256 not supported by this version of OpenSSL"); 
+        }
 
-	case (XSECCryptoHash::HASH_SHA384) :
-	
-		mp_md = EVP_get_digestbyname("SHA384");
-		if (mp_md == NULL) {
-			throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:Hash - SHA384 not supported by this version of OpenSSL"); 
-		}
+        break;
 
-		break;
+    case (XSECCryptoHash::HASH_SHA384) :
+    
+        mp_md = EVP_get_digestbyname("SHA384");
+        if (mp_md == NULL) {
+            throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:Hash - SHA384 not supported by this version of OpenSSL"); 
+        }
 
-	case (XSECCryptoHash::HASH_SHA512) :
-	
-		mp_md = EVP_get_digestbyname("SHA512");
-		if (mp_md == NULL) {
-			throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:Hash - SHA512 not supported by this version of OpenSSL"); 
-		}
+        break;
 
-		break;
+    case (XSECCryptoHash::HASH_SHA512) :
+    
+        mp_md = EVP_get_digestbyname("SHA512");
+        if (mp_md == NULL) {
+            throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:Hash - SHA512 not supported by this version of OpenSSL"); 
+        }
 
-	default :
+        break;
 
-		mp_md = NULL;
+    default :
 
-	}
+        mp_md = NULL;
 
-	if(!mp_md) {
+    }
 
-		throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:HashHMAC - Error loading Message Digest"); 
-	}
+    if(!mp_md) {
 
-	m_initialised = false;
-	m_hashType = alg;
+        throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:HashHMAC - Error loading Message Digest"); 
+    }
+
+    m_initialised = false;
+    m_hashType = alg;
 
 }
 
-void OpenSSLCryptoHashHMAC::setKey(XSECCryptoKey *key) {
+const XMLCh* OpenSSLCryptoHashHMAC::getProviderName() const {
+	return DSIGConstants::s_unicodeStrPROVOpenSSL;
+}
 
-	// Use this to initialise the HMAC Context
+void OpenSSLCryptoHashHMAC::setKey(const XSECCryptoKey *key) {
 
-	if (key->getKeyType() != XSECCryptoKey::KEY_HMAC) {
+    // Use this to initialise the HMAC Context
 
-		throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:HashHMAC - Non HMAC Key passed to OpenSSLHashHMAC");
+    if (key->getKeyType() != XSECCryptoKey::KEY_HMAC) {
 
-	}
+        throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:HashHMAC - Non HMAC Key passed to OpenSSLHashHMAC");
 
-	m_keyLen = ((XSECCryptoKeyHMAC *) key)->getKey(m_keyBuf);
+    }
+
+    m_keyLen = ((XSECCryptoKeyHMAC *) key)->getKey(m_keyBuf);
 
 
-	HMAC_Init(&m_hctx, 
-		m_keyBuf.rawBuffer(),
-		m_keyLen,
-		mp_md);
+    HMAC_Init(mp_hctx, 
+        m_keyBuf.rawBuffer(),
+        m_keyLen,
+        mp_md);
 
-	m_initialised = true;
+    m_initialised = true;
 
 }
 
 OpenSSLCryptoHashHMAC::~OpenSSLCryptoHashHMAC() {
 
-	if (m_initialised)
-		HMAC_CTX_cleanup(&m_hctx);
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+    if (m_initialised)
+        HMAC_CTX_cleanup(mp_hctx);
+#else
+    HMAC_CTX_free(mp_hctx);
+#endif
 
 }
 
@@ -149,46 +168,47 @@ OpenSSLCryptoHashHMAC::~OpenSSLCryptoHashHMAC() {
 
 void OpenSSLCryptoHashHMAC::reset(void) {
 
-	if (m_initialised) {
+    if (m_initialised) {
 
-		HMAC_CTX_cleanup(&m_hctx);
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+        HMAC_CTX_cleanup(mp_hctx);
+#endif
+        HMAC_Init(mp_hctx, 
+            m_keyBuf.rawBuffer(),
+            m_keyLen,
+            mp_md);
 
-		HMAC_Init(&m_hctx, 
-			m_keyBuf.rawBuffer(),
-			m_keyLen,
-			mp_md);
-
-	}
+    }
 
 }
 
 void OpenSSLCryptoHashHMAC::hash(unsigned char * data, 
-								 unsigned int length) {
+                                 unsigned int length) {
 
-	if (!m_initialised)
-		throw XSECCryptoException(XSECCryptoException::MDError,
-			"OpenSSL:HashHMAC - hash called prior to setKey");
+    if (!m_initialised)
+        throw XSECCryptoException(XSECCryptoException::MDError,
+            "OpenSSL:HashHMAC - hash called prior to setKey");
 
 
-	HMAC_Update(&m_hctx, data, (int) length);
+    HMAC_Update(mp_hctx, data, (int) length);
 
 }
 
 unsigned int OpenSSLCryptoHashHMAC::finish(unsigned char * hash,
-									   unsigned int maxLength) {
+                                       unsigned int maxLength) {
 
-	unsigned int retLen;
+    unsigned int retLen;
 
-	// Finish up and copy out hash, returning the length
+    // Finish up and copy out hash, returning the length
 
-	HMAC_Final(&m_hctx, m_mdValue, &m_mdLen);
+    HMAC_Final(mp_hctx, m_mdValue, &m_mdLen);
 
-	// Copy to output buffer
-	
-	retLen = (maxLength > m_mdLen ? m_mdLen : maxLength);
-	memcpy(hash, m_mdValue, retLen);
+    // Copy to output buffer
+    
+    retLen = (maxLength > m_mdLen ? m_mdLen : maxLength);
+    memcpy(hash, m_mdValue, retLen);
 
-	return retLen;
+    return retLen;
 
 }
 
@@ -196,7 +216,7 @@ unsigned int OpenSSLCryptoHashHMAC::finish(unsigned char * hash,
 
 XSECCryptoHash::HashType OpenSSLCryptoHashHMAC::getHashType(void) const {
 
-	return m_hashType;			// This could be any kind of hash
+    return m_hashType;          // This could be any kind of hash
 
 }
 

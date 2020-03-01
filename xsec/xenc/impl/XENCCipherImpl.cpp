@@ -22,13 +22,18 @@
  *
  * XENCCipherImpl := Implementation of the main encryption worker class
  *
- * $Id: XENCCipherImpl.cpp 1493962 2013-06-17 22:32:41Z scantor $
+ * $Id: XENCCipherImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 // XSEC Includes
 
+#include <xsec/enc/XSECKeyInfoResolver.hpp>
+#include <xsec/enc/XSECCryptoException.hpp>
+#include <xsec/framework/XSECAlgorithmMapper.hpp>
+#include <xsec/framework/XSECAlgorithmHandler.hpp>
 #include <xsec/framework/XSECDefs.hpp>
+#include <xsec/framework/XSECEnv.hpp>
 #include <xsec/framework/XSECError.hpp>
 #include <xsec/enc/XSECCryptoKey.hpp>
 #include <xsec/transformers/TXFMChain.hpp>
@@ -38,12 +43,6 @@
 #include <xsec/transformers/TXFMURL.hpp>
 #include <xsec/transformers/TXFMDocObject.hpp>
 #include <xsec/transformers/TXFMConcatChains.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
-#include <xsec/framework/XSECEnv.hpp>
-#include <xsec/enc/XSECKeyInfoResolver.hpp>
-#include <xsec/enc/XSECCryptoException.hpp>
-#include <xsec/framework/XSECAlgorithmMapper.hpp>
-#include <xsec/framework/XSECAlgorithmHandler.hpp>
 #include <xsec/utils/XSECPlatformUtils.hpp>
 #include <xsec/utils/XSECBinTXFMInputStream.hpp>
 
@@ -52,6 +51,8 @@
 #include "XENCEncryptedKeyImpl.hpp"
 #include "XENCEncryptionMethodImpl.hpp"
 #include "XENCAlgorithmHandlerDefault.hpp"
+#include "../../utils/XSECAutoPtr.hpp"
+#include "../../utils/XSECDOMUtils.hpp"
 
 #include <xercesc/dom/DOMNode.hpp>
 #include <xercesc/dom/DOMElement.hpp>
@@ -176,7 +177,7 @@ void XENCCipherImpl::setKeyInfoResolver(const XSECKeyInfoResolver * resolver) {
 //			Key Info resolvers
 // --------------------------------------------------------------------------------
 
-XENCEncryptedData * XENCCipherImpl::getEncryptedData(void) {
+XENCEncryptedData * XENCCipherImpl::getEncryptedData() const {
 
     return mp_encryptedData;
 
@@ -299,7 +300,7 @@ DOMDocumentFragment * XENCCipherImpl::deSerialise(safeBuffer &content, DOMNode *
     XSEC_RELEASE_XMLCH(trailer);
 
     // Create an input source
-    xsecsize_t bytes = XMLString::stringLen(sbt.rawCharBuffer());
+    XMLSize_t bytes = XMLString::stringLen(sbt.rawCharBuffer());
     MemBufInputSource memIS((const XMLByte*) sbt.rawBuffer(), bytes, "XSECMem");
 
     XercesDOMParser parser;
@@ -311,9 +312,9 @@ DOMDocumentFragment * XENCCipherImpl::deSerialise(safeBuffer &content, DOMNode *
     parser.setSecurityManager(&securityManager);
 
     parser.parse(memIS);
-    xsecsize_t errorCount = parser.getErrorCount();
+    XMLSize_t errorCount = parser.getErrorCount();
     if (errorCount > 0)
-        throw XSECException(XSECException::CipherError, "Errors occured during de-serialisation of decrypted element content");
+        throw XSECException(XSECException::CipherError, "Errors occurred during de-serialisation of decrypted element content");
 
     DOMDocument * doc = parser.getDocument();
 
@@ -351,7 +352,7 @@ DOMDocumentFragment * XENCCipherImpl::deSerialise(safeBuffer &content, DOMNode *
 XSECCryptoKey * XENCCipherImpl::decryptKeyFromKeyInfoList(DSIGKeyInfoList * kil) {
 
     XSECCryptoKey * ret = NULL;
-    XSECAlgorithmHandler *handler;
+    const XSECAlgorithmHandler *handler;
 
     int kLen = (int) kil->getSize();
 
@@ -382,7 +383,7 @@ XSECCryptoKey * XENCCipherImpl::decryptKeyFromKeyInfoList(DSIGKeyInfoList * kil)
                 }
             }
 
-            catch (XSECCryptoException &) {
+            catch (const XSECCryptoException&) {
                 /* Do nothing - this is likely to be a bad decrypt on a public key */
             } catch (...) {
                 memset((void *) buffer, 0, 1024);
@@ -442,9 +443,9 @@ DOMNode * XENCCipherImpl::decryptElementDetached(DOMElement * element) {
 
 }
 
-DOMNode * XENCCipherImpl::decryptElementDetached(void) {
+DOMNode * XENCCipherImpl::decryptElementDetached() {
 
-    XSECAlgorithmHandler *handler;
+    const XSECAlgorithmHandler *handler;
 
     if (mp_encryptedData == NULL) {
 
@@ -534,7 +535,7 @@ DOMNode * XENCCipherImpl::decryptElementDetached(void) {
 
 }
 
-DOMDocument * XENCCipherImpl::decryptElement(void) {
+DOMDocument * XENCCipherImpl::decryptElement() {
 
     // Call the worker
     DOMElement * element = mp_encryptedData->getElement();
@@ -566,11 +567,11 @@ XSECBinTXFMInputStream * XENCCipherImpl::decryptToBinInputStream(
     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element
 ) {
 
-    XSECAlgorithmHandler *handler;
+    const XSECAlgorithmHandler *handler;
 
     // First of all load the element
     if (mp_encryptedData != NULL)
-    delete mp_encryptedData;
+    	delete mp_encryptedData;
 
     XSECnew(mp_encryptedData,
         XENCEncryptedDataImpl(mp_env, element));
@@ -689,7 +690,7 @@ int XENCCipherImpl::decryptKey(XENCEncryptedKey * encryptedKey, XMLByte * rawKey
 
     // Get the Algorithm handler for the algorithm
     XENCEncryptionMethod * encryptionMethod = encryptedKey->getEncryptionMethod();
-    XSECAlgorithmHandler *handler;
+    const XSECAlgorithmHandler *handler;
 
     if (encryptionMethod != NULL) {
 
@@ -757,7 +758,6 @@ XENCEncryptedKey * XENCCipherImpl::loadEncryptedKey(DOMElement * keyNode) {
 
 XENCEncryptedData * XENCCipherImpl::encryptBinInputStream(
     XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream * plainText,
-    encryptionMethod em,
     const XMLCh * algorithmURI) {
 
     TXFMURL * uri;
@@ -766,7 +766,7 @@ XENCEncryptedData * XENCCipherImpl::encryptBinInputStream(
     uri->setInput(plainText);
     TXFMChain c(uri);
 
-    return encryptTXFMChain(&c, em, algorithmURI);
+    return encryptTXFMChain(&c, algorithmURI);
 
 }
 
@@ -774,24 +774,14 @@ XENCEncryptedData * XENCCipherImpl::encryptBinInputStream(
 //			Encrypt a TXFMChain
 // --------------------------------------------------------------------------------
 
-XENCEncryptedData * XENCCipherImpl::encryptTXFMChain(TXFMChain * plainText, encryptionMethod em, const XMLCh * algorithmURI) {
+XENCEncryptedData * XENCCipherImpl::encryptTXFMChain(TXFMChain * plainText, const XMLCh * algorithmURI) {
 
     // Make sure we have a key before we do anything too drastic
     if (mp_key == NULL) {
-        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptElement - No key set");
+        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptTXFMChain - No key set");
     }
-
-    // Map the encryption method to a URI
-    safeBuffer algorithmSB;
-    const XMLCh * algorithm;
-
-    if (em == ENCRYPT_NONE) {
-        algorithm = algorithmURI;
-    } else {
-        if (encryptionMethod2URI(algorithmSB, em) != true) {
-            throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptElement - Unknown encryption method");
-        }
-        algorithm = algorithmSB.sbStrToXMLCh();
+    else if (algorithmURI == NULL) {
+        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptTXFMChain - No algorithm set");
     }
 
     // Create the element with a dummy encrypted value
@@ -802,38 +792,20 @@ XENCEncryptedData * XENCCipherImpl::encryptTXFMChain(TXFMChain * plainText, encr
     }
 
     XSECnew(mp_encryptedData, XENCEncryptedDataImpl(mp_env));
-    mp_encryptedData->createBlankEncryptedData(XENCCipherData::VALUE_TYPE, algorithm, s_noData);
+    mp_encryptedData->createBlankEncryptedData(XENCCipherData::VALUE_TYPE, algorithmURI, s_noData);
 
     // Perform the encryption
-    XSECAlgorithmHandler *handler;
-
-    if (algorithm != NULL) {
-
-        handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(algorithm);
-
-    }
-
-    else {
-
-        handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(XSECAlgorithmMapper::s_defaultEncryptionMapping);
-
-    }
-
-    safeBuffer sb;
-
-    if (handler != NULL) {
-
-        handler->encryptToSafeBuffer(plainText, mp_encryptedData->getEncryptionMethod(), mp_key, mp_env->getParentDocument(),
-            sb);
-    } else {
-
+    const XSECAlgorithmHandler *handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(algorithmURI);
+    if (!handler) {
         // Very strange if we get here - any problems should throw an
         // exception in the AlgorithmMapper.
 
         throw XSECException(XSECException::CipherError,
             "XENCCipherImpl::encryptTXFMChain - Error retrieving a handler for algorithm");
-
     }
+
+    safeBuffer sb;
+    handler->encryptToSafeBuffer(plainText, mp_encryptedData->getEncryptionMethod(), mp_key, mp_env->getParentDocument(), sb);
 
     // Set the value
     XENCCipherValue * val = mp_encryptedData->getCipherData()->getCipherValue();
@@ -848,24 +820,19 @@ XENCEncryptedData * XENCCipherImpl::encryptTXFMChain(TXFMChain * plainText, encr
 //			Encrypt a key
 // --------------------------------------------------------------------------------
 
-XENCEncryptedKey * XENCCipherImpl::encryptKey(const unsigned char * keyBuffer, unsigned int keyLen, encryptionMethod em,
-    const XMLCh * algorithmURI) {
+XENCEncryptedKey * XENCCipherImpl::encryptKey(
+        const unsigned char* keyBuffer,
+        unsigned int keyLen,
+        const XMLCh* algorithmURI,
+        const XMLCh* mgfURI,
+        unsigned char* oaepParams,
+        unsigned int oaepParamsLen) {
 
     if (mp_kek == NULL) {
         throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptKey - No KEK set");
     }
-
-    // Map the encryption method to a URI
-    safeBuffer algorithmSB;
-    const XMLCh * algorithm;
-
-    if (em == ENCRYPT_NONE) {
-        algorithm = algorithmURI;
-    } else {
-        if (encryptionMethod2URI(algorithmSB, em) != true) {
-            throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptKey - Unknown encryption method");
-        }
-        algorithm = algorithmSB.sbStrToXMLCh();
+    else if (algorithmURI == NULL) {
+        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptKey - No algorithm set");
     }
 
     // Create the element with a dummy encrypted value
@@ -875,9 +842,30 @@ XENCEncryptedKey * XENCCipherImpl::encryptKey(const unsigned char * keyBuffer, u
     XSECnew(encryptedKey, XENCEncryptedKeyImpl(mp_env));
     Janitor<XENCEncryptedKeyImpl> j_encryptedKey(encryptedKey);
 
-    encryptedKey->createBlankEncryptedKey(XENCCipherData::VALUE_TYPE, algorithm, s_noData);
+    encryptedKey->createBlankEncryptedKey(XENCCipherData::VALUE_TYPE, algorithmURI, s_noData);
 
-    // Create a transform chain to do pass the key to the encrypto
+    if (mgfURI)
+        encryptedKey->getEncryptionMethod()->setMGF(mgfURI);
+
+    if (oaepParams != NULL && oaepParamsLen > 0) {
+        unsigned char * oaepParamsB64;
+        XSECnew(oaepParamsB64, unsigned char[oaepParamsLen * 2]);
+        ArrayJanitor<unsigned char> j_oaepParamsB64(oaepParamsB64);
+
+        XSECCryptoBase64 * b64 = XSECPlatformUtils::g_cryptoProvider->base64();
+        Janitor<XSECCryptoBase64> j_b64(b64);
+
+        b64->encodeInit();
+        int sz = b64->encode(oaepParams, oaepParamsLen, oaepParamsB64, oaepParamsLen *2);
+        sz += b64->encodeFinish(&oaepParamsB64[sz], (oaepParamsLen * 2)  - sz);
+        oaepParamsB64[sz] = '\0';
+
+        XSECAutoPtrXMLCh xBuf((char*) oaepParamsB64);
+
+        encryptedKey->getEncryptionMethod()->setOAEPparams(xBuf.get());
+    }
+
+    // Create a transform chain to do pass the key to the encryption.
 
     safeBuffer rawKey;
     rawKey.isSensitive();
@@ -893,33 +881,16 @@ XENCEncryptedKey * XENCCipherImpl::encryptKey(const unsigned char * keyBuffer, u
     tsb->setInput(rawKey, keyLen);
 
     // Perform the encryption
-    XSECAlgorithmHandler *handler;
-
-    if (algorithm != NULL) {
-
-        handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(algorithm);
-
-    }
-
-    else {
-
-        handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(XSECAlgorithmMapper::s_defaultEncryptionMapping);
-
-    }
-
-    safeBuffer sb;
-
-    if (handler != NULL) {
-
-        handler->encryptToSafeBuffer(c, encryptedKey->getEncryptionMethod(), mp_kek, mp_env->getParentDocument(), sb);
-    } else {
-
+    const XSECAlgorithmHandler *handler = XSECPlatformUtils::g_algorithmMapper->mapURIToHandler(algorithmURI);
+    if (!handler) {
         // Very strange if we get here - any problems should throw an
         // exception in the AlgorithmMapper.
 
         throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptKey - Error retrieving a handler for algorithm");
-
     }
+
+    safeBuffer sb;
+    handler->encryptToSafeBuffer(c, encryptedKey->getEncryptionMethod(), mp_kek, mp_env->getParentDocument(), sb);
 
     // Set the value
     XENCCipherValue * val = encryptedKey->getCipherData()->getCipherValue();
@@ -954,11 +925,14 @@ XENCEncryptedData * XENCCipherImpl::createEncryptedData(XENCCipherData::XENCCiph
 //			Encrypt an element
 // --------------------------------------------------------------------------------
 
-DOMNode * XENCCipherImpl::encryptElementDetached(DOMElement * element, encryptionMethod em, const XMLCh * algorithmURI) {
+DOMNode * XENCCipherImpl::encryptElementDetached(DOMElement * element, const XMLCh * algorithmURI) {
 
     // Make sure we have a key before we do anything too drastic
     if (mp_key == NULL) {
         throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptElement - No key set");
+    }
+    else if (algorithmURI == NULL) {
+        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptElement - No algorithm set");
     }
 
     // Create a transform chain to do the encryption
@@ -971,7 +945,7 @@ DOMNode * XENCCipherImpl::encryptElementDetached(DOMElement * element, encryptio
 
     tdocObj->setInput(mp_doc, element);
 
-    // Now need to serialise the element - easiest to just use a canonicaliser
+    // Now need to serialise the element - easiest to just use a canonicalizer
     TXFMC14n *tc14n;
     XSECnew(tc14n, TXFMC14n(mp_doc));
     c->appendTxfm(tc14n);
@@ -982,17 +956,17 @@ DOMNode * XENCCipherImpl::encryptElementDetached(DOMElement * element, encryptio
 
     // Do the hard work
 
-    encryptTXFMChain(c, em, algorithmURI);
+    encryptTXFMChain(c, algorithmURI);
 
     mp_encryptedData->setType(DSIGConstants::s_unicodeStrURIXENC_ELEMENT);
     return mp_encryptedData->getElement();
 
 }
 
-DOMDocument * XENCCipherImpl::encryptElement(DOMElement * element, encryptionMethod em, const XMLCh * algorithmURI) {
+DOMDocument * XENCCipherImpl::encryptElement(DOMElement * element, const XMLCh * algorithmURI) {
 
     // Do the actual encryption work
-    encryptElementDetached(element, em, algorithmURI);
+    encryptElementDetached(element, algorithmURI);
 
     // Replace original element
     DOMNode * p = element->getParentNode();
@@ -1016,11 +990,10 @@ DOMDocument * XENCCipherImpl::encryptElement(DOMElement * element, encryptionMet
 
 DOMDocument * XENCCipherImpl::encryptElementContent(
     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-    encryptionMethod em,
     const XMLCh * algorithmURI) {
 
     // Do the work
-    encryptElementContentDetached(element, em, algorithmURI);
+    encryptElementContentDetached(element, algorithmURI);
 
     // Delete current children
     DOMNode * n = element->getFirstChild();
@@ -1042,13 +1015,15 @@ DOMDocument * XENCCipherImpl::encryptElementContent(
 
 DOMNode * XENCCipherImpl::encryptElementContentDetached(
     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * element,
-    encryptionMethod em,
     const XMLCh * algorithmURI) {
 
     // Make sure we have a key before we do anything too drastic
     if (mp_key == NULL) {
         throw XSECException(XSECException::CipherError,
-            "XENCCipherImpl::encryptElement - No key set");
+            "XENCCipherImpl::encryptElementContentDetached - No key set");
+    }
+    else if (algorithmURI == NULL) {
+        throw XSECException(XSECException::CipherError, "XENCCipherImpl::encryptElementContentDetached - No algorithm set");
     }
 
     // Create a transform chain to do the encryption
@@ -1089,7 +1064,7 @@ DOMNode * XENCCipherImpl::encryptElementContentDetached(
 
     }
 
-    encryptTXFMChain(c, em, algorithmURI);
+    encryptTXFMChain(c, algorithmURI);
 
     mp_encryptedData->setType(DSIGConstants::s_unicodeStrURIXENC_CONTENT);
 
@@ -1106,7 +1081,7 @@ void XENCCipherImpl::setExclusiveC14nSerialisation(bool flag) {
     m_useExcC14nSerialisation = flag;
 }
 
-bool XENCCipherImpl::getExclusiveC14nSerialisation(void) {
+bool XENCCipherImpl::getExclusiveC14nSerialisation() const {
 
     return m_useExcC14nSerialisation;
 
@@ -1122,7 +1097,7 @@ void XENCCipherImpl::setPrettyPrint(bool flag) {
 
 }
 
-bool XENCCipherImpl::getPrettyPrint(void) {
+bool XENCCipherImpl::getPrettyPrint(void) const {
 
     return mp_env->getPrettyPrintFlag();
 

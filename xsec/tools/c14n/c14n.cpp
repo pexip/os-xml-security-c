@@ -23,7 +23,7 @@
  * c14n := tool to dump a XML file to the console after canonacalising it thru
  *			c14n
  *
- * $Id: c14n.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: c14n.cpp 1807984 2017-09-11 00:54:26Z scantor $
  *
  */
 
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
 	// Now parse out file
 
 	bool errorsOccured = false;
-	xsecsize_t errorCount = 0;
+	XMLSize_t errorCount = 0;
     try
     {
     	parser->parse(argv[argc-1]);
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
     catch (const XMLException& e)
     {
-        cerr << "An error occured during parsing\n   Message: "
+        cerr << "An error occurred during parsing\n   Message: "
              << e.getMessage() << endl;
         errorsOccured = true;
     }
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 
     catch (const DOMException& e)
     {
-       cerr << "A DOM error occured during parsing\n   DOMException code: "
+       cerr << "A DOM error occurred during parsing\n   DOMException code: "
              << e.code << endl;
         errorsOccured = true;
     }
@@ -179,22 +179,22 @@ int main(int argc, char **argv) {
     }
 
 	// Create the canonicalizer
-    XSECC14n20010315* canon=NULL;
-    if (subtree)
-	    canon = new XSECC14n20010315(theDOM, subtree);
-    else
-        canon = new XSECC14n20010315(theDOM);
+	XSECC14n20010315* canon=NULL;
+	if (subtree)
+		canon = new XSECC14n20010315(theDOM, subtree);
+	else
+		canon = new XSECC14n20010315(theDOM);
 	canon->setCommentsProcessing(printComments);
 	canon->setUseNamespaceStack(true);
-    if (inclusive11)
-        canon->setInclusive11();
-    else if (exclusive)
-        canon->setExclusive();
+	if (inclusive11)
+		canon->setInclusive11();
+	else if (exclusive)
+		canon->setExclusive();
 
 	// canon->XPathSelectNodes("(/descendant-or-self::node() | /descendant-or-self::node()/attribute::* | /descendant-or-self::node()/namespace::*)[ self::ietf:e1 or (parent::ietf:e1 and not(self::text() or self::e2)) or count (id(\"E3\") | ancestor-or-self::node()) = count (ancestor-or-self::node())]");
 
 	char buffer[512];
-	xsecsize_t res = canon->outputBuffer((unsigned char *) buffer, 128);
+	XMLSize_t res = canon->outputBuffer((unsigned char *) buffer, 128);
 
 
 	while (res != 0) {

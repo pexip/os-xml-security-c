@@ -17,12 +17,15 @@
 
 # Process this file with autoreconf
 AC_PREREQ(2.50)
-AC_INIT([[XML-Security-C]],[1.7.3],[dev@santuario.apache.org],[xml-security-c])
+AC_INIT([[XML-Security-C]],[2.0.2],[dev@santuario.apache.org],[xml-security-c])
 AC_CONFIG_SRCDIR(xsec)
 AC_CONFIG_AUX_DIR(build-aux)
 AC_CONFIG_MACRO_DIR(m4)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-zip subdir-objects nostdinc])
 AC_PROG_LIBTOOL
+PKG_INSTALLDIR
+
+AC_SYS_LARGEFILE
 
 AC_ARG_ENABLE(debug,
     AS_HELP_STRING([--enable-debug],[Have GCC compile with symbols (Default = no)]),
@@ -39,7 +42,7 @@ fi
 
 # Define the files we wish to generate
 
-AC_CONFIG_FILES([Makefile xsec/Makefile])
+AC_CONFIG_FILES([Makefile xsec/Makefile xml-security-c.pc])
 AC_CONFIG_HEADERS([config.h xsec/framework/XSECConfig.hpp])
 AH_BOTTOM([#include <xsec/framework/XSECVersion.hpp>])
 
@@ -64,14 +67,10 @@ CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 LIBS="${LIBS} ${PTHREAD_LIBS}"
 CC="${PTHREAD_CC}"
 
-# Checks for required libraries
-AC_CHECK_LIB(m, floor,)
-AC_CHECK_LIB(socket, getservent,)
-
 # Check for required includes
 AC_CHECK_HEADERS([unistd.h direct.h])
 
-AC_CHECK_DECL(strcasecmp,[AC_DEFINE([XSEC_HAVE_STRCASECMP],[1],[Define to 1 if strcasecmp present.])],,[#include <string.h>]) 
+AC_CHECK_FUNCS([strcasecmp])
 
 # Check whether getcwd can dynamically allocate memory.
 AC_MSG_CHECKING([whether getcwd(NULL, 0) works])
@@ -86,28 +85,16 @@ return (cwd != NULL) ? EXIT_SUCCESS : EXIT_FAILURE;])],
 
 AC_LANG(C++)
 
-# Xerces is required
+# Note that the pkg-config macros improperly set pkg_CFLAGS rather
+# than CPPFLAGS and/or CXXFLAGS, so this requires some workarounds.
+# Where possible, we clear the CFLAGS version to make sure nothing
+# is depending on it downstream. Compile tests are favored over
+# preproc-only tests so that CXXFLAGS should be sufficient.
 
-AC_ARG_WITH(xerces,AS_HELP_STRING([--with-xerces=PATH], [where xerces-c is installed]),
-    [if test x_$with_xerces != x_/usr; then
-        LDFLAGS="-L${with_xerces}/lib $LDFLAGS"
-        CPPFLAGS="-I${with_xerces}/include $CPPFLAGS"
-    fi])
-LIBS="-lxerces-c $LIBS"
-
-AC_CHECK_HEADER([xercesc/dom/DOM.hpp],,AC_MSG_ERROR([unable to find xerces header files]))
-AC_MSG_CHECKING([Xerces version])
-AC_PREPROC_IFELSE(
-    [AC_LANG_PROGRAM([#include <xercesc/util/XercesVersion.hpp>],
-[#if  _XERCES_VERSION >= 20000
-int i = 0;
-#else
-#error cannot use version 1.x
-#endif])],
-    [AC_MSG_RESULT(OK)],
-    [AC_MSG_FAILURE([Xerces-C 2.x or 3.x is required])])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/util/PlatformUtils.hpp>]], [[xercesc::XMLPlatformUtils::Initialize()]])],
-    [],[AC_MSG_ERROR([unable to link with Xerces])])
+AX_PKG_CHECK_MODULES([xerces],,[xerces-c >= 3.2])
+xerces_CXXFLAGS=$xerces_CFLAGS
+xerces_CFLAGS=""
+AC_SUBST([xerces_CXXFLAGS])
 
 # Get user options
 
@@ -121,310 +108,81 @@ if test x"$use_xalan" != "xyes" ; then
   fi
 fi
 
-# Ensure we are always compiling using library defs
-
-CFLAGS="${CFLAGS} -DXSEC_LIBRARY_BUILD"
-CXXFLAGS="${CXXFLAGS} -DXSEC_LIBRARY_BUILD"
-
-# Find out some properties of the version of Xerces we have
-
-AC_MSG_CHECKING([whether Xerces is 64-bit clean])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/framework/MemBufInputSource.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-      XMLFilePos testvar;
-    ]])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([XSEC_XERCES_64BITSAFE],[1],[Define to 1 if Xerces has a 64-bit-safe API.])],
-    [AC_MSG_RESULT([no])])
-
-AC_MSG_CHECKING([whether Xerces BinInputStream requires getContentType])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/util/BinMemInputStream.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-      XMLByte buf[1024];
-      BinMemInputStream in(buf,1024);
-      in.getContentType();
-    ]])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([XSEC_XERCES_INPUTSTREAM_HAS_CONTENTTYPE],[1],[Define to 1 if Xerces InputStream class requires getContentType.])],
-    [AC_MSG_RESULT([no])])
-
-AC_MSG_CHECKING([whether Xerces XMLFormatter requires a version])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/framework/XMLFormatter.hpp>
-	#include <xercesc/util/XercesDefs.hpp>
-	#include <xercesc/util/XMLUniDefs.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-	  XMLCh s_encoding[] = {
-		chLatin_U, chLatin_T, chLatin_F, chDash, chDigit_8, chNull
-	  };
-	  XMLFormatter f(s_encoding,
-		NULL,
-		NULL, 
-		XMLFormatter::NoEscapes, 
-		XMLFormatter::UnRep_CharRef);
-	]])],[AC_MSG_RESULT([yes])
-	AC_DEFINE([XSEC_XERCES_REQUIRES_MEMMGR],[1],[Define to 1 if Xerces XMLFormatter requires MemoryManager.])
-	AC_DEFINE([XSEC_XERCES_FORMATTER_REQUIRES_VERSION],[1],[Define to 1 if Xerces XMLFormatter requires version.])],
-	[AC_MSG_RESULT([no])])
-	
-AC_MSG_CHECKING([whether Xerces XMLString has ::release])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/util/XMLString.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-		XMLCh * tst;
-		XMLString::release(&tst);
-	]])],[AC_MSG_RESULT([yes])
-	AC_DEFINE([XSEC_XERCES_XMLSTRING_HAS_RELEASE],[1],[Define to 1 if Xerces XMLString has release method.])],
-	[AC_MSG_RESULT([no])])
-
-AC_MSG_CHECKING([whether Xerces XMLElement has ::setIdAttribute(XMLCh*)])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/dom/DOM.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-		DOMElement * elt;
-		elt->setIdAttribute(NULL);
-	]])],[AC_MSG_RESULT([yes])
-    xerces_has_setidattribute=yes
-	AC_DEFINE([XSEC_XERCES_HAS_SETIDATTRIBUTE],[1],[Define to 1 if Xerces has legacy setIdAttribute.])],
-	[AC_MSG_RESULT([no])])
-
-if test -z "$xerces_has_setidattribute" ; then
-  AC_MSG_CHECKING([whether Xerces XMLElement has ::setIdAttribute(XMLCh*, bool)])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/dom/DOM.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-		  DOMElement * elt;
-		  elt->setIdAttribute(NULL, false);
-	  ]])],[AC_MSG_RESULT([yes])
-      xerces_has_setidattribute=yes
-	  AC_DEFINE([XSEC_XERCES_HAS_BOOLSETIDATTRIBUTE],[1],[Define to 1 if Xerces DOM ID methods take extra parameter.])],
-	  [AC_MSG_RESULT([no])])
-fi
-
-# For Xerces 3.x we now have a stricter DOM L3 implementation
-AC_MSG_CHECKING([whether Xerces DOMImplementationLS has DOMLSSerializer])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/dom/DOM.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-        DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(NULL);
-        DOMLSSerializer *ls = ((DOMImplementationLS*)impl)->createLSSerializer();
-    ]])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([XSEC_XERCES_DOMLSSERIALIZER],[1],[Define to 1 if Xerces has DOMLSSerializer.])],
-    [AC_MSG_RESULT([no])])
-
-AC_MSG_CHECKING([whether Xerces DOMEntity uses getInputEncoding()])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xercesc/dom/DOM.hpp>]], [[using namespace XERCES_CPP_NAMESPACE;
-        DOMEntity *t;
-        t->getInputEncoding();
-    ]])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([XSEC_XERCES_DOMENTITYINPUTENCODING],[1],[Define to 1 if Xerces DOMEntity has getInputEncoding.])],
-    [AC_MSG_RESULT([no])])
-
-
 # Now check for Xalan
 
 if test x"$use_xalan" != x"no" ; then
 
   if test $XALANCROOT; then
 
-    AC_MSG_CHECKING([for Xalan headers in XALANCROOT])
+    AC_MSG_NOTICE([looking for Xalan headers in $XALANCROOT])
 
-    OLD_CPPFLAGS=$CPPFLAGS
     # Updated to include nls/include as this is generally needed for
     # compilation against non-installed xalan.
     # Also now include XALANCROOT/include to cater for installed xalan
-    CPPFLAGS=["-I${XALANCROOT}/src -I${XALANCROOT}/include -I${XALANCROOT}/nls/include ${CPPFLAGS}"]
-
-    AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <xalanc/Include/XalanVersion.hpp>]])],[xalan_found=yes 
-      LIBS="-L${XALANCROOT}/lib -lxalan-c ${LIBS}"
-      AC_MSG_RESULT([found])],[CPPFLAGS=$OLD_CPPFLAGS
-      AC_MSG_RESULT([no])]);
+    xalan_CXXFLAGS="-I${XALANCROOT}/src -I${XALANCROOT}/include -I${XALANCROOT}/nls/include"
+    xalan_LIBS="-L${XALANCROOT}/lib -lxalan-c"
+    AX_SAVE_FLAGS_WITH_PREFIX([xalan],[[CXXFLAGS]])
+    AC_CHECK_HEADER([xalanc/Include/XalanVersion.hpp],
+                    [xalan_found=yes])
+    AX_RESTORE_FLAGS_WITH_PREFIX([xalan],[[CXXFLAGS]])
 
   fi
 
   if test -z "$xalan_found" ; then
 
-    AC_MSG_CHECKING([for Xalan in system includes])
-    AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <xalanc/Include/XalanVersion.hpp>]])],[xalan_found=yes 
-      LIBS="${LIBS} -lxalan-c"
-      AC_MSG_RESULT([found])],
-      [AC_DEFINE([XSEC_NO_XALAN],[1],[Define to 1 if Xalan is unavailable.]) 
-      AC_MSG_RESULT([no - WARNING - configuring for no Xalan])
-      ]);
+    AC_MSG_NOTICE([looking for Xalan in system includes])
+    unset ac_cv_header_xalanc_Include_XalanVersion_hpp
+    AC_CHECK_HEADER([xalanc/Include/XalanVersion.hpp],
+                    [xalan_found=yes
+		     xalan_CXXFLAGS=""
+		     xalan_LIBS="-lxalan-c"],
+		    [AC_MSG_NOTICE([WARNING - configuring without Xalan])])
 
   fi
-
-else
-
-  # NO_XALAN is defined - so we skip
-
-  AC_MSG_NOTICE([Warning - Xalan being configured out - XPath and XSLT will not be available])
-  AC_DEFINE([XSEC_NO_XALAN],[1],[Define to 1 if Xalan is unavailable.])
-
 fi
 
 if test "${xalan_found}" = "yes" ; then
+AX_SAVE_FLAGS_WITH_PREFIX([xalan],[[CXXFLAGS],[LIBS]])
+
+AC_MSG_CHECKING([Xalan version])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <xalanc/Include/XalanVersion.hpp>],
+[#if  _XALAN_VERSION >= 11100
+int i = 0;
+#else
+#error requires Xalan version 1.11+
+#endif])],
+    [AC_MSG_RESULT(OK)],
+    [AC_MSG_FAILURE([Xalan-C 1.11+ is required])])
+
   # Do we need xalanMsg.so?
-  AC_MSG_CHECKING([if libxalanMsg is required])
-  old_libs=$LIBS
-  LIBS="${LIBS} -lxalanMsg"
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[
-    int test=1;
-  ]])],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)
-  LIBS=${old_libs}]);
+  AC_SEARCH_LIBS([XalanInitialize],[xalanMsg],[xalan_LIBS="$LIBS"])
+  
+  AC_DEFINE([XSEC_HAVE_XALAN],[1],[Define to 1 if Xalan is available.])
+  AC_SUBST([xalan_CXXFLAGS])
+  AC_SUBST([xalan_LIBS])
+
+AX_RESTORE_FLAGS_WITH_PREFIX([xalan],[[CXXFLAGS],[LIBS]])
+else
+  AC_MSG_NOTICE([Xalan not included in build - XPath and XSLT will not be available])
 fi
 
-# Check for handling of XSLException types
-if test "$xalan_found" = "yes" ; then
-
-  AC_MSG_CHECKING([whether XSLException::getType() returns XalanDOMString])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xalanc/PlatformSupport/XSLException.hpp>]], [[ try {
-          int x = 1;
-      } 
-      catch (XALAN_CPP_NAMESPACE_QUALIFIER XSLException &e) {
-        e.getType().c_str();
-      }
-    ]])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([XSEC_XSLEXCEPTION_RETURNS_DOMSTRING],[1],[Define to 1 if Xalan XSLException returns XalanDOMString.])],
-    [AC_MSG_RESULT([no])]);
-
-  AC_MSG_CHECKING([whether XercesParserLiaison ctor takes XercesDOMSupport])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xalanc/XercesParserLiaison/XercesDOMSupport.hpp>
-    #include <xalanc/XercesParserLiaison/XercesParserLiaison.hpp>]], [[ 	XALAN_CPP_NAMESPACE_QUALIFIER XercesDOMSupport 
-           theDOMSupport;
-	    XALAN_CPP_NAMESPACE_QUALIFIER XercesParserLiaison 
-           theParserLiaison(theDOMSupport);
-	]])],[AC_MSG_RESULT([yes])
-	AC_DEFINE([XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT],[1],[Define to 1 if Xalan XercesParserLiaison ctor takes XercesDOMSupport.])],
-	[AC_MSG_RESULT([no])]);
-
-  AC_MSG_CHECKING([whether XPathEvaluator::selectNodeList requires NodeRefList])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <xalanc/XercesParserLiaison/XercesDOMSupport.hpp>
-	#include <xalanc/XPath/XPathEvaluator.hpp>
-	#include <xalanc/XPath/NodeRefList.hpp>
-    #include <xalanc/XercesParserLiaison/XercesParserLiaison.hpp>]], [[ 	XALAN_CPP_NAMESPACE_QUALIFIER XercesDOMSupport 
-           theDOMSupport;
-		XALAN_CPP_NAMESPACE_QUALIFIER XPathEvaluator	theEvaluator;
-		XALAN_CPP_NAMESPACE_QUALIFIER NodeRefList	theResult(
-			theEvaluator.selectNodeList(
-			theDOMSupport,
-			NULL,
-			NULL,
-			NULL));
-	]])],[AC_MSG_RESULT([no])],
-	[AC_MSG_RESULT([yes])
-	AC_DEFINE([XSEC_SELECTNODELIST_REQS_NODEREFLIST],[1],[Define to 1 if Xalan XPathEvaluator requires NodeRefList.])]);
-
-  AC_MSG_CHECKING([whether Xalan classes require MemoryManager])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
- 	#include <xalanc/XPath/XPathDefinitions.hpp>
-    #include <xalanc/XPath/Function.hpp>]], [[
-    }
-	XALAN_CPP_NAMESPACE_BEGIN
-
-	class FunctionTest : public Function
-	{
-		public:
- 	       typedef Function        ParentType;
-
-    	    FunctionTest();
-
-        	virtual ~FunctionTest();      
-	        virtual XObjectPtr
-    	    execute(
-        	   XPathExecutionContext& executionContext,
-               XalanNode* context,
-               const XObjectArgVectorType& args,
-               const LocatorType* locator) const;
-
-            XObjectPtr
-            execute(
-                XPathExecutionContext&          executionContext,
-                XalanNode*                                      context,
-                const XObjectPtr                        arg1,
-                const XObjectPtr                        arg2,
-                const LocatorType*                      locator) const;
-
-            XObjectPtr
-            execute(
-                XPathExecutionContext&          executionContext,
-                XalanNode*                                      context,
-                   
-                const XObjectPtr                        arg1,
-                const XObjectPtr                        arg2,
-                const XObjectPtr                        arg3,
-                const LocatorType*                      locator) const;
-
-	#if !defined(XALAN_NO_USING_DECLARATION)
-        using ParentType::execute;
-	#endif
-
-	#if defined(XALAN_NO_COVARIANT_RETURN_TYPE)
-        virtual Function*
-	#else
-        virtual FunctionTest*
-	#endif
-        clone() const;
-
-	protected:
-
-        virtual const XalanDOMString
-        getError() const;
-
-    private:
-
-        // Not implemented...
-        FunctionTest&
-        operator=(const FunctionTest&);
-
-        bool
-        operator==(const FunctionTest&) const;
-	};
-
-  void main2(void){
-
-	FunctionTest t;
-
-  }
-
-XALAN_CPP_NAMESPACE_END
-  int main3(void) {
-
-	]])],[AC_MSG_RESULT([no])],
-	[AC_MSG_RESULT([yes])
-	AC_DEFINE([XSEC_XALAN_REQS_MEMORYMANAGER],[1],[Define to 1 if Xalan requires MemoryManager])]);
-fi
+AC_LANG(C)
 
 # Crypto provider options (OpenSSL / NSS)
 
-AC_ARG_WITH(openssl,
-    AS_HELP_STRING([--with-openssl],[Use Openssl.  Values = 'yes' or installation directory (Default = yes)]),
-    use_openssl=$withval, use_openssl=yes)
+AC_ARG_WITH([openssl],
+    [AS_HELP_STRING([--with-openssl],[use the OpenSSL crypto provider @<:@default=check@:>@])],,
+    [with_openssl=check])
 
-if test x"$use_openssl" != "xno" ; then
+AS_IF([test x"$with_openssl" != xno],
+    [AX_PKG_CHECK_MODULES([openssl],,[libcrypto],
+        [with_openssl=found
+         AC_DEFINE([XSEC_HAVE_OPENSSL],[1],[Define if OpenSSL is in use])
 
-    # Check for explicit location or try pkg-config
-    if test x"$use_openssl" = "xyes" ; then
-        AC_PATH_PROG(PKG_CONFIG, pkg-config,)
-        if test "x$PKG_CONFIG" != x && test "x$PKG_CONFIG" != "xno" ; then
-            if pkg-config openssl ; then
-                SSLLIBS="`$PKG_CONFIG --libs openssl`"
-                SSLFLAGS="`$PKG_CONFIG --cflags openssl`"
-            else
-                AC_MSG_WARN([OpenSSL not supported by pkg-config, try --with-openssl=PATH instead])
-            fi
-        fi
-    else
-        if test x_$use_openssl != x_/usr; then
-            SSLFLAGS="-I${use_openssl}/include"
-            SSLLIBS="-L${use_openssl}/lib -lcrypto -lssl"
-        else
-            SSLLIBS="-lcrypto -lssl"
-        fi
-    fi
-    
-    AC_MSG_CHECKING(for OpenSSL cflags)
-    AC_MSG_RESULT($SSLFLAGS)
-    CPPFLAGS="$CPPFLAGS $SSLFLAGS"
-    
-    AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <openssl/opensslv.h>]])],
-        [AC_DEFINE([XSEC_HAVE_OPENSSL],[1],[Define if OpenSSL is in use.])],
-        [AC_MSG_ERROR([Unable to find OpenSSL headers])]);
-    
-    AC_MSG_CHECKING(for OpenSSL libraries)
-    AC_MSG_RESULT($SSLLIBS)
-    LIBS="$LIBS $SSLLIBS"
-    
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <openssl/evp.h>]], [[EVP_EncryptInit(NULL, NULL, NULL, NULL) ; return 0; ]])],,
-        [AC_MSG_ERROR(["Unable to find libcrypto"])])
-    
     # Now try to find out some things about this version of OpenSSL
+   
+    AX_SAVE_FLAGS_WITH_PREFIX([openssl],[[CFLAGS],[LIBS]]) 
     
     AC_MSG_CHECKING([for const input buffers in OpenSSL])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <openssl/rsa.h>]], [[ const unsigned char * buf;
@@ -434,6 +192,10 @@ if test x"$use_openssl" != "xno" ; then
     	[AC_MSG_RESULT([yes])
     	AC_DEFINE([XSEC_OPENSSL_CONST_BUFFERS],[1],[Define to 1 if OpenSSL uses const input buffers.])],
     	[AC_MSG_RESULT([no])])
+    
+    AC_CHECK_DECL(EVP_PKEY_id,
+        [AC_DEFINE([XSEC_OPENSSL_HAVE_EVP_PKEY_ID],[1],[Define to 1 if OpenSSL has EVP_PKEY_id function.])],
+        ,[#include <openssl/evp.h>])
     
     AC_MSG_CHECKING([for non-broken AES support])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <openssl/evp.h>]], [[ EVP_aes_256_cbc();
@@ -472,61 +234,36 @@ if test x"$use_openssl" != "xno" ; then
         [AC_MSG_RESULT([yes])
     	AC_DEFINE([XSEC_OPENSSL_D2IX509_CONST_BUFFER],[1],[Define to 1 if OpenSSL X509 API has const input buffer.])],
     	[AC_MSG_RESULT([no])])
-fi
 
-AC_ARG_WITH(nss,
-    AS_HELP_STRING([--with-nss],[Use NSS.  Values = 'yes' or installation directory (Default = no)]),
-    use_nss=$withval, use_nss=no)
+    AX_RESTORE_FLAGS_WITH_PREFIX([openssl],[[CFLAGS],[LIBS]])
 
-if test x"$use_nss" != "xno" ; then
+        ],[AS_IF([test "x$with_openssl" != xcheck],[AC_MSG_ERROR([Unable to find OpenSSL])])])       
+    ])
 
-    # Check for explicit location or try pkg-config
-    if test x"$use_nss" = "xyes" ; then
-        AC_PATH_PROG(PKG_CONFIG, pkg-config,)
-        if test "x$PKG_CONFIG" != x && test "x$PKG_CONFIG" != "xno" ; then
-            if pkg-config nss ; then
-                NSSLIBS="`$PKG_CONFIG --libs nss`"
-                NSSFLAGS="`$PKG_CONFIG --cflags nss`"
-            else
-                AC_MSG_WARN([NSS not supported by pkg-config, try --with-nss=PATH instead])
-            fi
-        else
-            check=`nss-config --version 2>/dev/null`
-            if test -n "$check"; then
-                NSSLIBS=`nss-config --libs`
-                NSSFLAGS=`nss-config --cflags`
-            else
-                AC_MSG_ERROR([Unable to use pkg-config or find nss-config, try --with-nss=PATH])
-            fi
-        fi
-    else
-        if test x_$use_nss != x_/usr; then
-            NSSLIBS="-L${use_nss}/lib"
-        fi
-        # NSS is broken and doesn't use a standard include path.
-        NSSFLAGS="-I${use_nss}/include/nss3 -I${use_nss}/include/nss"
-        NSSLIBS="$NSSLIBS -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4"
-    fi
-    
-    AC_MSG_CHECKING(for NSS cflags)
-    AC_MSG_RESULT($NSSFLAGS)
-    CPPFLAGS="$CPPFLAGS $NSSFLAGS"
-    
-    AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <nss.h>]])],
-        [AC_DEFINE([XSEC_HAVE_NSS],[1],[Define if NSS is in use.])],
-        [AC_MSG_ERROR([Unable to find NSS headers])])
-    
-    AC_MSG_CHECKING(for NSS libraries)
-    AC_MSG_RESULT($NSSLIBS)
-    LIBS="$LIBS $NSSLIBS"
-    
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <nss.h>]], [[NSS_NoDB_Init(NULL);]])],,
-        [AC_MSG_ERROR([Unable to link with NSS])])
+AC_ARG_WITH([nss],
+    [AS_HELP_STRING([--with-nss],[use the NSS crypto provider @<:@default=check@:>@])],,
+    [with_nss=check])
+
+AS_IF([test x"$with_nss" != xno],
+    [AX_PKG_CHECK_MODULES([nss],,[nss],
+        [with_nss=found
+         AC_DEFINE([XSEC_HAVE_NSS],[1],[Define if NSS is in use])
+         AC_MSG_WARN([NSS is no longer officially supported])
+        ],[AS_IF([test "x$with_nss" != "xcheck"],[AC_MSG_ERROR([Unable to find NSS])])])
+    ])
+
+AC_ARG_ENABLE(xkms,
+    AS_HELP_STRING([--disable-xkms],[disable XKMS support]),
+    [have_xkms=${enableval}],
+    [have_xkms=yes])
+if test x"$have_xkms" = "xyes" ; then
+    AC_DEFINE([XSEC_XKMS_ENABLED],[1],[Define to 1 if XKMS support is included.])
 fi
 
 # Populate the Makefile conditionals
-AM_CONDITIONAL(XSEC_AM_HAVE_OPENSSL, test x"$use_openssl" != "xno")
-AM_CONDITIONAL(XSEC_AM_HAVE_NSS, test x"$use_nss" != "xno")
+AM_CONDITIONAL([XSEC_AM_HAVE_OPENSSL],[test "x$with_openssl" = xfound])
+AM_CONDITIONAL([XSEC_AM_HAVE_NSS],[test "x$with_nss" = xfound])
+AM_CONDITIONAL(XSEC_AM_HAVE_XKMS, test x"$have_xkms" = "xyes")
 
 # output the Makefiles
 AC_OUTPUT

@@ -1,0 +1,33 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Sat, 24 Nov 2018 01:16:30 +0100
+Subject: Initialize Libtool in the modern way and after the compiler
+
+The Libtool initialization macros require AC_PROG_CC, which sets CFLAGS
+to the default -g -O2 if unset, unexpectedly resulting different flags
+for C and C++.
+
+Disable building static libraries by default.
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index f69d2b3..9b5ea48 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -22,7 +22,6 @@ AC_CONFIG_SRCDIR(xsec)
+ AC_CONFIG_AUX_DIR(build-aux)
+ AC_CONFIG_MACRO_DIR(m4)
+ AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-zip subdir-objects nostdinc])
+-AC_PROG_LIBTOOL
+ PKG_INSTALLDIR
+ 
+ AC_SYS_LARGEFILE
+@@ -50,6 +49,7 @@ AH_BOTTOM([#include <xsec/framework/XSECVersion.hpp>])
+ 
+ AC_PROG_CC([gcc gcc3 cc])
+ AC_PROG_CXX([g++ g++3 c++ CC])
++LT_INIT([disable-static])
+ AC_PROG_INSTALL
+ AC_PROG_LN_S
+ AC_PROG_AWK

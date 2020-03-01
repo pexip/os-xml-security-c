@@ -26,74 +26,9 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECW32Config.hpp 1655934 2015-01-30 04:36:29Z scantor $
+ * $Id: XSECW32Config.hpp 1830714 2018-05-02 01:10:44Z scantor $
  *
  */
-
-#include <xercesc/util/XercesVersion.hpp>
-
-/*
- * Because we don't have a configure script, we need to rely on version
- * numbers to understand library idiosycracies
- */
-
-#if (XERCES_VERSION_MAJOR >= 3)
-
-/* Is it possible to setIdAttributes? - DOM level 3 call.  V3.x
-   API Version */
-
-#	define XSEC_XERCES_HAS_BOOLSETIDATTRIBUTE 1
-
-/* 3.0 no longer supports DOMWriter, must use DOMLSSerializer instead
-*/
-
-#	define XSEC_XERCES_DOMLSSERIALIZER 1
-
-/* 3.0 now uses getInputEncoding rather than getEncoding to determine
-   encoding that was found in input document */
-
-#	define XSEC_XERCES_DOMENTITYINPUTENCODING 1
-
-/* 3.0 now 64-bit safe */
-
-#   define XSEC_XERCES_64BITSAFE 1
-
-/* 3.0 InputStream must expose content type */
-
-#   define XSEC_XERCES_INPUTSTREAM_HAS_CONTENTTYPE 1
-#endif
-
-#if (XERCES_VERSION_MAJOR == 3) || ((XERCES_VERSION_MAJOR == 2) && (XERCES_VERSION_MINOR >= 3))
-/*
- * As of version 2.3, xerces requires a version parameter in XMLFormatter
- * constructors
- */
-#	define XSEC_XERCES_FORMATTER_REQUIRES_VERSION 1
-
- /* 2.3 and above use a user defined Memory Manager.  In some cases, this
-   actually needs to be passed to functions
-*/
-
-#	define XSEC_XERCES_REQUIRES_MEMMGR 1
-
-/* Does XMLString::release() exist */
-
-#	define XSEC_XERCES_XMLSTRING_HAS_RELEASE 1
-
-#	if (XERCES_VERSION_MAJOR < 3)
-		/* Is it possible to setIdAttributes? - DOM level 3 call.  V2.x API */
-
-#		define XSEC_XERCES_HAS_SETIDATTRIBUTE 1
-
-#	endif
-
-#else
-/*
- * In version 2.2, the XMLUri class was broken for relative URI de-referencing
- */
-#	define XSEC_XERCES_BROKEN_XMLURI 1
-#endif
-
 
 
 /*
@@ -103,76 +38,25 @@
  * Activate this #define if Xalan is not required (or desired)
  */
 
-#define XSEC_NO_XALAN
+// #define XSEC_HAVE_XALAN 1
 
-#if !defined (XSEC_NO_XALAN)
-
-#	include <xalanc/Include/XalanVersion.hpp>
-
-#	if (_XALAN_VERSION <= 10800)
-#		define XSEC_XSLEXCEPTION_RETURNS_DOMSTRING	1
-#	endif
-#	if (_XALAN_VERSION >= 10900)
-
-		/* 1.9 and above have XSLException::getType() returns XalanDOMChar *, not
-			XalanDOMString
-		*/
-
-#		undef XSEC_XSLEXCEPTION_RETURNS_DOMSTRING
-
-		/* 1.9 and above do not take a XercesDOMSupport as input to the ctor */
-
-#		undef XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT
-
-		/* 1.9 and above require a NodeRefList as input to XPathEvaluator::
-		   selectNodeList
-		*/
-
-#		define XSEC_SELECTNODELIST_REQS_NODEREFLIST
-
-		/* 1.9 and above use MemoryManager for the XPath Function classes
-		*/
-
-#		define XSEC_XALAN_REQS_MEMORYMANAGER
-#	else
-		/* 1.9 and above have XSLException::getType() returns XalanDOMChar *, not
-			XalanDOMString
-		*/
-
-#		define XSEC_XSLEXCEPTION_RETURNS_DOMSTRING 1
-
-		/* 1.9 and above do not take a XercesDOMSupport as input to the ctor */
-
-#		define XSEC_XERCESPARSERLIAISON_REQS_DOMSUPPORT
-
-		/* 1.9 and above require a NodeRefList as input to XPathEvaluator::
-		   selectNodeList
-		*/
-
-#		undef XSEC_SELECTNODELIST_REQS_NODEREFLIST
-
-		/* 1.9 and above use MemoryManager for the XPath Function classes
-		*/
-
-#		undef XSEC_XALAN_REQS_MEMORYMANAGER
-
-#	endif
-
-#endif
 
 /*
- * Define presence of cryptographic providers
+ * Define presence of cryptographic providers.
+ *
+ * WARNING: Neither WinCAPI nor NSS are officially supported by the sole remanining
+ * maintainer of this library. Use at your own risk, or contact the project if you're
+ * interested in assisting with maintenance and support of that code.
  */
 
-#define XSEC_HAVE_OPENSSL 1
+// #define XSEC_HAVE_OPENSSL 1
+// #define XSEC_HAVE_WINCAPI 1
+// #define XSEC_HAVE_NSS 1
 
-#define XSEC_HAVE_WINCAPI 1
-
-// NSS Code is currently alpha.  It should work, but you will also
-// need to include the NSS libraries during the link.
-
-/* #define XSEC_HAVE_NSS 1 */
-
+/*
+ * Define if XKMS support is enabled.
+ */
+// #define XSEC_XKMS_ENABLED 1
 
 /*
  * Some settings for OpenSSL if we have it
@@ -193,6 +77,7 @@
 #		define XSEC_OPENSSL_D2IX509_CONST_BUFFER
 #       define XSEC_OPENSSL_HAVE_SHA2
 #       define XSEC_OPENSSL_HAVE_MGF1
+#       define XSEC_OPENSSL_HAVE_EVP_PKEY_ID
 #	endif
 #	if (OPENSSL_VERSION_NUMBER >= 0x10001000)
 #		define XSEC_OPENSSL_HAVE_GCM

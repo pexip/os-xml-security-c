@@ -22,7 +22,7 @@
  *
  * XKMSRegisterResultImpl := Implementation of RegisterResult Messages
  *
- * $Id: XKMSRegisterResultImpl.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XKMSRegisterResultImpl.hpp 1820685 2018-01-09 17:48:51Z scantor $
  *
  */
 
@@ -34,6 +34,8 @@
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/xkms/XKMSRegisterResult.hpp>
 #include <xsec/framework/XSECProvider.hpp>
+
+#ifdef XSEC_XKMS_ENABLED
 
 #include "XKMSResultTypeImpl.hpp"
 
@@ -86,7 +88,6 @@ public:
 		XMLCh * DQ,
 		XMLCh * InverseQ,
 		XMLCh * D,		
-		encryptionMethod em,
 		const XMLCh * algorithmURI = NULL);
 
 
@@ -124,4 +125,5 @@ private:
 
 };
 
+#endif /* XSEC_XKMS_ENABLED */
 #endif /* XKMSREGISTERRESULTIMPL_INCLUDE */

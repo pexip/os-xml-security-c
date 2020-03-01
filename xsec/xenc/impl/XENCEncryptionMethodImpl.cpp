@@ -22,19 +22,19 @@
  *
  * XENCEncryptionMethod := Interface definition for EncryptionMethod element
  *
- * $Id: XENCEncryptionMethodImpl.cpp 1350045 2012-06-13 22:33:10Z scantor $
+ * $Id: XENCEncryptionMethodImpl.cpp 1833341 2018-06-11 16:25:41Z scantor $
  *
  */
 
 #include <xsec/framework/XSECDefs.hpp>
 #include <xsec/framework/XSECError.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/framework/XSECEnv.hpp>
 
 #include "XENCEncryptionMethodImpl.hpp"
+#include "../../utils/XSECDOMUtils.hpp"
 
-#include <xercesc/util/XMLUniDefs.hpp>
 #include <xercesc/dom/DOM.hpp>
+#include <xercesc/util/XMLUniDefs.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -113,6 +113,15 @@ static XMLCh s_KeySize [] = {
 	chLatin_e,
 	chNull
 };
+
+XENCEncryptionMethod* XENCEncryptionMethod::create(const XSECEnv* env, const XMLCh* algorithm) {
+
+	XENCEncryptionMethodImpl* ret = new XENCEncryptionMethodImpl(env);
+	if (!ret)
+		throw XSECException(XSECException::MemoryAllocationFail);
+	ret->createBlankEncryptionMethod(algorithm);
+	return ret;
+}
 
 // --------------------------------------------------------------------------------
 //			Constructors and Destructors
@@ -234,7 +243,7 @@ void XENCEncryptionMethodImpl::load() {
 //			Create from scratch
 // --------------------------------------------------------------------------------
 
-DOMElement * XENCEncryptionMethodImpl::createBlankEncryptedMethod(const XMLCh * algorithm) {
+DOMElement * XENCEncryptionMethodImpl::createBlankEncryptionMethod(const XMLCh * algorithm) {
 
 	// Get some setup values
 	safeBuffer str;

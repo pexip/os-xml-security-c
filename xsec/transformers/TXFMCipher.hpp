@@ -22,7 +22,7 @@
  *
  * TXFMCipher := Class that performs a symmetric encrypt/decrypt transform
  *
- * $Id: TXFMCipher.hpp 1352681 2012-06-21 20:58:40Z scantor $
+ * $Id: TXFMCipher.hpp 1818065 2017-12-13 20:55:19Z scantor $
  *
  */
 
@@ -42,24 +42,24 @@
  * @ingroup internal
  */
 
-class DSIG_EXPORT TXFMCipher : public TXFMBase {
+class XSEC_EXPORT TXFMCipher : public TXFMBase {
 
 public:
 
 	// Constructors and destructors
 
     TXFMCipher(XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* doc,
-                XSECCryptoKey* key,
+                const XSECCryptoKey* key,
                 bool encrypt,
                 XSECCryptoSymmetricKey::SymmetricKeyMode mode = XSECCryptoSymmetricKey::MODE_CBC,
                 unsigned int taglen = 0);
-	~TXFMCipher();
+	virtual ~TXFMCipher();
 
 	// Methods to get tranform output type and input requirement
 
-	virtual TXFMBase::ioType getInputType(void);
-	virtual TXFMBase::ioType getOutputType(void);
-	virtual nodeType getNodeType(void);
+	virtual TXFMBase::ioType getInputType(void) const;
+	virtual TXFMBase::ioType getOutputType(void) const;
+	virtual nodeType getNodeType(void) const;
 
 	// TXFMCipher Unique
 
@@ -72,9 +72,6 @@ public:
 	// Methods to get output data
 
 	virtual unsigned int readBytes(XMLByte * const toFill, const unsigned int maxToFill);
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *getDocument();
-	virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *getFragmentNode();
-	virtual const XMLCh * getFragmentId();
 	
 private:
 	TXFMCipher();

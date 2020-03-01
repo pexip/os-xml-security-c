@@ -22,7 +22,7 @@
  *
  * checkSig := (Very ugly) tool to check a signature embedded in an XML file
  *
- * $Id: checksig.cpp 1655934 2015-01-30 04:36:29Z scantor $
+ * $Id: checksig.cpp 1832576 2018-05-30 23:45:26Z scantor $
  *
  */
 
@@ -37,16 +37,9 @@
 #include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/framework/XSECException.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
-#include <xsec/utils/XSECDOMUtils.hpp>
 #include <xsec/enc/XSECKeyInfoResolverDefault.hpp>
 
-// ugly :<
-
-#if defined(_WIN32)
-#	include <xsec/utils/winutils/XSECURIResolverGenericWin32.hpp>
-#else
-#	include <xsec/utils/unixutils/XSECURIResolverGenericUnix.hpp>
-#endif
+#include "../../utils/XSECDOMUtils.hpp"
 
 // General
 
@@ -83,7 +76,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 
 // XALAN
 
@@ -119,7 +112,7 @@ XALAN_USING_XALAN(XalanTransformer)
 
 #include <time.h>
 
-#ifdef XSEC_NO_XALAN
+#ifndef XSEC_HAVE_XALAN
 
 std::ostream& operator<< (std::ostream& target, const XMLCh * s)
 {
@@ -345,7 +338,7 @@ int evaluate(int argc, char ** argv) {
 	// Now parse out file
 
 	bool errorsOccured = false;
-	xsecsize_t errorCount = 0;
+	XMLSize_t errorCount = 0;
     try
     {
     	parser->parse(filename);
@@ -356,7 +349,7 @@ int evaluate(int argc, char ** argv) {
 
     catch (const XMLException& e)
     {
-        cerr << "An error occured during parsing\n   Message: "
+        cerr << "An error occurred during parsing\n   Message: "
              << e.getMessage() << endl;
         errorsOccured = true;
     }
@@ -364,7 +357,7 @@ int evaluate(int argc, char ** argv) {
 
     catch (const DOMException& e)
     {
-       cerr << "A DOM error occured during parsing\n   DOMException code: "
+       cerr << "A DOM error occurred during parsing\n   DOMException code: "
              << e.code << endl;
         errorsOccured = true;
     }
@@ -427,13 +420,6 @@ int evaluate(int argc, char ** argv) {
 		useAnonymousResolver == true ||
 		useInteropResolver == true) {
 
-#if defined(_WIN32)
-		XSECURIResolverGenericWin32 
-#else
-		XSECURIResolverGenericUnix 
-#endif
-			theResolver;
-
 		AnonymousResolver theAnonymousResolver;
 		     
 		// Map out base path of the file
@@ -480,28 +466,18 @@ int evaluate(int argc, char ** argv) {
 #endif
 
 		if (useAnonymousResolver == true) {
-			// AnonymousResolver takes precedence
-			theAnonymousResolver.setBaseURI(baseURIXMLCh);
 			sig->setURIResolver(&theAnonymousResolver);
 		}
-		else if (useXSECURIResolver == true) {
-			theResolver.setBaseURI(baseURIXMLCh);
-			sig->setURIResolver(&theResolver);
-		}
+        sig->getURIResolver()->setBaseURI(baseURIXMLCh);
 
 #if defined (XSEC_HAVE_OPENSSL)
 		if (useInteropResolver == true) {
-
 			InteropResolver ires(&(baseURIXMLCh[8]));
 			sig->setKeyInfoResolver(&ires);
-
 		}
 #endif
 		XSEC_RELEASE_XMLCH(baseURIXMLCh);
-
 	}
-
-
 
 	bool result;
 
@@ -528,16 +504,16 @@ int evaluate(int argc, char ** argv) {
 			result = sig->verify();
 	}
 
-	catch (XSECException &e) {
+	catch (const XSECException &e) {
 		char * msg = XMLString::transcode(e.getMsg());
-		cerr << "An error occured during signature verification\n   Message: "
+		cerr << "An error occurred during signature verification\n   Message: "
 		<< msg << endl;
 		XSEC_RELEASE_XMLCH(msg);
 		errorsOccured = true;
 		return 2;
 	}
-	catch (XSECCryptoException &e) {
-		cerr << "An error occured during signature verification\n   Message: "
+	catch (const XSECCryptoException &e) {
+		cerr << "An error occurred during signature verification\n   Message: "
 		<< e.getMsg() << endl;
 		errorsOccured = true;
 
@@ -555,7 +531,7 @@ int evaluate(int argc, char ** argv) {
 #if 0
 	catch (...) {
 
-		cerr << "Unknown Exception type occured.  Cleaning up and exiting\n" << endl;
+		cerr << "Unknown Exception type occurred.  Cleaning up and exiting\n" << endl;
 
 		return 2;
 
@@ -610,7 +586,7 @@ int main(int argc, char **argv) {
 	try {
 
 		XMLPlatformUtils::Initialize();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 		XPathEvaluator::initialize();
 		XalanTransformer::initialize();
 #endif
@@ -628,7 +604,7 @@ int main(int argc, char **argv) {
 	retResult = evaluate(argc, argv);
 
 	XSECPlatformUtils::Terminate();
-#ifndef XSEC_NO_XALAN
+#ifdef XSEC_HAVE_XALAN
 	XalanTransformer::terminate();
 	XPathEvaluator::terminate();
 #endif

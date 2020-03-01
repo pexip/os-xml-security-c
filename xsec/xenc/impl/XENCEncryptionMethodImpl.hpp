@@ -22,7 +22,7 @@
  *
  * XENCEncryptionMethod := Interface definition for EncryptionMethod element
  *
- * $Id: XENCEncryptionMethodImpl.hpp 1350045 2012-06-13 22:33:10Z scantor $
+ * $Id: XENCEncryptionMethodImpl.hpp 1825499 2018-02-27 20:46:24Z scantor $
  *
  */
 
@@ -53,7 +53,7 @@ public:
 	void load();
 
 	// Create from scratch
-	XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * createBlankEncryptedMethod(
+	XERCES_CPP_NAMESPACE_QUALIFIER DOMElement * createBlankEncryptionMethod(
 						const XMLCh * algorithm);
 
 	// Interface

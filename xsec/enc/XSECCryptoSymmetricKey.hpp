@@ -25,7 +25,7 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCryptoSymmetricKey.hpp 1352680 2012-06-21 20:58:07Z scantor $
+ * $Id: XSECCryptoSymmetricKey.hpp 1808174 2017-09-12 21:50:30Z scantor $
  *
  */
 
@@ -52,7 +52,7 @@
  * providers for a particular algorithm.
  */
 
-class DSIG_EXPORT XSECCryptoSymmetricKey : public XSECCryptoKey {
+class XSEC_EXPORT XSECCryptoSymmetricKey : public XSECCryptoKey {
 
 public :
 
@@ -185,7 +185,7 @@ public :
 							 SymmetricKeyMode mode = MODE_CBC,
 							 const unsigned char* iv = NULL,
                              const unsigned char* tag = NULL,
-                             unsigned int taglen = NULL) = 0;
+                             unsigned int taglen = 0) = 0;
 
 	/**
 	 * \brief Continue a decrypt operation using this key.

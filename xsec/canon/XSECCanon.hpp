@@ -25,8 +25,12 @@
  *
  * Author(s): Berin Lautenbach
  *
- * $Id: XSECCanon.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCanon.hpp 1808174 2017-09-12 21:50:30Z scantor $
  */
+
+
+#ifndef XSECCanon_INCLUDE
+#define XSECCanon_INCLUDE
 
 // XSEC includes
 #include <xsec/framework/XSECDefs.hpp>
@@ -50,7 +54,7 @@ XSEC_DECLARE_XERCES_CLASS(DOMDocument)
 // processing is done via the processNextNode virtual function that must be
 // implemented by all children classes.
 
-class CANON_EXPORT XSECCanon {
+class XSEC_EXPORT XSECCanon {
 
 protected:
 
@@ -60,7 +64,7 @@ protected:
 	XERCES_CPP_NAMESPACE_QUALIFIER DOMNode		* mp_startNode,	// Node to start processing from
 										*mp_nextNode;	// Next Node to be processeed
 	safeBuffer							m_buffer;		// Buffer holding parsed output
-	xsecsize_t							m_bufferLength,	// Length of input currently in buffer
+	XMLSize_t							m_bufferLength,	// Length of input currently in buffer
 										m_bufferPoint;	// Next "character" to copy out
 	bool								m_allNodesDone;	// Have we completed?
 
@@ -84,7 +88,7 @@ public:
 	// outputBuffer is used by all canonicalisers to output the next numBytes bytes of
 	// canonicalised XML to the nominated buffer
 
-	xsecsize_t outputBuffer(unsigned char *outBuffer, xsecsize_t numBytes);
+	XMLSize_t outputBuffer(unsigned char *outBuffer, XMLSize_t numBytes);
 	
 	// setStartNode sets the starting point for the output if it is a sub-document 
 	// that needs canonicalisation and we want to re-start
@@ -95,7 +99,8 @@ protected:
 
 	// processNextNode is the pure virtual function that must be implemented by all canons
 
-	virtual xsecsize_t processNextNode() = 0;
+	virtual XMLSize_t processNextNode() = 0;
 
 };
 
+ #endif /* XSECCanon_INCLUDE */ 

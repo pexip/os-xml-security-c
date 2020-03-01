@@ -22,7 +22,7 @@
  *
  * DSIGTransformXSL := Class that performs XML Stylesheet Language transforms
  *
- * $Id: DSIGTransformXSL.hpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: DSIGTransformXSL.hpp 1817973 2017-12-13 03:18:57Z scantor $
  *
  */
 
@@ -50,7 +50,7 @@
 
 
 
-class DSIG_EXPORT DSIGTransformXSL : public DSIGTransform {
+class XSEC_EXPORT DSIGTransformXSL : public DSIGTransform {
 
 public:
 
@@ -95,15 +95,6 @@ public:
 	/** @name Interface Methods */
 
 	//@{
-
-	/**
-	 * \brief Determine the transform type.
-	 *
-	 * Used to determine what the type of the transform is.
-	 *
-	 */
-
-	virtual transformType getTransformType();
 
 	/**
 	 * \brief Create the XSLT transformer element.

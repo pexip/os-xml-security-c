@@ -22,7 +22,7 @@
  *
  * XSECCryptoX509:= A base class for handling X509 (V3) certificates
  *
- * $Id: XSECCryptoX509.cpp 1125514 2011-05-20 19:08:33Z scantor $
+ * $Id: XSECCryptoX509.cpp 1807015 2017-09-01 23:25:22Z scantor $
  *
  */
 
@@ -46,7 +46,7 @@ void XSECCryptoX509::loadX509PEM(const char * buf, unsigned int len) {
 		b = b1;
 	}
 
-	const char *p = strstr(buf, "-----BEGIN CERTIFICATE-----");
+	const char *p = strstr(b, "-----BEGIN CERTIFICATE-----");
 
 	if (p == NULL) {
 
